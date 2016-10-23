@@ -1,0 +1,5 @@
+A) Nem igaz, mert ott a default konstruktor.
+B) Nem igaz, mert ott a default konstruktor.
+C) A synchronized kulcsszó miatt az.
+D) A szálbiztossághoz nem kell, hogy a változó osztályszintû legyen.
+E) A volatile azt éri el, hogy ha egy szál változtat valamit, az azonnal megjelenjen a többi szálon, nem tudom, hogy mire jó, de nem nevezném szálbiztosnak. :)
