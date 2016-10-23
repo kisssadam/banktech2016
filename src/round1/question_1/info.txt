@@ -1,0 +1,37 @@
+1. Az alábbi kód a regisztrált szálak közül a megadott nevű-t leállítja a megadott ideig. Mi vele a probléma?
+
+public class ThreadSleeper {
+
+    private Map<String, Thread> registeredThreads =  new HashMap<>();
+
+    public synchronized void registerThread(String name, Thread thread){
+        if (name==null) throw new IllegalArgumentException();
+        registeredThreads.put(name, thread);
+    }
+
+    public synchronized void sleepThread(String name, int duration) throws InterruptedException {
+        if (registeredThreads.containsKey(name)){
+            registeredThreads.get(name).sleep(duration);
+        }
+    }
+}
+
+A - nincs vele probléma.
+Ez a válasz kizárható, mert igenis van vele probléma.
+
+B - NullPointerException-t dobhat
+Nem dobhat NullPointerException-t, mert:
+A registerThread metódus ellenőrzi a name értékét, és ha null, akkor IllegalArgumentException-t dob. Ha a thread paraméter a null, akkor az nem befolyásol semmi, attól még a hashmap-be bekerül a megfelelő kulcs érték pár, mindössze annyi történik, hogy a kulcshoz tartozó érték null lesz.
+A sleepThread metódus-nál, ha a name paraméter értéke null, akkor sem dobódik NullPointerException, mert kiszedi a hashmap-ből a null kulcshoz tartozó értéket és meghívja a Thread.sleep statikus metódust. Fontos, hogy a registeredThreads.get(name) null-t ad vissza, de a sleep metódus statikus, így nem példányhoz kötődik, ezért lehet meghívni a sleep-et.
+
+C - Nem a megfelelő szálat állítja le
+Az előző válasznál már leírtam, hogy a Thread.sleep() statikus metódus hívódik meg, tehát a rossz szálat állítja meg egy időre. Azt a szálat állítja meg egy időre, ami meghívta a metódust.
+
+D - ReadWriteLock használatával jobb teljesítmény lenne elérhető
+Szerintem nem, mert az gondot okozna, ha több helyen is ugyan azt a szálat állítanánk le.
+
+E - az osztály Singleton
+Az osztály nem Singleton, annyi példányt hozok létre belőle, amennyit csak akarok.
+
+F - az osztály nem szálbiztos
+Az ostály szálbiztos, mert a metódusoknál szereplő synchronized kulcsszavak az osztályhoz tartozó objektumon zárolnak, azaz mind a két metódus ugyanazon az objektumon zárol, így nem fordulhat elő, hogy a metódusok egyszerre férjenek hozzá a registeredThread nevű Map-hez.
