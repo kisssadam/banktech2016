@@ -1,0 +1,4 @@
+C) "Double.POSITIVE_INFINITY;".hashCode()
+/* De azért buzik, mert van még kismillió verzió, amivel ki lehetne fejezni, pl. "Double.MAX_VALUE;" vagy
+"0x1.fffffffffffffp1023", aminek meg qrvára nem ez a hashCode-ja...*/
+//Elnézést... :)
