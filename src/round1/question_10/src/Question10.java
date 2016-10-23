@@ -26,8 +26,7 @@ public class Question10 {
 		 */
 
 		/*
-		 * A "D" válasz nem helyes, mert referenciával tér vissza. Lásd a javap
-		 * program kimenetét.
+		 * A "D" válasz is helyes. Lásd a javap program kimenetét.
 		 */
 	}
 
