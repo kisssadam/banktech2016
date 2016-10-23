@@ -1,0 +1,1 @@
+E) az equals-nek Object kellene legyen a paramétere, ha felül van definiálva
