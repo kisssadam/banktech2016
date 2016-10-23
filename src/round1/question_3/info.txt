@@ -1,0 +1,3 @@
+A) teszteltem
+C) mivel halmazról beszélünk, egy elem nem szerepelhet többször
+D) önmagában a compare metódust meghívva dobhat csapatnevet (NPE-t)
