@@ -1,0 +1,5 @@
+A) Nem, mert lehet más a sorrend.
+B) Nem, mert lehet más a sorrend.
+C) Lefordulni lefordul.
+D) java.lang.IndexOutOfBoundsException
+E) Mivel a C igaz, így ez nem.
