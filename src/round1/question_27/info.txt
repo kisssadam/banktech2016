@@ -1,0 +1,2 @@
+Az A), C), F) válaszokra true-t ír ki, a többire le sem fordul.
+Amúgy õszintén fogalmam sincs, hogy mit csinál.
