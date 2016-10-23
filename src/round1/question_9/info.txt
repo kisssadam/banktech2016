@@ -47,13 +47,13 @@ D - kiírja, hogy: 1000 100 10
 Igen ez lehetséges, attól függ, hogy a szálak milyen sorrendben ébrednek fel.
 
 E - kiírja, hogy: 10
-Szerintem ez nem lehetséges, legfeljebb akkor következhet be, ha a 10-es szál lefut, de a többi nem. De ha nem fut le, akkor a program nem lépne ki, mert még vannak futó szálak.
+Szerintem ez nem lehetséges, legfeljebb akkor következhet be, ha a 10-es szál lefut, de a többi nem. De ha nem fut le, akkor a program nem lépne ki, mert még vannak futó szálak. Végül beírtam ezt is, mert elvileg van esély arra, hogy ez bekövetkezzen, csakúgy, mint a G válasz esetében.
 
 F - kiírja, hogy: Sleep interrupted!
 Szerintem nem.
 
 G - nincs kimenet, a program örökké fut(na)
-Valaminek nagyon le kell terhelnie a processzort, hogy ez bekövetkezzen. Kérdés, hogy beírjuk-e.
+Valaminek nagyon le kell terhelnie a processzort, hogy ez bekövetkezzen. Kérdés, hogy beírjuk-e. Mivel előfordulhat, ezért bejelöltem ezt a választ is.
 
 H - kiírja, hogy: 100 10 1000
 Igen ez lehetséges, attól függ, hogy a szálak milyen sorrendben ébrednek fel.
