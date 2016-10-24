@@ -1,0 +1,51 @@
+23. Mely válaszok igazak az alábbi kódra?
+
+import java.io.Serializable;
+
+public class CacheTimeoutHandler implements Serializable {
+
+	private static final CacheTimeoutHandler INSTANCE = new CacheTimeoutHandler();
+	
+	private CacheTimeoutHandler() { }
+	
+	private volatile long lastChecked;
+	
+	private static final int TIMEOUT_INTERVAL = 3000;
+	
+	public static CacheTimeoutHandler getInstance() {
+		return INSTANCE;
+	}
+	
+	/**
+	 * @return Returns true for the first time calling this method.
+	 * Returns false if the cache has been living for less or equal time 
+	 * than the specified TIMEOUT_INTERVAL.
+	 * Otherwise, returns true.
+	 */
+	public boolean isTimeout() {
+		final long currentTime = System.currentTimeMillis();
+		if (currentTime - lastChecked > TIMEOUT_INTERVAL) {
+			synchronized (this) {
+				lastChecked = currentTime;
+				return true;
+			}
+		}
+		
+		return false;
+	}
+}
+
+A - sérülhet a Singleton egyedisége, több Singleton objektum is létrejöhet akár 1 classloaderben is
+Ez így igaz, az osztály szerializálható, tehát nem Singleton! Tavaly volt egy hasonló kérdés, akkor bedőltünk neki.
+
+B - minden esetben csak egy Singleton objektum fog létezni classloaderenként
+Nem, lásd az A válasznál szereplő indokot.
+
+C - az isTimeout metódus megvalósítása hibás, mert a TIMEOUT_INTERVAL integer típusú
+Az int-et automatikusan konvertálja long-ra, így nincs probléma.
+
+D - az isTimeout() metódus mindig az elvárt eredményt adja
+Nem, mert több példány is létre jöhet az osztályból, mert szerializálható, így ha két példányom van, akkor mindkettőnél lesz egy-egy true, utána pedig állandóan false, holott az első true után false kellene a másik objektumnál is.
+
+E - az isTimeout() metódus nem mindig az elvárt eredményt adja
+Lásd a "D" válasznál szereplő indokot.
