@@ -1,0 +1,12 @@
+http://stackoverflow.com/questions/817856/when-and-how-should-i-use-a-threadlocal-variable
+Az érdekes rész belőle talán ez lehet:
+Since a ThreadLocal is a reference to data within a given Thread, you can end up with classloading leaks when using ThreadLocals in application servers which use thread pools. You need to be very careful about cleaning up any ThreadLocals you get() or set() by using the ThreadLocal's remove() method.
+
+If you do not clean up when you're done, any references it holds to classes loaded as part of a deployed webapp will remain in the permanent heap and will never get garbage collected. Redeploying/undeploying the webapp will not clean up each Thread's reference to your webapp's class(es) since the Thread is not something owned by your webapp. Each successive deployment will create a new instance of the class which will never be garbage collected.
+
+You will end up with out of memory exceptions due to java.lang.OutOfMemoryError: PermGen space and after some googling will probably just increase -XX:MaxPermSize instead of fixing the bug.
+
+If you do end up experiencing these problems, you can determine which thread and class is retaining these references by using Eclipse's Memory Analyzer and/or by following Frank Kieviet's guide and followup.
+
+Update: Re-discovered Alex Vasseur's blog entry that helped me track down some ThreadLocal issues I was having.
+
