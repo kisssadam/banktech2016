@@ -1,6 +1,8 @@
 A - 0
+Ez nem fordulhat elő.
 
 B - 1
+Alapból ott van X.java fájl, de azt lefordítja így lesz egy X.class is, ezért jelenlegi legjobb tudásom szerint ez nem lehetséges, de mivel versenyfeladatról van szó, ezért lehet, hogy van valami mágikus trükk arra, hogy kiírja az 1-et, de nem jöttem rá, hogy mi lenne az.
 
 C - 2
 Ha csak egy X.java szerepel a mappában ezzel a tartalommal, akkor 2 lesz a kimenet. Az X.java tartalma:
@@ -24,4 +26,4 @@ enum Y {
 	
 }
 
-Akkor 3 lesz a kimenet
+Akkor 3 lesz a kimenet.
