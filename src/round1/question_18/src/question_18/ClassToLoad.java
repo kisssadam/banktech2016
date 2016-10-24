@@ -7,7 +7,7 @@ public class ClassToLoad {
 	public static ThreadLocal<ClassToLoad> THREAD_LOCAL;
 
 	static {
-		BYTE_ARRAY = new byte[1024 /** 1024*/ * 8]; // 8 KB
+		BYTE_ARRAY = new byte[1024 * 1024 * 8]; // 8 MB
 		THREAD_LOCAL = new ThreadLocal<>();
 	}
 
