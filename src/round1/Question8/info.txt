@@ -1,0 +1,64 @@
+8. Objektum
+
+Melyik állítás igaz az alábbi kódra?
+Object obj = new MyObject(){};
+
+A - MyObject lehet enum
+Nem lehet enum, nem fordul le:
+
+public class Question8 {
+	
+	public enum MyObject {
+		
+	}
+	
+	public static void main(String[] args) {
+		Object obj = new MyObject(){};
+	}
+	
+}
+
+
+B - MyObject lehet osztály
+Ez a válasz igaz. Lásd a példát:
+
+public class Question8 {
+
+	public static class MyObject {
+		
+	}
+	
+	public static void main(String[] args) {
+		Object obj = new MyObject(){};
+	}
+	
+}
+
+
+C - MyObject lehet interface
+Ez a válasz igaz. Példa:
+
+public class Question8 {
+
+	public interface MyObject {
+		
+	}
+	
+	public static void main(String[] args) {
+		Object obj = new MyObject(){};
+	}
+	
+}
+
+
+D - MyObject egyik sem lehet
+Mivel az egyik lehet, ezért ez a válasz nem helyes.
+
+E - obj dinamikus típusa MyObject, ha MyObject egy osztály
+Igaz.
+
+F - obj-nak nem lesz MyObject a dinamikus típusa
+Baromság.
+
+G - Hibás a kód
+Baromság.
