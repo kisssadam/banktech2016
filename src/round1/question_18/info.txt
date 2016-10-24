@@ -20,7 +20,7 @@ A - Kiderült, hogy az általa használt JVM implementáció az osztályokat és
 A PermGen-en is lefut a GC, de az osztálybetöltőket manuálisan kell megszűntetni, hogy szemétgyűjthető legyen. Mindaddig amíg a manuális megszűntetés nem történik meg, addig az osztáylbetöltő referenciákat tartalmaz az általa létrehozott osztályokra/példányokra. http://stackoverflow.com/questions/3796427/in-java-is-permanent-generation-space-garbage-collected
 
 B - Memóriaszivárgás történt az alkalmazásban.
-Igen, szerintem ez történt, mert a betöltött osztályokat sosem takarította ki a gc, ez a csatolt jvisualvm-es képen is látszik. A program 5 perc után elszállt az alábbi hibaüzenettel:
+Igen, szerintem ez történt, mert a betöltött osztályokat sosem takarította ki a gc, ez a csatolt jvisualvm-es képen is látszik. http://stackoverflow.com/questions/17968803/threadlocal-memory-leak A program 5 perc után elszállt az alábbi hibaüzenettel:
 
 Exception in thread "Thread-0" java.lang.OutOfMemoryError: GC overhead limit exceeded
 	at question_18.ClassToLoad.<clinit>(ClassToLoad.java:10)
