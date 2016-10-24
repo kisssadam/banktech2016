@@ -4,7 +4,7 @@ String str = new String("foo");
 Mit mondhatunk el róla biztosan, anélkül, hogy ismernénk az előtte és utána futó kódrészletet.
 
 A - a str referencia a String Poolban lévő "foo" stringre mutat
-Ez a válasz igaz.
+Ez a válasz nem igaz. Az újonnan létrejött String objektumra mutat.
 
 B - java-ban ez a leghatékonyabb módja egy string értékadásnak
 Ez a válasz nem igaz, pont az ellentétje lenne igaz.
