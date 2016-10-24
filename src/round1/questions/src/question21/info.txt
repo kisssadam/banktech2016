@@ -1,0 +1,27 @@
+A - 0
+
+B - 1
+
+C - 2
+Ha csak egy X.java szerepel a mappában ezzel a tartalommal, akkor 2 lesz a kimenet. Az X.java tartalma:
+
+package question21.files;
+
+public class X {
+
+}
+
+D - 3
+Ha az X.java tartalma:
+
+package question21.files;
+
+public class X {
+
+}
+
+enum Y {
+	
+}
+
+Akkor 3 lesz a kimenet
