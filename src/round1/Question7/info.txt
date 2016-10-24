@@ -1,0 +1,16 @@
+A - A mûködése nemdeterminisztikus, azaz olyan sorrendben futnak le a szálak, ahogy a rendszer jónak látja.
+Mindössze annyit csinál, hogy minden szálat elindít, de ezután már a futtatókörnyezeten múlik, hogy milyen sorrendben futnak le a szálak.
+
+B - A stream() miatt sorban megy végig és futtatja a szálakat.
+Az "A" válasz miatt nem igaz.
+
+C - Fordított sorrendben, azaz végigmegy az összes szálon és a legutolsótól halad vissza az elsõig.
+Az "A" válasz miatt nem igaz.
+
+D - A kód le sem fordul.
+Fordítás során csak "Note"-ok vannak, de ettõl függetlenül még lefordul a kód.
+
+javac ThreadWork.java
+
+Note: ThreadWork.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
