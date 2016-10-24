@@ -1,0 +1,17 @@
+11. Tekintsük a következő String deklarációt
+
+String str = new String("foo");
+Mit mondhatunk el róla biztosan, anélkül, hogy ismernénk az előtte és utána futó kódrészletet.
+
+A - a str referencia a String Poolban lévő "foo" stringre mutat
+Ez a válasz igaz.
+
+B - java-ban ez a leghatékonyabb módja egy string értékadásnak
+Ez a válasz nem igaz, pont az ellentétje lenne igaz.
+
+C - ebben az értékadásban 2 objectumot hoz létre a rendszer
+Ez nem eldönthető, mert az "str" akkor kerül be a StringPool-ba, amikor először van rá szükség.
+
+D - nem eldönthető a kód többi részének az ismerete nélkül, hogy 1 vagy 2 objektum jön létre
+A "C" válasz miatt ez is jó válasz. Egy objektum mindeképpen létrejön, ez pediglen nem más, mint ami az újonnan létrejött "foo"-ra hivatkozik.
+A másik már benne van a StringPool-ban, vagy most kerül bele.
