@@ -1,4 +1,4 @@
-24. Mely válasz igaz az alábbi kódra?
+24. Mely valasz igaz az alabbi kodra?
 
 import java.util.Random;
 
