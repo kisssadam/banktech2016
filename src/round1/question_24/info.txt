@@ -1,0 +1,86 @@
+24. Mely válasz igaz az alábbi kódra?
+
+import java.util.Random;
+
+interface RandomNumberI<N extends Number> {
+  N getRandomValue();
+}
+
+class SingletonRandomInteger implements RandomNumberI<Integer> {
+  
+  private static final String LOCK_OBJECT = "LOCK";
+    
+  private SingletonRandomInteger() { 
+  }
+  
+  private static RandomNumberI<Integer> INSTANCE;
+  
+  public static RandomNumberI<Integer> getInstance() {
+    if (INSTANCE == null) {
+      synchronized (LOCK_OBJECT) {
+        if (INSTANCE == null) {
+          INSTANCE = new SingletonRandomInteger();
+        }
+      }
+    }
+    return INSTANCE;
+  }
+
+  @Override
+  public Integer getRandomValue() {
+    return SingletonRandomNumber.getInstance().getRandomInteger();
+  }
+  
+}
+
+class SingletonRandomNumber {
+  
+  private static final String LOCK_OBJECT = "LOCK";
+  
+  final Random rand = new Random();
+  
+  private SingletonRandomNumber() { }
+  
+  private static SingletonRandomNumber INSTANCE;
+  
+  public static SingletonRandomNumber getInstance() {
+    if (INSTANCE == null) {
+      synchronized (LOCK_OBJECT) {
+        if (INSTANCE == null) {
+          INSTANCE = new SingletonRandomNumber();
+        }
+      }
+    }
+    return INSTANCE;
+  }
+
+  public Double getRandomDouble() {
+    return rand.nextDouble();
+  }
+  
+  public Integer getRandomInteger() {
+    return rand.nextInt();
+  }
+}
+
+public class Main {
+  
+  public static void main(String[] args) {
+    // example for getting instances and random values:
+    System.out.println(SingletonRandomNumber.getInstance().getRandomDouble());
+    System.out.println(SingletonRandomInteger.getInstance().getRandomValue());
+  }
+}
+
+
+
+A.) According to Gergo: All members of interfaces are implicitly public.
+Azaz kizarva.
+
+B.) Deadlock: nem valoszinu.
+Egyeb: http://www.javalobby.org/java/forums/t96352.html
+
+C.) Elfogadva.
+According to Adam: http://javarevisited.blogspot.hu/2014/05/double-checked-locking-on-singleton-in-java.html
+
+D.) & E.) Elvetve, bar null ertekadassal ki lehet eppen kenyszeriteni a D-t (?).
