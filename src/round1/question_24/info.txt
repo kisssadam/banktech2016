@@ -74,6 +74,19 @@ public class Main {
 
 
 
+A
+az interface logikailag hibás, mert nem public a metódusa
+B
+deadlock alakulhat ki
+C
+sérülhet a Singleton pattern, elõfordulhat hogy több azonos típusú objektum létrejön
+D
+a getRandomDouble() és a getRandomInteger() metódusok elszállhatnak NullPointerException-nel
+E
+a getRandomValue() metódus implementációja elszállhat NullPointerException-nel
+
+
+
 A.) According to Gergo: All members of interfaces are implicitly public.
 Azaz kizarva.
 
