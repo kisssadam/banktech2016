@@ -1,0 +1,50 @@
+22. Mely válaszok igazak az alábbi kódra?
+
+class NotEnoughMoneyException extends RuntimeException {
+
+}
+
+public class Inflation {
+	
+	private double remainingMoney;
+	private double cost;
+	
+	public Inflation(double remainingMoney, double cost) {
+		this.remainingMoney = remainingMoney;
+		this.cost = cost;
+	}
+	
+	public int countWithInflation(double inflationRate) {
+		if (remainingMoney < cost) {
+			throw new NotEnoughMoneyException();
+		}
+		
+		int count = 0;
+		while (remainingMoney >= cost) {
+			count++;
+			remainingMoney -= cost;
+			cost += inflationRate;
+		}
+		
+		return count;
+	}
+
+	public static void main(String[] args) {
+		// example for creating and using an Inflation object:
+		Inflation d = new Inflation(10, 3);
+		System.out.println("count: " + d.countWithInflation(1));
+	}
+
+}
+
+A - countWithInflation metódus minden esetben pontosan megmondja, hogy ha minden vásárláskor az ár a paraméterben megadott értékkel növekszik, akkor hányszor lehet a terméket megvásárolni
+Kerekítési hiba miatt nem.
+
+B - countWithInflation metódus nem minden esetben mondja meg pontosan, hogy ha minden vásárláskor az ár a paraméterben megadott értékkel növekszik, akkor hányszor lehet a terméket megvásárolni
+Ez a válasz a helyes.
+
+C - NotEnoughMoneyException osztály nem használható kivételként, mert nincs konstruktora
+Van konstruktora. Ott az alapértelmezett.
+
+D - countWithInflation metódus fejlécéből hiányzik a throws kulcsszó, így kivétel nem dobható
+Ez a válasz nem igaz, mert RuntimeException-ről van szó, így nincs szükség a throws kulcsszóra.
