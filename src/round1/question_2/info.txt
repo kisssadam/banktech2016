@@ -1,4 +1,4 @@
-2. Mely állítások igazak az alábbi osztályra?
+2. Mely allitasok igazak az alabbi osztalyra?
 
 public class ThreadSafeClass {
 
@@ -15,14 +15,14 @@ public class ThreadSafeClass {
 
 
 A - okes.
-az osztály szálbiztos
+az osztaly szalbiztos
 B - okes.
-b() és f() metódus futhat párhuzamosan
+b() es f() metodus futhat parhuzamosan
 C
-b() és c() metódus futhat párhuzamosan
+b() es c() metodus futhat parhuzamosan
 D
-f() és g() metódus futhat párhuzamosan
+f() es g() metodus futhat parhuzamosan
 E - okes.
-e() és g() metódus futhat párhuzamosan
+e() es g() metodus futhat parhuzamosan
 F - okes.
-a() bármivel futhat párhuzamosan
+a() barmivel futhat parhuzamosan
