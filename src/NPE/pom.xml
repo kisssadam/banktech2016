@@ -20,6 +20,20 @@
 				<linkedin>https://hu.linkedin.com/in/kisssandoradam</linkedin>
 			</properties>
 		</developer>
+		<developer>
+			<id>zsocacoder</id>
+			<name>Zsolt Laszlo</name>
+			<email>zotyarex@gmail.com</email>
+			<organization>University of Debrecen - Faculty of Informatics</organization>
+			<organizationUrl>https://www.inf.unideb.hu/</organizationUrl>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>Europe/Budapest</timezone>
+			<properties>
+				<linkedin>https://www.linkedin.com/in/zsolt-l%C3%A1szl%C3%B3-333860117</linkedin>
+			</properties>
+		</developer>
 	</developers>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
