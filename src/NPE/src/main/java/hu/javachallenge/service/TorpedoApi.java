@@ -3,10 +3,12 @@ package hu.javachallenge.service;
 import hu.javachallenge.request.MoveRequest;
 import hu.javachallenge.request.ShootRequest;
 import hu.javachallenge.response.CreateGameResponse;
+import hu.javachallenge.response.ExtendSonarResponse;
 import hu.javachallenge.response.GameInfoResponse;
 import hu.javachallenge.response.GameListResponse;
 import hu.javachallenge.response.JoinGameResponse;
 import hu.javachallenge.response.ShootResponse;
+import hu.javachallenge.response.SonarResponse;
 import hu.javachallenge.response.SubmarinesResponse;
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -38,5 +40,11 @@ public interface TorpedoApi {
 	@POST("game/{gameId}/submarine/{submarineId}/shoot")
 	Call<ShootResponse> shoot(@Path("gameId") long gameId, @Path("submarineId") long submarineId,
 			@Body ShootRequest shootRequest);
+
+	@GET("game/{gameId}/submarine/{submarineId}/sonar")
+	Call<SonarResponse> sonar(@Path("gameId") long gameId, @Path("submarineId") long submarineId);
+
+	@POST("game/{gameId}/submarine/{submarineId}/sonar")
+	Call<ExtendSonarResponse> extendSonar(@Path("gameId") long gameId, @Path("submarineId") long submarineId);
 
 }

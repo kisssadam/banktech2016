@@ -8,10 +8,12 @@ import org.slf4j.LoggerFactory;
 
 import hu.javachallenge.request.MoveRequest;
 import hu.javachallenge.request.ShootRequest;
+import hu.javachallenge.response.ExtendSonarResponse;
 import hu.javachallenge.response.GameInfoResponse;
 import hu.javachallenge.response.GameListResponse;
 import hu.javachallenge.response.JoinGameResponse;
 import hu.javachallenge.response.ShootResponse;
+import hu.javachallenge.response.SonarResponse;
 import hu.javachallenge.response.SubmarinesResponse;
 import hu.javachallenge.service.MoveResponse;
 import hu.javachallenge.service.ServiceGenerator;
@@ -109,6 +111,26 @@ public class Main {
 			Response<ShootResponse> response = shootCall.execute();
 			System.out.println("ShootResponse " + response.raw());
 			System.out.println("ShootResponse " + response.body());
+			System.out.println();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		Call<SonarResponse> sonarCall = torpedoApi.sonar(2067620462, 786);
+		try {
+			Response<SonarResponse> response = sonarCall.execute();
+			System.out.println("SonarResponse " + response.raw());
+			System.out.println("SonarResponse " + response.body());
+			System.out.println();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		Call<ExtendSonarResponse> extendSonarCall = torpedoApi.extendSonar(2067620462, 786);
+		try {
+			Response<ExtendSonarResponse> response = extendSonarCall.execute();
+			System.out.println("ExtendSonarResponse " + response.raw());
+			System.out.println("ExtendSonarResponse " + response.body());
 			System.out.println();
 		} catch (IOException e) {
 			e.printStackTrace();
