@@ -140,7 +140,7 @@
 				<configuration>
 					<archive>
 						<manifest>
-							<mainClass>hu.javachallenge.torpedo.Main</mainClass>
+							<mainClass>hu.javachallenge.controller.Main</mainClass>
 						</manifest>
 					</archive>
 					<descriptorRefs>
@@ -172,7 +172,7 @@
 					</execution>
 				</executions>
 				<configuration>
-					<mainClass>hu.javachallenge.torpedo.Main</mainClass>
+					<mainClass>hu.javachallenge.controller.Main</mainClass>
 					<arguments>
 						<argument>${default.server.address}</argument>
 					</arguments>

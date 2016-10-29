@@ -20,6 +20,36 @@ public class ConnectionStatus {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 11321;
+		int result = 1;
+		result = prime * result + ((connected == null) ? 0 : connected.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof ConnectionStatus)) {
+			return false;
+		}
+		ConnectionStatus other = (ConnectionStatus) obj;
+		if (connected == null) {
+			if (other.connected != null) {
+				return false;
+			}
+		} else if (!connected.equals(other.connected)) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("ConnectionStatus [connected=");

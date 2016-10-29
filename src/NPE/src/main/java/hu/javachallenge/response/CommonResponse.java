@@ -1,16 +1,12 @@
 package hu.javachallenge.response;
 
-import org.apache.commons.lang3.StringUtils;
-
 public class CommonResponse {
 
 	private String message;
-
 	private int code;
 
 	public CommonResponse() {
 		super();
-		this.message = StringUtils.EMPTY;
 	}
 
 	public CommonResponse(String message, int code) {

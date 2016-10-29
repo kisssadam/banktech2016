@@ -235,6 +235,128 @@ public class MapConfiguration {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 11321;
+		int result = 1;
+		result = prime * result + extendedSonarCooldown;
+		result = prime * result + extendedSonarRange;
+		result = prime * result + extendedSonarRounds;
+		result = prime * result + height;
+		result = prime * result + Arrays.hashCode(islandPositions);
+		result = prime * result + islandSize;
+		result = prime * result + maxAccelerationPerRound;
+		result = prime * result + maxSpeed;
+		result = prime * result + maxSteeringPerRound;
+		result = prime * result + rateLimitedPenalty;
+		result = prime * result + roundLength;
+		result = prime * result + rounds;
+		result = prime * result + sonarRange;
+		result = prime * result + submarineSize;
+		result = prime * result + submarinesPerTeam;
+		result = prime * result + teamCount;
+		result = prime * result + torpedoCooldown;
+		result = prime * result + torpedoDamage;
+		result = prime * result + torpedoDestroyScore;
+		result = prime * result + torpedoExplosionRadius;
+		result = prime * result + torpedoHitPenalty;
+		result = prime * result + torpedoHitScore;
+		result = prime * result + torpedoRange;
+		result = prime * result + torpedoSpeed;
+		result = prime * result + width;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof MapConfiguration)) {
+			return false;
+		}
+		MapConfiguration other = (MapConfiguration) obj;
+		if (extendedSonarCooldown != other.extendedSonarCooldown) {
+			return false;
+		}
+		if (extendedSonarRange != other.extendedSonarRange) {
+			return false;
+		}
+		if (extendedSonarRounds != other.extendedSonarRounds) {
+			return false;
+		}
+		if (height != other.height) {
+			return false;
+		}
+		if (!Arrays.equals(islandPositions, other.islandPositions)) {
+			return false;
+		}
+		if (islandSize != other.islandSize) {
+			return false;
+		}
+		if (maxAccelerationPerRound != other.maxAccelerationPerRound) {
+			return false;
+		}
+		if (maxSpeed != other.maxSpeed) {
+			return false;
+		}
+		if (maxSteeringPerRound != other.maxSteeringPerRound) {
+			return false;
+		}
+		if (rateLimitedPenalty != other.rateLimitedPenalty) {
+			return false;
+		}
+		if (roundLength != other.roundLength) {
+			return false;
+		}
+		if (rounds != other.rounds) {
+			return false;
+		}
+		if (sonarRange != other.sonarRange) {
+			return false;
+		}
+		if (submarineSize != other.submarineSize) {
+			return false;
+		}
+		if (submarinesPerTeam != other.submarinesPerTeam) {
+			return false;
+		}
+		if (teamCount != other.teamCount) {
+			return false;
+		}
+		if (torpedoCooldown != other.torpedoCooldown) {
+			return false;
+		}
+		if (torpedoDamage != other.torpedoDamage) {
+			return false;
+		}
+		if (torpedoDestroyScore != other.torpedoDestroyScore) {
+			return false;
+		}
+		if (torpedoExplosionRadius != other.torpedoExplosionRadius) {
+			return false;
+		}
+		if (torpedoHitPenalty != other.torpedoHitPenalty) {
+			return false;
+		}
+		if (torpedoHitScore != other.torpedoHitScore) {
+			return false;
+		}
+		if (torpedoRange != other.torpedoRange) {
+			return false;
+		}
+		if (torpedoSpeed != other.torpedoSpeed) {
+			return false;
+		}
+		if (width != other.width) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("MapConfiguration [width=");

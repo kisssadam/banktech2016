@@ -7,6 +7,7 @@ import hu.javachallenge.response.ExtendSonarResponse;
 import hu.javachallenge.response.GameInfoResponse;
 import hu.javachallenge.response.GameListResponse;
 import hu.javachallenge.response.JoinGameResponse;
+import hu.javachallenge.response.MoveResponse;
 import hu.javachallenge.response.ShootResponse;
 import hu.javachallenge.response.SonarResponse;
 import hu.javachallenge.response.SubmarinesResponse;

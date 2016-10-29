@@ -1,6 +1,4 @@
-package hu.javachallenge.service;
-
-import hu.javachallenge.response.CommonResponse;
+package hu.javachallenge.response;
 
 public class MoveResponse extends CommonResponse {
 

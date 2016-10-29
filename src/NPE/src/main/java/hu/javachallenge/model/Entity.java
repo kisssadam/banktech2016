@@ -83,6 +83,74 @@ public class Entity {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 11321;
+		int result = 1;
+		long temp;
+		temp = Double.doubleToLongBits(angle);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		result = prime * result + (int) (id ^ (id >>> 32));
+		result = prime * result + ((owner == null) ? 0 : owner.hashCode());
+		result = prime * result + ((position == null) ? 0 : position.hashCode());
+		result = prime * result + ((roundsMoved == null) ? 0 : roundsMoved.hashCode());
+		result = prime * result + ((type == null) ? 0 : type.hashCode());
+		result = prime * result + velocity;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Entity)) {
+			return false;
+		}
+		Entity other = (Entity) obj;
+		if (Double.doubleToLongBits(angle) != Double.doubleToLongBits(other.angle)) {
+			return false;
+		}
+		if (id != other.id) {
+			return false;
+		}
+		if (owner == null) {
+			if (other.owner != null) {
+				return false;
+			}
+		} else if (!owner.equals(other.owner)) {
+			return false;
+		}
+		if (position == null) {
+			if (other.position != null) {
+				return false;
+			}
+		} else if (!position.equals(other.position)) {
+			return false;
+		}
+		if (roundsMoved == null) {
+			if (other.roundsMoved != null) {
+				return false;
+			}
+		} else if (!roundsMoved.equals(other.roundsMoved)) {
+			return false;
+		}
+		if (type == null) {
+			if (other.type != null) {
+				return false;
+			}
+		} else if (!type.equals(other.type)) {
+			return false;
+		}
+		if (velocity != other.velocity) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("Entity [type=");

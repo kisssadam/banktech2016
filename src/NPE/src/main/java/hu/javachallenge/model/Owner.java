@@ -1,13 +1,11 @@
 package hu.javachallenge.model;
 
-import org.apache.commons.lang3.StringUtils;
-
 public class Owner {
 
 	private String name;
 
 	public Owner() {
-		this.name = StringUtils.EMPTY;
+		super();
 	}
 
 	public Owner(String name) {
@@ -20,6 +18,36 @@ public class Owner {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 11321;
+		int result = 1;
+		result = prime * result + ((name == null) ? 0 : name.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof Owner)) {
+			return false;
+		}
+		Owner other = (Owner) obj;
+		if (name == null) {
+			if (other.name != null) {
+				return false;
+			}
+		} else if (!name.equals(other.name)) {
+			return false;
+		}
+		return true;
 	}
 
 	@Override
