@@ -1,5 +1,11 @@
 package hu.javachallenge.service;
 
+import java.lang.reflect.Type;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.TimeZone;
+
 import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
@@ -7,6 +13,10 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -37,7 +47,16 @@ public class ServiceGenerator {
 									.build()))
 							.build();
 
-					Gson gson = new GsonBuilder().create();
+					Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
+						
+						@Override
+						public LocalDateTime deserialize(JsonElement json, Type typeOfT,
+								JsonDeserializationContext context) throws JsonParseException {
+							ZoneId budapestZoneId = TimeZone.getTimeZone("Europe/Budapest").toZoneId();
+							return LocalDateTime.ofInstant(Instant.ofEpochMilli(json.getAsLong()), budapestZoneId);
+						}
+						
+					}).create();
 					
 					Retrofit retrofit = new Retrofit.Builder()
 							.baseUrl(HttpUrl.parse(serverAddress))

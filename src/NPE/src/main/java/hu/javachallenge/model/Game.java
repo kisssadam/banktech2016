@@ -1,5 +1,7 @@
 package hu.javachallenge.model;
 
+import java.time.LocalDateTime;
+
 public class Game {
 
 	private long id;
@@ -8,7 +10,7 @@ public class Game {
 	private ConnectionStatus connectionStatus;
 	private MapConfiguration mapConfiguration;
 	private Status status;
-	private long createdTime;
+	private LocalDateTime createdTime;
 
 	public Game() {
 		this.connectionStatus = new ConnectionStatus();
@@ -63,11 +65,11 @@ public class Game {
 		this.status = status;
 	}
 
-	public long getCreatedTime() {
+	public LocalDateTime getCreatedTime() {
 		return createdTime;
 	}
 
-	public void setCreatedTime(long createdTime) {
+	public void setCreatedTime(LocalDateTime createdTime) {
 		this.createdTime = createdTime;
 	}
 
