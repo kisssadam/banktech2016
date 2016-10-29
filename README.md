@@ -1,5 +1,9 @@
-NPE Torpedo Usage
-=================
+NPE Torpedo
+===========
+Our team name, NPE is the abbreviation of NullPointerException
+
+Usage
+-----
 ```
 mvn clean install
 
