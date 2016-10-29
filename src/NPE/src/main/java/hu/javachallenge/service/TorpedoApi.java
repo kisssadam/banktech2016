@@ -4,6 +4,7 @@ import hu.javachallenge.response.CreateGameResponse;
 import hu.javachallenge.response.GameInfoResponse;
 import hu.javachallenge.response.GameListResponse;
 import hu.javachallenge.response.JoinGameResponse;
+import hu.javachallenge.response.SubmarinesResponse;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
@@ -22,5 +23,8 @@ public interface TorpedoApi {
 
 	@GET("game/{gameId}")
 	Call<GameInfoResponse> gameInfo(@Path("gameId") long gameId);
+
+	@GET("game/{gameId}/submarine")
+	Call<SubmarinesResponse> submarines(@Path("gameId") long gameId);
 
 }

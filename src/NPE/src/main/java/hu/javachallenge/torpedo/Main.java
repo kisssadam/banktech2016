@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import hu.javachallenge.response.CommonResponse;
 import hu.javachallenge.response.GameInfoResponse;
 import hu.javachallenge.response.GameListResponse;
+import hu.javachallenge.response.SubmarinesResponse;
 import hu.javachallenge.service.ServiceGenerator;
 import hu.javachallenge.service.TorpedoApi;
 import retrofit2.Call;
@@ -35,13 +36,13 @@ public class Main {
 
 		TorpedoApi torpedoApi = ServiceGenerator.getClient(serverAddress, TEAMTOKEN);
 
-//		Call<CreateGameResponse> call = torpedoApi.createGame();
-//		try {
-//			Response<CreateGameResponse> response = call.execute();
-//			System.out.println(response.body());
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
+		// Call<CreateGameResponse> call = torpedoApi.createGame();
+		// try {
+		// Response<CreateGameResponse> response = call.execute();
+		// System.out.println(response.body());
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
 
 		Call<GameListResponse> gameList = torpedoApi.gameList();
 		try {
@@ -49,15 +50,15 @@ public class Main {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-//		Call<JoinGameResponse> call = torpedoApi.joinGame(2067620462L);
-//		try {
-//			Response<JoinGameResponse> response = call.execute();
-//			System.out.println(response.raw());
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-		
+
+		// Call<JoinGameResponse> call = torpedoApi.joinGame(2067620462L);
+		// try {
+		// Response<JoinGameResponse> response = call.execute();
+		// System.out.println(response.raw());
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
+
 		Call<GameInfoResponse> gameInfoCall = torpedoApi.gameInfo(2067620462);
 		try {
 			Response<GameInfoResponse> response = gameInfoCall.execute();
@@ -66,7 +67,16 @@ public class Main {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
+		Call<SubmarinesResponse> submarinesCall = torpedoApi.submarines(2067620462);
+		try {
+			Response<SubmarinesResponse> response = submarinesCall.execute();
+			System.out.println(response.raw());
+			System.out.println(response.body());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
 		// call.enqueue(new Callback<CreateGameResponse>() {
 		//
 		// @Override
