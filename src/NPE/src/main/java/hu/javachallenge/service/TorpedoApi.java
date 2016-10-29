@@ -1,11 +1,15 @@
 package hu.javachallenge.service;
 
+import hu.javachallenge.request.MoveRequest;
+import hu.javachallenge.request.ShootRequest;
 import hu.javachallenge.response.CreateGameResponse;
 import hu.javachallenge.response.GameInfoResponse;
 import hu.javachallenge.response.GameListResponse;
 import hu.javachallenge.response.JoinGameResponse;
+import hu.javachallenge.response.ShootResponse;
 import hu.javachallenge.response.SubmarinesResponse;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
@@ -26,5 +30,13 @@ public interface TorpedoApi {
 
 	@GET("game/{gameId}/submarine")
 	Call<SubmarinesResponse> submarines(@Path("gameId") long gameId);
+
+	@POST("game/{gameId}/submarine/{submarineId}/move")
+	Call<MoveResponse> move(@Path("gameId") long gameId, @Path("submarineId") long submarineId,
+			@Body MoveRequest moveRequest);
+
+	@POST("game/{gameId}/submarine/{submarineId}/shoot")
+	Call<ShootResponse> shoot(@Path("gameId") long gameId, @Path("submarineId") long submarineId,
+			@Body ShootRequest shootRequest);
 
 }

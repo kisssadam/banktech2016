@@ -6,10 +6,14 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import hu.javachallenge.response.CommonResponse;
+import hu.javachallenge.request.MoveRequest;
+import hu.javachallenge.request.ShootRequest;
 import hu.javachallenge.response.GameInfoResponse;
 import hu.javachallenge.response.GameListResponse;
+import hu.javachallenge.response.JoinGameResponse;
+import hu.javachallenge.response.ShootResponse;
 import hu.javachallenge.response.SubmarinesResponse;
+import hu.javachallenge.service.MoveResponse;
 import hu.javachallenge.service.ServiceGenerator;
 import hu.javachallenge.service.TorpedoApi;
 import retrofit2.Call;
@@ -36,6 +40,8 @@ public class Main {
 
 		TorpedoApi torpedoApi = ServiceGenerator.getClient(serverAddress, TEAMTOKEN);
 
+		System.out.println();
+
 		// Call<CreateGameResponse> call = torpedoApi.createGame();
 		// try {
 		// Response<CreateGameResponse> response = call.execute();
@@ -46,24 +52,30 @@ public class Main {
 
 		Call<GameListResponse> gameList = torpedoApi.gameList();
 		try {
-			System.out.println(gameList.execute().body());
+			Response<GameListResponse> response = gameList.execute();
+			System.out.println("GameListResponse " + response.raw());
+			System.out.println("GameListResponse " + response.body());
+			System.out.println();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		// Call<JoinGameResponse> call = torpedoApi.joinGame(2067620462L);
-		// try {
-		// Response<JoinGameResponse> response = call.execute();
-		// System.out.println(response.raw());
-		// } catch (IOException e) {
-		// e.printStackTrace();
-		// }
+		Call<JoinGameResponse> call = torpedoApi.joinGame(2067620462);
+		try {
+			Response<JoinGameResponse> response = call.execute();
+			System.out.println("JoinGameResponse " + response.raw());
+			System.out.println("JoinGameResponse " + response.body());
+			System.out.println();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 		Call<GameInfoResponse> gameInfoCall = torpedoApi.gameInfo(2067620462);
 		try {
 			Response<GameInfoResponse> response = gameInfoCall.execute();
-			System.out.println(response.raw());
-			System.out.println(response.body());
+			System.out.println("GameInfoResponse " + response.raw());
+			System.out.println("GameInfoResponse " + response.body());
+			System.out.println();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -71,8 +83,33 @@ public class Main {
 		Call<SubmarinesResponse> submarinesCall = torpedoApi.submarines(2067620462);
 		try {
 			Response<SubmarinesResponse> response = submarinesCall.execute();
-			System.out.println(response.raw());
-			System.out.println(response.body());
+			System.out.println("SubmarinesResponse " + response.raw());
+			System.out.println("SubmarinesResponse " + response.body());
+			System.out.println();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		// double speed = 0.5;
+		// double turn = -15.0;
+		// Call<MoveResponse> moveCall = torpedoApi.move(2067620462, 786, new
+		// MoveRequest(speed, turn));
+		// try {
+		// Response<MoveResponse> response = moveCall.execute();
+		// System.out.println("MoveResponse " + response.raw());
+		// System.out.println("MoveResponse " + response.body());
+		// System.out.println();
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
+
+		double angle = 1.1;
+		Call<ShootResponse> shootCall = torpedoApi.shoot(2067620462, 786, new ShootRequest(angle));
+		try {
+			Response<ShootResponse> response = shootCall.execute();
+			System.out.println("ShootResponse " + response.raw());
+			System.out.println("ShootResponse " + response.body());
+			System.out.println();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
