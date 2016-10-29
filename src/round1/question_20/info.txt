@@ -1,0 +1,48 @@
+20. Ok ez igy?
+
+import java.util.*;
+public class OkObject implements Comparator<OkObject> {
+    public boolean isOk;
+    public static void main(String[] args){
+        OkObject okObject1 = new OkObject(true);
+        OkObject okObject2 = new OkObject(false);
+        TreeSet treeSet = new TreeSet<OkObject>(okObject1);
+        treeSet.add(okObject1);
+        treeSet.add(okObject2);
+        System.out.println("Vege");
+    }
+    public OkObject(boolean isOk){
+        this.isOk = isOk;
+    }
+    public int compare(OkObject o1, OkObject o2) {
+        if(o1.isOk == false && o2.isOk == true){
+            return 1;
+        } else if(o1.isOk == true && o1.isOk == false){
+            return 0;
+        } else {
+            throw new IllegalStateException("Ket OkObject-nek nem lehet egyszerre ugyanaz az isOk flagje!");
+        }
+    }
+}
+
+
+
+Milyen kimenetei lehetnek a fenti programnak?
+A
+Vege
+B
+IllegalStateException dobódik a compare metódus else ágában
+C
+IllegalArgumentException dobódik a treeSet.add(okObject1); utasításnál.
+D
+Bizonyos JVM implementációk alatt nem fordul a kód a treeSet változó definiálásánál hiányzó generikus típus miatt.
+E
+ClassCastException váltódik ki a treeSet.add(okObject1); utasításnál.
+
+
+
+A.) Elfogadva (Adamnak sikerult produkalnia az eredmenyt - JDK 5).
+B.) Dobta a kivetelt (JDK 1.8).
+C.) Aligha.
+D.) Kiveve (gondolom, mert az allitas masodik fele nem stimmel).
+E.) Aligha.

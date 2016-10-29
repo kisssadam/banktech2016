@@ -1,0 +1,28 @@
+2. Mely allitasok igazak az alabbi osztalyra?
+
+public class ThreadSafeClass {
+
+    public void a(){}
+    public synchronized void b(){}
+    public synchronized void c(){}
+    public static void d(){}
+    public static void e(){}
+    public static synchronized void f(){}
+    public static synchronized void g(){}
+
+}
+
+
+
+A - okes.
+az osztaly szalbiztos
+B - okes.
+b() es f() metodus futhat parhuzamosan
+C
+b() es c() metodus futhat parhuzamosan
+D
+f() es g() metodus futhat parhuzamosan
+E - okes.
+e() es g() metodus futhat parhuzamosan
+F - okes.
+a() barmivel futhat parhuzamosan
