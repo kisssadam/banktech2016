@@ -54,7 +54,6 @@ public class Main {
 			log.trace("CreateGameResponse {}", response.raw());
 			log.trace("CreateGameResponse {}",
 					response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
-			throw new IOException();
 		} catch (IOException e) {
 			log.error("CreateGameResponse {}", e.toString());
 			e.printStackTrace();
