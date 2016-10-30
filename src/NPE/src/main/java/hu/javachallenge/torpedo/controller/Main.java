@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import hu.javachallenge.torpedo.request.MoveRequest;
 import hu.javachallenge.torpedo.request.ShootRequest;
+import hu.javachallenge.torpedo.response.CommonResponse;
 import hu.javachallenge.torpedo.response.CreateGameResponse;
 import hu.javachallenge.torpedo.response.ExtendSonarResponse;
 import hu.javachallenge.torpedo.response.GameInfoResponse;
@@ -19,7 +20,9 @@ import hu.javachallenge.torpedo.response.SonarResponse;
 import hu.javachallenge.torpedo.response.SubmarinesResponse;
 import hu.javachallenge.torpedo.service.ServiceGenerator;
 import hu.javachallenge.torpedo.service.TorpedoApi;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
+import retrofit2.Converter;
 import retrofit2.Response;
 
 public class Main {
@@ -40,57 +43,64 @@ public class Main {
 		String serverAddress = args[0];
 		log.debug("serverAddress: '{}'", serverAddress);
 
-		TorpedoApi torpedoApi = ServiceGenerator.getClient(serverAddress, TEAMTOKEN);
+		ServiceGenerator serviceGenerator = new ServiceGenerator(serverAddress, TEAMTOKEN);
 
-		System.out.println();
+		TorpedoApi torpedoApi = serviceGenerator.getTorpedoApi();
+		Converter<ResponseBody, CommonResponse> converter = serviceGenerator.getConverter();
 
 		Call<CreateGameResponse> createGameCall = torpedoApi.createGame();
 		try {
 			Response<CreateGameResponse> response = createGameCall.execute();
-			System.out.println("CreateGameResponse " + response.raw());
-			System.out.println("CreateGameResponse " + response.body());
-			System.out.println();
+			log.trace("CreateGameResponse {}", response.raw());
+			log.trace("CreateGameResponse {}",
+					response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
+			throw new IOException();
 		} catch (IOException e) {
+			log.error("CreateGameResponse {}", e.toString());
 			e.printStackTrace();
 		}
 
 		Call<GameListResponse> gameListCall = torpedoApi.gameList();
 		try {
 			Response<GameListResponse> response = gameListCall.execute();
-			System.out.println("GameListResponse " + response.raw());
-			System.out.println("GameListResponse " + response.body());
-			System.out.println();
+			log.trace("GameListResponse {}", response.raw());
+			log.trace("GameListResponse {}",
+					response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
+			log.error("GameListResponse {}", e.toString());
 			e.printStackTrace();
 		}
 
 		Call<JoinGameResponse> joinGameCall = torpedoApi.joinGame(2067620462);
 		try {
 			Response<JoinGameResponse> response = joinGameCall.execute();
-			System.out.println("JoinGameResponse " + response.raw());
-			System.out.println("JoinGameResponse " + response.body());
-			System.out.println();
+			log.trace("JoinGameResponse {}", response.raw());
+			log.trace("JoinGameResponse {}",
+					response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
+			log.error("JoinGameResponse {}", e.toString());
 			e.printStackTrace();
 		}
 
 		Call<GameInfoResponse> gameInfoCall = torpedoApi.gameInfo(2067620462);
 		try {
 			Response<GameInfoResponse> response = gameInfoCall.execute();
-			System.out.println("GameInfoResponse " + response.raw());
-			System.out.println("GameInfoResponse " + response.body());
-			System.out.println();
+			log.trace("GameInfoResponse {}", response.raw());
+			log.trace("GameInfoResponse {}",
+					response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
+			log.error("GameInfoResponse {}", e.toString());
 			e.printStackTrace();
 		}
 
 		Call<SubmarinesResponse> submarinesCall = torpedoApi.submarines(2067620462);
 		try {
 			Response<SubmarinesResponse> response = submarinesCall.execute();
-			System.out.println("SubmarinesResponse " + response.raw());
-			System.out.println("SubmarinesResponse " + response.body());
-			System.out.println();
+			log.trace("SubmarinesResponse {}", response.raw());
+			log.trace("SubmarinesResponse {}",
+					response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
+			log.error("SubmarinesResponse {}", e.toString());
 			e.printStackTrace();
 		}
 
@@ -99,10 +109,11 @@ public class Main {
 		Call<MoveResponse> moveCall = torpedoApi.move(2067620462, 786, new MoveRequest(speed, turn));
 		try {
 			Response<MoveResponse> response = moveCall.execute();
-			System.out.println("MoveResponse " + response.raw());
-			System.out.println("MoveResponse " + response.body());
-			System.out.println();
+			log.trace("MoveResponse {}", response.raw());
+			log.trace("MoveResponse {}",
+					response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
+			log.error("MoveResponse {}", e.toString());
 			e.printStackTrace();
 		}
 
@@ -110,47 +121,35 @@ public class Main {
 		Call<ShootResponse> shootCall = torpedoApi.shoot(2067620462, 786, new ShootRequest(angle));
 		try {
 			Response<ShootResponse> response = shootCall.execute();
-			System.out.println("ShootResponse " + response.raw());
-			System.out.println("ShootResponse " + response.body());
-			System.out.println();
+			log.trace("ShootResponse {}", response.raw());
+			log.trace("ShootResponse {}",
+					response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
+			log.error("ShootResponse {}", e.toString());
 			e.printStackTrace();
 		}
 
 		Call<SonarResponse> sonarCall = torpedoApi.sonar(2067620462, 786);
 		try {
 			Response<SonarResponse> response = sonarCall.execute();
-			System.out.println("SonarResponse " + response.raw());
-			System.out.println("SonarResponse " + response.body());
-			System.out.println();
+			log.trace("SonarResponse {}", response.raw());
+			log.trace("SonarResponse {}",
+					response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
+			log.error("SonarResponse {}", e.toString());
 			e.printStackTrace();
 		}
 
 		Call<ExtendSonarResponse> extendSonarCall = torpedoApi.extendSonar(2067620462, 786);
 		try {
 			Response<ExtendSonarResponse> response = extendSonarCall.execute();
-			System.out.println("ExtendSonarResponse " + response.raw());
-			System.out.println("ExtendSonarResponse " + response.body());
-			System.out.println();
+			log.trace("ExtendSonarResponse {}", response.raw());
+			log.trace("ExtendSonarResponse {}",
+					response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
+			log.error("ExtendSonarResponse {}", e.toString());
 			e.printStackTrace();
 		}
-
-		// call.enqueue(new Callback<CreateGameResponse>() {
-		//
-		// @Override
-		// public void onResponse(Call<CreateGameResponse> call,
-		// Response<CreateGameResponse> response) {
-		// log.trace("onResponse call: {}, response: {}", call, response);
-		// }
-		//
-		// @Override
-		// public void onFailure(Call<CreateGameResponse> call, Throwable
-		// throwable) {
-		// log.trace("onFailure call: {}, throwable: {}", call, throwable);
-		// }
-		// });
 	};
 
 }
