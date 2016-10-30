@@ -59,9 +59,9 @@ public class ServiceGenerator {
 		OkHttpClient okHttpClient = new OkHttpClient.Builder()
 				.addInterceptor(chain -> chain.proceed(chain.request()
 						.newBuilder()
+						.header("Accept", MediaType.APPLICATION_JSON)
+						.header("Content-Type", MediaType.APPLICATION_JSON)
 						.addHeader("TEAMTOKEN", teamToken)
-						.addHeader("Accept", MediaType.APPLICATION_JSON)
-						.addHeader("Content-Type", MediaType.APPLICATION_JSON)
 						.build()))
 				.addInterceptor(httpLoggingInterceptor)
 				.build();
