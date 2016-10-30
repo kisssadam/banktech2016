@@ -20,6 +20,8 @@ import com.google.gson.JsonParseException;
 
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
+import okhttp3.logging.HttpLoggingInterceptor;
+import okhttp3.logging.HttpLoggingInterceptor.Level;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -37,14 +39,24 @@ public class ServiceGenerator {
 		if (torpedoApi == null) {
 			synchronized (ServiceGenerator.class) {
 				if (torpedoApi == null) {
-					OkHttpClient okHttpClient = new OkHttpClient()
-							.newBuilder()
+					HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
+
+						@Override
+						public void log(String message) {
+							log.trace(message);
+						}
+						
+					});
+					httpLoggingInterceptor.setLevel(Level.BODY);
+					
+					OkHttpClient okHttpClient = new OkHttpClient.Builder()
 							.addInterceptor(chain -> chain.proceed(chain.request()
 									.newBuilder()
 									.addHeader("TEAMTOKEN", teamToken)
 									.addHeader("Accept", MediaType.APPLICATION_JSON)
 									.addHeader("Content-Type", MediaType.APPLICATION_JSON)
 									.build()))
+							.addInterceptor(httpLoggingInterceptor)
 							.build();
 
 					Gson gson = new GsonBuilder().registerTypeAdapter(LocalDateTime.class, new JsonDeserializer<LocalDateTime>() {
