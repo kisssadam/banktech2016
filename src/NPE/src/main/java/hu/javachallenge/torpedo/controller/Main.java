@@ -44,6 +44,12 @@ public class Main {
 		String serverAddress = args[0];
 		log.debug("serverAddress: '{}'", serverAddress);
 
+		if (!serverAddress.endsWith("/")) {
+			log.warn("Server address doesn't end with '/' character, it will be automatically appended to it!");
+			serverAddress = serverAddress + '/';
+			log.debug("New server address: '{}'", serverAddress);
+		}
+
 		ServiceGenerator serviceGenerator = new ServiceGenerator(serverAddress, TEAMTOKEN, Level.BODY);
 
 		TorpedoApi torpedoApi = serviceGenerator.getTorpedoApi();
