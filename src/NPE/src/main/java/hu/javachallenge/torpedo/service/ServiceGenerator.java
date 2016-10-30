@@ -24,7 +24,6 @@ import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
-import okhttp3.logging.HttpLoggingInterceptor.Level;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -34,16 +33,18 @@ public class ServiceGenerator {
 	private static final Logger log = LoggerFactory.getLogger(ServiceGenerator.class);
 
 	private final String serverAddress;
-	private final String teamToken; 
+	private final String teamToken;
+	private final HttpLoggingInterceptor.Level loglevel;
 	private final Gson gson;
 	private final TorpedoApi torpedoApi;
 	private final Converter<ResponseBody, CommonResponse> converter;
 	
-	public ServiceGenerator(String serverAddress, String teamToken) {
-		log.debug("serverAddress: '{}', teamToken: '{}'", serverAddress, teamToken);
+	public ServiceGenerator(String serverAddress, String teamToken, HttpLoggingInterceptor.Level loglevel) {
+		log.debug("serverAddress: '{}', teamToken: '{}', loglevel: '{}'", serverAddress, teamToken, loglevel);
 		
 		this.serverAddress = serverAddress;
 		this.teamToken = teamToken;
+		this.loglevel = loglevel;
 		
 		HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
 
@@ -53,8 +54,7 @@ public class ServiceGenerator {
 			}
 			
 		});
-		httpLoggingInterceptor.setLevel(Level.BODY);
-		log.debug("HTTP loglevel: '{}'", httpLoggingInterceptor.getLevel());
+		httpLoggingInterceptor.setLevel(this.loglevel);
 		
 		OkHttpClient okHttpClient = new OkHttpClient.Builder()
 				.addInterceptor(chain -> chain.proceed(chain.request()
@@ -93,6 +93,10 @@ public class ServiceGenerator {
 	
 	public String getTeamToken() {
 		return teamToken;
+	}
+	
+	public HttpLoggingInterceptor.Level getLoglevel() {
+		return loglevel;
 	}
 	
 	public Gson getGson() {

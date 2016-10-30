@@ -21,6 +21,7 @@ import hu.javachallenge.torpedo.response.SubmarinesResponse;
 import hu.javachallenge.torpedo.service.ServiceGenerator;
 import hu.javachallenge.torpedo.service.TorpedoApi;
 import okhttp3.ResponseBody;
+import okhttp3.logging.HttpLoggingInterceptor.Level;
 import retrofit2.Call;
 import retrofit2.Converter;
 import retrofit2.Response;
@@ -43,7 +44,7 @@ public class Main {
 		String serverAddress = args[0];
 		log.debug("serverAddress: '{}'", serverAddress);
 
-		ServiceGenerator serviceGenerator = new ServiceGenerator(serverAddress, TEAMTOKEN);
+		ServiceGenerator serviceGenerator = new ServiceGenerator(serverAddress, TEAMTOKEN, Level.BODY);
 
 		TorpedoApi torpedoApi = serviceGenerator.getTorpedoApi();
 		Converter<ResponseBody, CommonResponse> converter = serviceGenerator.getConverter();
