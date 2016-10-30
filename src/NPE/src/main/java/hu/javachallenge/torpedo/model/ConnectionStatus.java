@@ -11,6 +11,11 @@ public class ConnectionStatus {
 		this.connected = new HashMap<>();
 	}
 
+	public ConnectionStatus(Map<String, Boolean> connected) {
+		super();
+		this.connected = connected;
+	}
+
 	public Map<String, Boolean> getConnected() {
 		return connected;
 	}

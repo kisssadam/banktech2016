@@ -17,6 +17,18 @@ public class Game {
 		this.mapConfiguration = new MapConfiguration();
 	}
 
+	public Game(long id, long round, Scores scores, ConnectionStatus connectionStatus,
+			MapConfiguration mapConfiguration, Status status, LocalDateTime createdTime) {
+		super();
+		this.id = id;
+		this.round = round;
+		this.scores = scores;
+		this.connectionStatus = connectionStatus;
+		this.mapConfiguration = mapConfiguration;
+		this.status = status;
+		this.createdTime = createdTime;
+	}
+
 	public long getId() {
 		return id;
 	}

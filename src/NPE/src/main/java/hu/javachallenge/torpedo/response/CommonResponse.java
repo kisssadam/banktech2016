@@ -32,6 +32,40 @@ public class CommonResponse {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 11321;
+		int result = 1;
+		result = prime * result + code;
+		result = prime * result + ((message == null) ? 0 : message.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (obj == null) {
+			return false;
+		}
+		if (!(obj instanceof CommonResponse)) {
+			return false;
+		}
+		CommonResponse other = (CommonResponse) obj;
+		if (code != other.code) {
+			return false;
+		}
+		if (message == null) {
+			if (other.message != null) {
+				return false;
+			}
+		} else if (!message.equals(other.message)) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("CommonResponse [message=");

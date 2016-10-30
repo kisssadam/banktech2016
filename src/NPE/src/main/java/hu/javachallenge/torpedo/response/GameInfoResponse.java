@@ -15,6 +15,36 @@ public class GameInfoResponse extends CommonResponse {
 	}
 
 	@Override
+	public int hashCode() {
+		final int prime = 11321;
+		int result = super.hashCode();
+		result = prime * result + ((game == null) ? 0 : game.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		if (!(obj instanceof GameInfoResponse)) {
+			return false;
+		}
+		GameInfoResponse other = (GameInfoResponse) obj;
+		if (game == null) {
+			if (other.game != null) {
+				return false;
+			}
+		} else if (!game.equals(other.game)) {
+			return false;
+		}
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
 		builder.append("GameInfoResponse [game=");

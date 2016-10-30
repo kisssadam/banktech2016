@@ -34,6 +34,40 @@ public class MapConfiguration {
 		this.islandPositions = new IslandPosition[0];
 	}
 
+	public MapConfiguration(int width, int height, IslandPosition[] islandPositions, int teamCount,
+			int submarinesPerTeam, int torpedoDamage, int torpedoHitScore, int torpedoHitPenalty, int torpedoCooldown,
+			int sonarRange, int extendedSonarRange, int extendedSonarRounds, int extendedSonarCooldown,
+			int torpedoSpeed, int torpedoExplosionRadius, int roundLength, int islandSize, int submarineSize,
+			int rounds, int maxSteeringPerRound, int maxAccelerationPerRound, int maxSpeed, int torpedoRange,
+			int rateLimitedPenalty, int torpedoDestroyScore) {
+		super();
+		this.width = width;
+		this.height = height;
+		this.islandPositions = islandPositions;
+		this.teamCount = teamCount;
+		this.submarinesPerTeam = submarinesPerTeam;
+		this.torpedoDamage = torpedoDamage;
+		this.torpedoHitScore = torpedoHitScore;
+		this.torpedoHitPenalty = torpedoHitPenalty;
+		this.torpedoCooldown = torpedoCooldown;
+		this.sonarRange = sonarRange;
+		this.extendedSonarRange = extendedSonarRange;
+		this.extendedSonarRounds = extendedSonarRounds;
+		this.extendedSonarCooldown = extendedSonarCooldown;
+		this.torpedoSpeed = torpedoSpeed;
+		this.torpedoExplosionRadius = torpedoExplosionRadius;
+		this.roundLength = roundLength;
+		this.islandSize = islandSize;
+		this.submarineSize = submarineSize;
+		this.rounds = rounds;
+		this.maxSteeringPerRound = maxSteeringPerRound;
+		this.maxAccelerationPerRound = maxAccelerationPerRound;
+		this.maxSpeed = maxSpeed;
+		this.torpedoRange = torpedoRange;
+		this.rateLimitedPenalty = rateLimitedPenalty;
+		this.torpedoDestroyScore = torpedoDestroyScore;
+	}
+
 	public int getWidth() {
 		return width;
 	}

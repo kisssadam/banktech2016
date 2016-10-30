@@ -11,6 +11,11 @@ public class Scores {
 		this.scores = new HashMap<>();
 	}
 
+	public Scores(Map<String, Long> scores) {
+		super();
+		this.scores = scores;
+	}
+
 	public Map<String, Long> getScores() {
 		return scores;
 	}

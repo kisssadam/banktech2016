@@ -33,7 +33,7 @@ public class MoveRequest extends CommonRequest {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		final int prime = 11321;
 		int result = 1;
 		long temp;
 		temp = Double.doubleToLongBits(speed);
