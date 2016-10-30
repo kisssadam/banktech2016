@@ -34,17 +34,17 @@ public class ServiceGenerator {
 
 	private final String serverAddress;
 	private final String teamToken;
-	private final HttpLoggingInterceptor.Level loglevel;
+	private final HttpLoggingInterceptor.Level httpLoggingLevel;
 	private final Gson gson;
 	private final TorpedoApi torpedoApi;
 	private final Converter<ResponseBody, CommonResponse> converter;
 	
-	public ServiceGenerator(String serverAddress, String teamToken, HttpLoggingInterceptor.Level loglevel) {
-		log.debug("serverAddress: '{}', teamToken: '{}', loglevel: '{}'", serverAddress, teamToken, loglevel);
+	public ServiceGenerator(String serverAddress, String teamToken, HttpLoggingInterceptor.Level httpLoggingLevel) {
+		log.debug("serverAddress: '{}', teamToken: '{}', httpLoggingLevel: '{}'", serverAddress, teamToken, httpLoggingLevel);
 		
 		this.serverAddress = serverAddress;
 		this.teamToken = teamToken;
-		this.loglevel = loglevel;
+		this.httpLoggingLevel = httpLoggingLevel;
 		
 		HttpLoggingInterceptor httpLoggingInterceptor = new HttpLoggingInterceptor(new HttpLoggingInterceptor.Logger() {
 
@@ -54,7 +54,7 @@ public class ServiceGenerator {
 			}
 			
 		});
-		httpLoggingInterceptor.setLevel(this.loglevel);
+		httpLoggingInterceptor.setLevel(this.httpLoggingLevel);
 		
 		OkHttpClient okHttpClient = new OkHttpClient.Builder()
 				.addInterceptor(chain -> chain.proceed(chain.request()
@@ -95,8 +95,8 @@ public class ServiceGenerator {
 		return teamToken;
 	}
 	
-	public HttpLoggingInterceptor.Level getLoglevel() {
-		return loglevel;
+	public HttpLoggingInterceptor.Level getHttpLoggingLevel() {
+		return httpLoggingLevel;
 	}
 	
 	public Gson getGson() {
