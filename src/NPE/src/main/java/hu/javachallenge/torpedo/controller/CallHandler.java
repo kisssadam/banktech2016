@@ -47,8 +47,8 @@ public class CallHandler {
 	private static final String TEAMTOKEN = "4906CD1A4718F0B4F315BDE34B5FE430";
 	private String serverAddress;
 	private TorpedoApi torpedoApi;
-	ServiceGenerator serviceGenerator;
-	Converter<ResponseBody, CommonResponse> converter;
+	private ServiceGenerator serviceGenerator;
+	private Converter<ResponseBody, CommonResponse> converter;
 
 	public CallHandler(String serverAddress) {
 		this.serverAddress = serverAddress;
