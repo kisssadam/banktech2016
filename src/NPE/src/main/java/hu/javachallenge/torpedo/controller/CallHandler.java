@@ -1,9 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package hu.javachallenge.torpedo.controller;
+
+import java.io.IOException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import hu.javachallenge.torpedo.exception.AccelerationIsTooBigException;
 import hu.javachallenge.torpedo.exception.CallBeforeRefillException;
@@ -28,34 +28,21 @@ import hu.javachallenge.torpedo.response.SonarResponse;
 import hu.javachallenge.torpedo.response.SubmarinesResponse;
 import hu.javachallenge.torpedo.service.ServiceGenerator;
 import hu.javachallenge.torpedo.service.TorpedoApi;
-import java.io.IOException;
 import okhttp3.ResponseBody;
-import okhttp3.logging.HttpLoggingInterceptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import retrofit2.Call;
 import retrofit2.Converter;
 import retrofit2.Response;
 
-/**
- *
- * @author Czuczi
- */
 public class CallHandler {
 
 	private static final Logger log = LoggerFactory.getLogger(CallHandler.class);
-	private static final String TEAMTOKEN = "4906CD1A4718F0B4F315BDE34B5FE430";
-	private String serverAddress;
+	
 	private TorpedoApi torpedoApi;
-	private ServiceGenerator serviceGenerator;
 	private Converter<ResponseBody, CommonResponse> converter;
 
-	public CallHandler(String serverAddress) {
-		this.serverAddress = serverAddress;
-		serviceGenerator = new ServiceGenerator(serverAddress, TEAMTOKEN, HttpLoggingInterceptor.Level.BODY);
-
-		torpedoApi = serviceGenerator.getTorpedoApi();
-		converter = serviceGenerator.getConverter();
+	public CallHandler(ServiceGenerator serviceGenerator) {
+		this.torpedoApi = serviceGenerator.getTorpedoApi();
+		this.converter = serviceGenerator.getConverter();
 	}
 
 	public CreateGameResponse createGame() throws Exception {
@@ -64,14 +51,13 @@ public class CallHandler {
 			Response<CreateGameResponse> response = createGameCall.execute();
 			log.trace("CreateGameResponse {}", response.raw());
 			if (response.isSuccessful()) {
+				log.trace("CreateGameResponse {}", response.body());
 				return response.body();
 			} else {
 				CommonResponse commonResponse = converter.convert(response.errorBody());
+				log.trace("CreateGameResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-
-			log.trace("CreateGameResponse {}",
-				response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
 			log.error("CreateGameResponse {}", e.toString());
 			e.printStackTrace();
@@ -85,13 +71,13 @@ public class CallHandler {
 			Response<GameListResponse> response = gameListCall.execute();
 			log.trace("GameListResponse {}", response.raw());
 			if (response.isSuccessful()) {
+				log.trace("GameListResponse {}", response.body());
 				return response.body();
 			} else {
 				CommonResponse commonResponse = converter.convert(response.errorBody());
+				log.trace("GameListResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-			log.trace("GameListResponse {}",
-				response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
 			log.error("GameListResponse {}", e.toString());
 			e.printStackTrace();
@@ -105,13 +91,13 @@ public class CallHandler {
 			Response<JoinGameResponse> response = joinGameCall.execute();
 			log.trace("JoinGameResponse {}", response.raw());
 			if (response.isSuccessful()) {
+				log.trace("JoinGameResponse {}", response.body());
 				return response.body();
 			} else {
 				CommonResponse commonResponse = converter.convert(response.errorBody());
+				log.trace("JoinGameResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-			log.trace("JoinGameResponse {}",
-				response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
 			log.error("JoinGameResponse {}", e.toString());
 			e.printStackTrace();
@@ -125,13 +111,13 @@ public class CallHandler {
 			Response<GameInfoResponse> response = gameInfoCall.execute();
 			log.trace("GameInfoResponse {}", response.raw());
 			if (response.isSuccessful()) {
+				log.trace("GameInfoResponse {}", response.body());
 				return response.body();
 			} else {
 				CommonResponse commonResponse = converter.convert(response.errorBody());
+				log.trace("GameInfoResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-			log.trace("GameInfoResponse {}",
-				response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
 			log.error("GameInfoResponse {}", e.toString());
 			e.printStackTrace();
@@ -145,13 +131,13 @@ public class CallHandler {
 			Response<SubmarinesResponse> response = submarinesCall.execute();
 			log.trace("SubmarinesResponse {}", response.raw());
 			if (response.isSuccessful()) {
+				log.trace("SubmarinesResponse {}", response.body());
 				return response.body();
 			} else {
 				CommonResponse commonResponse = converter.convert(response.errorBody());
+				log.trace("SubmarinesResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-			log.trace("SubmarinesResponse {}",
-				response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
 			log.error("SubmarinesResponse {}", e.toString());
 			e.printStackTrace();
@@ -165,13 +151,13 @@ public class CallHandler {
 			Response<MoveResponse> response = moveCall.execute();
 			log.trace("MoveResponse {}", response.raw());
 			if (response.isSuccessful()) {
+				log.trace("MoveResponse {}", response.body());
 				return response.body();
 			} else {
 				CommonResponse commonResponse = converter.convert(response.errorBody());
+				log.trace("MoveResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-			log.trace("MoveResponse {}",
-				response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
 			log.error("MoveResponse {}", e.toString());
 			e.printStackTrace();
@@ -185,13 +171,13 @@ public class CallHandler {
 			Response<SonarResponse> response = sonarCall.execute();
 			log.trace("SonarResponse {}", response.raw());
 			if (response.isSuccessful()) {
+				log.trace("SonarResponse {}", response.body());
 				return response.body();
 			} else {
 				CommonResponse commonResponse = converter.convert(response.errorBody());
+				log.trace("SonarResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-			log.trace("SonarResponse {}",
-				response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
 			log.error("SonarResponse {}", e.toString());
 			e.printStackTrace();
@@ -205,13 +191,13 @@ public class CallHandler {
 			Response<ExtendSonarResponse> response = extendSonarCall.execute();
 			log.trace("ExtendSonarResponse {}", response.raw());
 			if (response.isSuccessful()) {
+				log.trace("ExtendSonarResponse {}", response.body());
 				return response.body();
 			} else {
 				CommonResponse commonResponse = converter.convert(response.errorBody());
+				log.trace("ExtendSonarResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-			log.trace("ExtendSonarResponse {}",
-					response.isSuccessful() ? response.body() : converter.convert(response.errorBody()));
 		} catch (IOException e) {
 			log.error("ExtendSonarResponse {}", e.toString());
 			e.printStackTrace();
@@ -221,6 +207,8 @@ public class CallHandler {
 	
 	private void testCode(CommonResponse commonResponse) throws Exception {
 		switch (commonResponse.getCode()) {
+			case 0:
+				return;
 			case 1:
 				throw new TeamIsNotInvitedException(commonResponse.getMessage());
 			case 2:
@@ -242,7 +230,7 @@ public class CallHandler {
 			case 12:
 				throw new TurningIsTooBigException(commonResponse.getMessage());
 			default:
-				System.out.println("lefutott");
+				log.error("Unhandled error: {}", commonResponse);
 				throw new UnexpectedErrorCodeException(commonResponse.getMessage());
 		}
 	}
