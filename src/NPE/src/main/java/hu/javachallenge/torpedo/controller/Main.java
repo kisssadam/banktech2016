@@ -45,18 +45,18 @@ public class Main {
 			CreateGameResponse game = callHandler.createGame();
 			long gameId = game.getId();
 			// callHandler.gameList();
-//			callHandler.joinGame(gameId);
+			// callHandler.joinGame(gameId);
 			callHandler.gameInfo(gameId);
 			SubmarinesResponse submarinesResponse = callHandler.submarinesInGame(gameId);
 			Submarine[] submarines = submarinesResponse.getSubmarines();
 			callHandler.shoot(gameId, submarines[0].getId(), 0.0);
 			callHandler.sonar(gameId, submarines[0].getId());
-//			callHandler.gameInfo(gameId);
-//			double speed = 0.5;
-//			double turn = -15.0;
-//			callHandler.move(gameId, submarines[0].getId(), speed, turn);
-//			callHandler.sonar(gameId, submarines[0].getId());
-//			callHandler.extendSonar(gameId, submarines[0].getId());
+			// callHandler.gameInfo(gameId);
+			// double speed = 0.5;
+			// double turn = -15.0;
+			// callHandler.move(gameId, submarines[0].getId(), speed, turn);
+			// callHandler.sonar(gameId, submarines[0].getId());
+			// callHandler.extendSonar(gameId, submarines[0].getId());
 		} catch (Exception e) {
 			log.error(e.toString());
 		}
@@ -75,6 +75,12 @@ public class Main {
 
 	public static double torpedoDistance(Position sourcePosition, Position destinationPosition, double destinationR) {
 		return distance(sourcePosition, 0.0, destinationPosition, destinationR);
+	}
+
+	public static double valamivelBezartSzog(Position sourcePosition, Position destinationPosition) {
+		double yDest = Math.abs(destinationPosition.getY().subtract(sourcePosition.getY()).doubleValue());
+		double xDest = Math.abs(destinationPosition.getX().subtract(sourcePosition.getX()).doubleValue());
+		return Math.toDegrees(Math.atan(yDest / xDest));
 	}
 
 }
