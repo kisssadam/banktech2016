@@ -135,6 +135,7 @@ public class Main {
 		return velocity * Math.sin(angle);
 	}
 
+	// https://www.kirupa.com/forum/showthread.php?347334-Aiming-and-hitting-a-moving-target
 	public static double aimAtMovingTarget(Position sourcePosition, Position targetPosition, double targetMovementAngle,
 			double targetVelocity, double bulletVelocity) {
 		double dX = targetPosition.getX().subtract(sourcePosition.getX()).doubleValue();
