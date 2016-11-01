@@ -1,10 +1,12 @@
 package hu.javachallenge.torpedo.controller;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.model.Submarine;
 import hu.javachallenge.torpedo.response.CreateGameResponse;
 import hu.javachallenge.torpedo.response.SubmarinesResponse;
@@ -55,6 +57,10 @@ public class Main {
 		}
 	}
 	
-	
+	public static double distance(Position sourcePosition, double sourceR, Position destinationPosition, double destinationR) {
+		BigDecimal xSquare = sourcePosition.getX().subtract(destinationPosition.getX()).multiply(sourcePosition.getX().subtract(destinationPosition.getX()));
+		BigDecimal ySquare = sourcePosition.getY().subtract(destinationPosition.getY()).multiply(sourcePosition.getY().subtract(destinationPosition.getY()));
+		return Math.sqrt(xSquare.add(ySquare).doubleValue()) - (sourceR + destinationR);
+	}
 
 }
