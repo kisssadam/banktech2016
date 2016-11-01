@@ -77,10 +77,46 @@ public class Main {
 		return distance(sourcePosition, 0.0, destinationPosition, destinationR);
 	}
 
-	public static double valamivelBezartSzog(Position sourcePosition, Position destinationPosition) {
-		double yDest = Math.abs(destinationPosition.getY().subtract(sourcePosition.getY()).doubleValue());
-		double xDest = Math.abs(destinationPosition.getX().subtract(sourcePosition.getX()).doubleValue());
-		return Math.toDegrees(Math.atan(yDest / xDest));
+	public static double torpedoDestinationAngle(Position sourcePosition, Position destinationPosition) {
+		double distY = Math.abs(destinationPosition.getY().subtract(sourcePosition.getY()).doubleValue());
+		double distX = Math.abs(destinationPosition.getX().subtract(sourcePosition.getX()).doubleValue());
+
+		double angle = Math.toDegrees(Math.atan(distY / distX));
+
+		double destX = destinationPosition.getX().doubleValue();
+		double destY = destinationPosition.getY().doubleValue();
+
+		double srcX = sourcePosition.getX().doubleValue();
+		double srcY = sourcePosition.getY().doubleValue();
+
+		if (destX > srcX && destY == srcY) {
+			return 0.0;
+		}
+		if (destX == srcX && destY > srcY) {
+			return 90.0;
+		}
+		if (destX < srcX && destY == srcY) {
+			return 180.0;
+		}
+		if (destX == srcX && destY < srcY) {
+			return 270;
+		}
+
+		if (destX > srcX && destY > srcY) {
+			return angle;
+		}
+		if (destX < srcX && destY > srcY) {
+			return 180.0 - angle;
+		}
+		if (destX < srcX && destY < srcY) {
+			return 180.0 + angle;
+		}
+		if (destX > srcX && destY < srcY) {
+			return 360.0 - angle;
+		}
+
+		log.info("SHOULD NOT HAPPEN!");
+		return angle;
 	}
 
 }
