@@ -17,6 +17,10 @@ public class Position {
 		this.y = y;
 	}
 
+	public Position(double x, double y) {
+		this(BigDecimal.valueOf(x), BigDecimal.valueOf(y));
+	}
+
 	public BigDecimal getX() {
 		return x;
 	}
