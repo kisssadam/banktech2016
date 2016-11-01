@@ -37,13 +37,14 @@ public class Main {
 			log.debug("New server address: '{}'", serverAddress);
 		}
 
-		ServiceGenerator serviceGenerator = new ServiceGenerator(serverAddress, TEAMTOKEN, HttpLoggingInterceptor.Level.BODY);
+		ServiceGenerator serviceGenerator = new ServiceGenerator(serverAddress, TEAMTOKEN,
+				HttpLoggingInterceptor.Level.BODY);
 		CallHandler callHandler = new CallHandler(serviceGenerator);
 		try {
 			CreateGameResponse game = callHandler.createGame();
 			long gameId = game.getId();
 			callHandler.gameList();
-//			callHandler.joinGame(gameId);
+			// callHandler.joinGame(gameId);
 			callHandler.gameInfo(gameId);
 			SubmarinesResponse submarinesResponse = callHandler.submarinesInGame(gameId);
 			Submarine[] submarines = submarinesResponse.getSubmarines();
@@ -56,11 +57,20 @@ public class Main {
 			log.error(e.toString());
 		}
 	}
-	
-	public static double distance(Position sourcePosition, double sourceR, Position destinationPosition, double destinationR) {
-		BigDecimal xSquare = sourcePosition.getX().subtract(destinationPosition.getX()).multiply(sourcePosition.getX().subtract(destinationPosition.getX()));
-		BigDecimal ySquare = sourcePosition.getY().subtract(destinationPosition.getY()).multiply(sourcePosition.getY().subtract(destinationPosition.getY()));
+
+	public static double distance(Position sourcePosition, double sourceR, Position destinationPosition,
+			double destinationR) {
+		BigDecimal xSubtract = sourcePosition.getX().subtract(destinationPosition.getX());
+		BigDecimal xSquare = xSubtract.multiply(xSubtract);
+
+		BigDecimal ySubtract = sourcePosition.getY().subtract(destinationPosition.getY());
+		BigDecimal ySquare = ySubtract.multiply(ySubtract);
+
 		return Math.sqrt(xSquare.add(ySquare).doubleValue()) - (sourceR + destinationR);
+	}
+
+	public static double torpedoDistance(Position sourcePosition, Position destinationPosition, double destinationR) {
+		return distance(sourcePosition, 0.0, destinationPosition, destinationR);
 	}
 
 }
