@@ -11,14 +11,14 @@ public class Position {
 		super();
 	}
 
+	public Position(double x, double y) {
+		this(BigDecimal.valueOf(x), BigDecimal.valueOf(y));
+	}
+
 	public Position(BigDecimal x, BigDecimal y) {
 		super();
 		this.x = x;
 		this.y = y;
-	}
-
-	public Position(double x, double y) {
-		this(BigDecimal.valueOf(x), BigDecimal.valueOf(y));
 	}
 
 	public BigDecimal getX() {
