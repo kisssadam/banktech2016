@@ -4,7 +4,7 @@ public class Entity {
 
 	private String type;
 	private long id;
-	private BigDecimalPosition position;
+	private Position position;
 	private Owner owner;
 	private int velocity;
 	private double angle;
@@ -14,7 +14,7 @@ public class Entity {
 		super();
 	}
 
-	public Entity(String type, long id, BigDecimalPosition position, Owner owner, int velocity, double angle,
+	public Entity(String type, long id, Position position, Owner owner, int velocity, double angle,
 			Integer roundsMoved) {
 		super();
 		this.type = type;
@@ -42,11 +42,11 @@ public class Entity {
 		this.id = id;
 	}
 
-	public BigDecimalPosition getPosition() {
+	public Position getPosition() {
 		return position;
 	}
 
-	public void setPosition(BigDecimalPosition position) {
+	public void setPosition(Position position) {
 		this.position = position;
 	}
 

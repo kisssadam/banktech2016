@@ -2,16 +2,16 @@ package hu.javachallenge.torpedo.model;
 
 import java.math.BigDecimal;
 
-public class BigDecimalPosition {
+public class Position {
 
 	private BigDecimal x;
 	private BigDecimal y;
 
-	public BigDecimalPosition() {
+	public Position() {
 		super();
 	}
 
-	public BigDecimalPosition(BigDecimal x, BigDecimal y) {
+	public Position(BigDecimal x, BigDecimal y) {
 		super();
 		this.x = x;
 		this.y = y;
@@ -50,10 +50,10 @@ public class BigDecimalPosition {
 		if (obj == null) {
 			return false;
 		}
-		if (!(obj instanceof BigDecimalPosition)) {
+		if (!(obj instanceof Position)) {
 			return false;
 		}
-		BigDecimalPosition other = (BigDecimalPosition) obj;
+		Position other = (Position) obj;
 		if (x == null) {
 			if (other.x != null) {
 				return false;
@@ -74,7 +74,7 @@ public class BigDecimalPosition {
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
-		builder.append("BigDecimalPosition [x=");
+		builder.append("Position [x=");
 		builder.append(x);
 		builder.append(", y=");
 		builder.append(y);

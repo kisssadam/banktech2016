@@ -6,7 +6,7 @@ public class MapConfiguration {
 
 	private int width;
 	private int height;
-	private IslandPosition[] islandPositions;
+	private Position[] islandPositions;
 	private int teamCount;
 	private int submarinesPerTeam;
 	private int torpedoDamage;
@@ -31,10 +31,10 @@ public class MapConfiguration {
 	private int torpedoDestroyScore;
 
 	public MapConfiguration() {
-		this.islandPositions = new IslandPosition[0];
+		this.islandPositions = new Position[0];
 	}
 
-	public MapConfiguration(int width, int height, IslandPosition[] islandPositions, int teamCount,
+	public MapConfiguration(int width, int height, Position[] islandPositions, int teamCount,
 			int submarinesPerTeam, int torpedoDamage, int torpedoHitScore, int torpedoHitPenalty, int torpedoCooldown,
 			int sonarRange, int extendedSonarRange, int extendedSonarRounds, int extendedSonarCooldown,
 			int torpedoSpeed, int torpedoExplosionRadius, int roundLength, int islandSize, int submarineSize,
@@ -84,11 +84,11 @@ public class MapConfiguration {
 		this.height = height;
 	}
 
-	public IslandPosition[] getIslandPositions() {
+	public Position[] getIslandPositions() {
 		return islandPositions;
 	}
 
-	public void setIslandPositions(IslandPosition[] islandPositions) {
+	public void setIslandPositions(Position[] islandPositions) {
 		this.islandPositions = islandPositions;
 	}
 
