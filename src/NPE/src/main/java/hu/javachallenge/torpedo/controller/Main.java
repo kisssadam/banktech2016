@@ -78,16 +78,16 @@ public class Main {
 	}
 
 	public static double torpedoDestinationAngle(Position sourcePosition, Position destinationPosition) {
-		double distY = Math.abs(destinationPosition.getY().subtract(sourcePosition.getY()).doubleValue());
-		double distX = Math.abs(destinationPosition.getX().subtract(sourcePosition.getX()).doubleValue());
-
-		double angle = Math.toDegrees(Math.atan(distY / distX));
-
-		double destX = destinationPosition.getX().doubleValue();
-		double destY = destinationPosition.getY().doubleValue();
-
 		double srcX = sourcePosition.getX().doubleValue();
 		double srcY = sourcePosition.getY().doubleValue();
+		
+		double destX = destinationPosition.getX().doubleValue();
+		double destY = destinationPosition.getY().doubleValue();
+		
+		double distX = destinationPosition.getX().subtract(sourcePosition.getX()).abs().doubleValue();
+		double distY = destinationPosition.getY().subtract(sourcePosition.getY()).abs().doubleValue();
+
+		double angle = Math.toDegrees(Math.atan(distY / distX));
 
 		if (destX > srcX && destY == srcY) {
 			return 0.0;
@@ -99,7 +99,7 @@ public class Main {
 			return 180.0;
 		}
 		if (destX == srcX && destY < srcY) {
-			return 270;
+			return 270.0;
 		}
 
 		if (destX > srcX && destY > srcY) {
@@ -115,7 +115,7 @@ public class Main {
 			return 360.0 - angle;
 		}
 
-		log.info("SHOULD NOT HAPPEN!");
+		log.warn("None of the if statements were executed in torpedoDestinationAngle. Returning angle: {}", angle);
 		return angle;
 	}
 
@@ -149,9 +149,9 @@ public class Main {
 		double c = Math.pow(dX, 2) + Math.pow(dY, 2);
 
 		// Check we're not breaking into complex numbers
-		double q = Math.pow(b, 2) - 4 * a * c; // kvóciens
+		double q = Math.pow(b, 2) - 4 * a * c;
 		if (q < 0.0) {
-			log.error("Something went wrong.");
+			log.error("Math.pow({}) cannot be interpreted on negative numbers.", q);
 			return 0.0;
 		}
 
