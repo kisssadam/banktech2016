@@ -67,4 +67,19 @@ public class MathTest {
 		Assert.assertEquals(expected, Main.torpedoDestinationAngle(sourcePosition, destinationPosition), DELTA);
 	}
 
+	@Test
+	public void aimAtMovingTargetTest() {
+		// Position sourcePosition, Position targetPosition, double targetMovementAngle, double targetVelocity, double bulletVelocity
+
+		Position sourcePosition = new Position(BigDecimal.valueOf(1), BigDecimal.valueOf(1));
+		Position targetPosition = new Position(BigDecimal.valueOf(4), BigDecimal.valueOf(4));
+		double targetMovementAngle = 45.0;
+		double targetVelocity = 2;
+		double bulletVelocity = 5;
+		
+		double result = Main.aimAtMovingTarget(sourcePosition, targetPosition, targetMovementAngle, targetVelocity, bulletVelocity);
+		
+		Assert.assertEquals(45.0, result, DELTA);
+	}
+
 }

@@ -119,4 +119,50 @@ public class Main {
 		return angle;
 	}
 
+	/**
+	 *
+	 * @param velocity
+	 *            átfogó
+	 * @param angle
+	 *            szög
+	 * @return szomszédos befogó
+	 */
+	public static double xMovement(double velocity, double angle) {
+		return velocity * Math.cos(angle);
+	}
+
+	public static double yMovement(double velocity, double angle) {
+		return velocity * Math.sin(angle);
+	}
+
+	public static double aimAtMovingTarget(Position sourcePosition, Position targetPosition, double targetMovementAngle,
+			double targetVelocity, double bulletVelocity) {
+		double dX = targetPosition.getX().subtract(sourcePosition.getX()).doubleValue();
+		double dY = targetPosition.getY().subtract(sourcePosition.getY()).doubleValue();
+
+		double xMovementResult = xMovement(targetVelocity, Math.toRadians(targetMovementAngle));
+		double yMovementResult = yMovement(targetVelocity, Math.toRadians(targetMovementAngle));
+
+		double a = Math.pow(xMovementResult, 2) + Math.pow(yMovementResult, 2) - Math.pow(bulletVelocity, 2);
+		double b = 2 * (xMovementResult * dX + yMovementResult * dY);
+		double c = Math.pow(dX, 2) + Math.pow(dY, 2);
+
+		// Check we're not breaking into complex numbers
+		double q = Math.pow(b, 2) - 4 * a * c; // kvóciens
+		if (q < 0.0) {
+			log.error("Something went wrong.");
+			return 0.0;
+		}
+
+		// The time that we will hit the target
+		double time = ((a < 0.0 ? -1.0 : 1.0) * Math.sqrt(q) - b) / (2.0 * a);
+
+		// Aim for where the target will be after time t
+		dX += time * xMovementResult;
+		dY += time * yMovementResult;
+
+		double theta = Math.toDegrees(Math.atan2(dY, dX));
+		return theta;
+	}
+
 }
