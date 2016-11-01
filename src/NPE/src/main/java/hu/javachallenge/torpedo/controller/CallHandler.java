@@ -17,6 +17,7 @@ import hu.javachallenge.torpedo.exception.TorpedoIsOnCooldown;
 import hu.javachallenge.torpedo.exception.TurningIsTooBigException;
 import hu.javachallenge.torpedo.exception.UnexpectedErrorCodeException;
 import hu.javachallenge.torpedo.request.MoveRequest;
+import hu.javachallenge.torpedo.request.ShootRequest;
 import hu.javachallenge.torpedo.response.CommonResponse;
 import hu.javachallenge.torpedo.response.CreateGameResponse;
 import hu.javachallenge.torpedo.response.ExtendSonarResponse;
@@ -24,6 +25,7 @@ import hu.javachallenge.torpedo.response.GameInfoResponse;
 import hu.javachallenge.torpedo.response.GameListResponse;
 import hu.javachallenge.torpedo.response.JoinGameResponse;
 import hu.javachallenge.torpedo.response.MoveResponse;
+import hu.javachallenge.torpedo.response.ShootResponse;
 import hu.javachallenge.torpedo.response.SonarResponse;
 import hu.javachallenge.torpedo.response.SubmarinesResponse;
 import hu.javachallenge.torpedo.service.ServiceGenerator;
@@ -36,7 +38,7 @@ import retrofit2.Response;
 public class CallHandler {
 
 	private static final Logger log = LoggerFactory.getLogger(CallHandler.class);
-	
+
 	private TorpedoApi torpedoApi;
 	private Converter<ResponseBody, CommonResponse> converter;
 
@@ -165,6 +167,26 @@ public class CallHandler {
 		return null;
 	}
 
+	public ShootResponse shoot(long gameId, long submarineId, double angle) throws Exception {
+		Call<ShootResponse> shootCall = torpedoApi.shoot(gameId, submarineId, new ShootRequest(angle));
+		try {
+			Response<ShootResponse> response = shootCall.execute();
+			log.trace("ShootResponse {}", response.raw());
+			if (response.isSuccessful()) {
+				log.trace("ShootResponse {}", response.body());
+				return response.body();
+			} else {
+				CommonResponse commonResponse = converter.convert(response.errorBody());
+				log.trace("ShootResponse {}", commonResponse);
+				testCode(commonResponse);
+			}
+		} catch (IOException e) {
+			log.error("ShootResponse {}", e.toString());
+			e.printStackTrace();
+		}
+		return null;
+	}
+
 	public SonarResponse sonar(long gameId, long submarineId) throws Exception {
 		Call<SonarResponse> sonarCall = torpedoApi.sonar(gameId, submarineId);
 		try {
@@ -204,34 +226,34 @@ public class CallHandler {
 		}
 		return null;
 	}
-	
+
 	private void testCode(CommonResponse commonResponse) throws Exception {
 		switch (commonResponse.getCode()) {
-			case 0:
-				return;
-			case 1:
-				throw new TeamIsNotInvitedException(commonResponse.getMessage());
-			case 2:
-				throw new GameIsInProgressException(commonResponse.getMessage());
-			case 3:
-				throw new NonexistantGameIdException(commonResponse.getMessage());
-			case 4:
-				throw new TheTeamHasNoAccessToHandleTheGivenSubmarineException(commonResponse.getMessage());
-			case 7:
-				throw new TorpedoIsOnCooldown(commonResponse.getMessage());
-			case 8:
-				throw new CallBeforeRefillException(commonResponse.getMessage());
-			case 9:
-				throw new TheGameIsNotInProgressException(commonResponse.getMessage());
-			case 10:
-				throw new TheGivenShipHasAlreadyMovedException(commonResponse.getMessage());
-			case 11:
-				throw new AccelerationIsTooBigException(commonResponse.getMessage());
-			case 12:
-				throw new TurningIsTooBigException(commonResponse.getMessage());
-			default:
-				log.error("Unhandled error: {}", commonResponse);
-				throw new UnexpectedErrorCodeException(commonResponse.getMessage());
+		case 0:
+			return;
+		case 1:
+			throw new TeamIsNotInvitedException(commonResponse.getMessage());
+		case 2:
+			throw new GameIsInProgressException(commonResponse.getMessage());
+		case 3:
+			throw new NonexistantGameIdException(commonResponse.getMessage());
+		case 4:
+			throw new TheTeamHasNoAccessToHandleTheGivenSubmarineException(commonResponse.getMessage());
+		case 7:
+			throw new TorpedoIsOnCooldown(commonResponse.getMessage());
+		case 8:
+			throw new CallBeforeRefillException(commonResponse.getMessage());
+		case 9:
+			throw new TheGameIsNotInProgressException(commonResponse.getMessage());
+		case 10:
+			throw new TheGivenShipHasAlreadyMovedException(commonResponse.getMessage());
+		case 11:
+			throw new AccelerationIsTooBigException(commonResponse.getMessage());
+		case 12:
+			throw new TurningIsTooBigException(commonResponse.getMessage());
+		default:
+			log.error("Unhandled error: {}", commonResponse);
+			throw new UnexpectedErrorCodeException(commonResponse.getMessage());
 		}
 	}
 }

@@ -40,19 +40,23 @@ public class Main {
 		ServiceGenerator serviceGenerator = new ServiceGenerator(serverAddress, TEAMTOKEN,
 				HttpLoggingInterceptor.Level.BODY);
 		CallHandler callHandler = new CallHandler(serviceGenerator);
+
 		try {
 			CreateGameResponse game = callHandler.createGame();
 			long gameId = game.getId();
-			callHandler.gameList();
-			// callHandler.joinGame(gameId);
+			// callHandler.gameList();
+//			callHandler.joinGame(gameId);
 			callHandler.gameInfo(gameId);
 			SubmarinesResponse submarinesResponse = callHandler.submarinesInGame(gameId);
 			Submarine[] submarines = submarinesResponse.getSubmarines();
-			double speed = 0.5;
-			double turn = -15.0;
-			callHandler.move(gameId, submarines[0].getId(), speed, turn);
+			callHandler.shoot(gameId, submarines[0].getId(), 0.0);
 			callHandler.sonar(gameId, submarines[0].getId());
-			callHandler.extendSonar(gameId, submarines[0].getId());
+//			callHandler.gameInfo(gameId);
+//			double speed = 0.5;
+//			double turn = -15.0;
+//			callHandler.move(gameId, submarines[0].getId(), speed, turn);
+//			callHandler.sonar(gameId, submarines[0].getId());
+//			callHandler.extendSonar(gameId, submarines[0].getId());
 		} catch (Exception e) {
 			log.error(e.toString());
 		}
