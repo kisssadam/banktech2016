@@ -1,7 +1,9 @@
 package hu.javachallenge.torpedo.controller;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.model.Submarine;
 import hu.javachallenge.torpedo.response.CreateGameResponse;
+import hu.javachallenge.torpedo.response.GameInfoResponse;
 import hu.javachallenge.torpedo.response.SubmarinesResponse;
 import hu.javachallenge.torpedo.service.ServiceGenerator;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -80,10 +83,10 @@ public class Main {
 	public static double torpedoDestinationAngle(Position sourcePosition, Position destinationPosition) {
 		double srcX = sourcePosition.getX().doubleValue();
 		double srcY = sourcePosition.getY().doubleValue();
-		
+
 		double destX = destinationPosition.getX().doubleValue();
 		double destY = destinationPosition.getY().doubleValue();
-		
+
 		double distX = destinationPosition.getX().subtract(sourcePosition.getX()).abs().doubleValue();
 		double distY = destinationPosition.getY().subtract(sourcePosition.getY()).abs().doubleValue();
 
@@ -164,6 +167,64 @@ public class Main {
 
 		double theta = Math.toDegrees(Math.atan2(dY, dX));
 		return theta;
+	}
+
+	// http://stackoverflow.com/questions/1571294/line-equation-with-angle
+	public static double meredekség(double angle) {
+		return Math.tan(Math.toRadians(angle));
+	}
+
+	public static List<Position> islandsInDirection(GameInfoResponse gameInfoResponse, Position sourcePosition,
+			double angle) {
+		List<Position> islandsInDirection = new ArrayList<>();
+
+		Position[] islandPositions = gameInfoResponse.getGame().getMapConfiguration().getIslandPositions();
+		int islandSize = gameInfoResponse.getGame().getMapConfiguration().getIslandSize();
+
+		for (Position islandPosition : islandPositions) {
+			double meredekség = meredekség(angle);
+			double a = Math.pow(meredekség, 2) + 1;
+
+			double srcX = sourcePosition.getX().doubleValue();
+			double srcY = sourcePosition.getY().doubleValue();
+
+			double c2 = srcY - meredekség * srcX;
+
+			double islandX = islandPosition.getX().doubleValue();
+			double islandY = islandPosition.getY().doubleValue();
+
+			double b = 2 * (meredekség * c2 - meredekség * islandY - islandX);
+			double c1 = Math.pow(islandY, 2) - Math.pow(islandSize, 2) + Math.pow(islandX, 2) - 2 * c2 * islandY
+					+ Math.pow(c2, 2);
+			
+			if (Math.pow(b, 2) - 4 * a * c1 >= 0) {
+				islandsInDirection.add(islandPosition);
+			}
+		}
+
+		return islandsInDirection;
+		//
+		//
+		// List<Position> submarines = new ArrayList<>();
+		// List<Position> torpedos = new ArrayList<>();
+		//
+		// for (Entity entity : sonarResponse.getEntities()) {
+		// switch (entity.getType()) {
+		// case "Submarine":
+		//
+		// radius = gameInfoResponse.getGame().getMapConfiguration().getSubmarineSize();
+		// break;
+		//
+		// case "Torpedo":
+		// radius = 0.0;
+		// break;
+		//
+		// default:
+		// break;
+		// }
+		// }
+		//
+		//
 	}
 
 }
