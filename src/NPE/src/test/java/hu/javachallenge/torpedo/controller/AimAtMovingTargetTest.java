@@ -19,27 +19,29 @@ public class AimAtMovingTargetTest {
 	private double targetMovementAngle;
 	private double targetVelocity;
 	private double bulletVelocity;
+	private double expected;
 
 	public AimAtMovingTargetTest(double srcX, double srcY, double destX, double destY, double targetMovementAngle,
-			double targetVelocity, double bulletVelocity) {
-		this(new Position(srcX, srcY), new Position(destX, destY), targetMovementAngle, targetVelocity, bulletVelocity);
+			double targetVelocity, double bulletVelocity, double expected) {
+		this(new Position(srcX, srcY), new Position(destX, destY), targetMovementAngle, targetVelocity, bulletVelocity, expected);
 	}
 
 	private AimAtMovingTargetTest(Position sourcePosition, Position targetPosition, double targetMovementAngle,
-			double targetVelocity, double bulletVelocity) {
+			double targetVelocity, double bulletVelocity, double expected) {
 		super();
 		this.sourcePosition = sourcePosition;
 		this.targetPosition = targetPosition;
 		this.targetMovementAngle = targetMovementAngle;
 		this.targetVelocity = targetVelocity;
 		this.bulletVelocity = bulletVelocity;
+		this.expected = expected;
 	}
 
-	@Parameters
+	@Parameters(name = "{index}: aimAtMovingTarget(srcPos:({0}, {1}), destPos:({2}, {3}), targetMovementAngle: {4}, targetVelocity: {5}, bulletVelocity: {6})={7}")
 	public static Collection<Object[]> generateData() {
 		return Arrays.asList(
 			new Object[][] {
-				{ 1, 1, 4, 4, 45, 2, 5 }
+				{ 1, 1, 4, 4, 45, 2, 5, 45 }
 			}
 		);
 	}
@@ -47,7 +49,7 @@ public class AimAtMovingTargetTest {
 	@Test
 	public void testAimAtMovingTarget() {
 		double actual = Main.aimAtMovingTarget(sourcePosition, targetPosition, targetMovementAngle, targetVelocity, bulletVelocity);
-		Assert.assertEquals(45.0, actual, TestConstants.DELTA);
+		Assert.assertEquals(expected, actual, TestConstants.DELTA);
 	}
 
 }

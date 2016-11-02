@@ -33,7 +33,7 @@ public class DistanceTest {
 		this.expected = expected;
 	}
 
-	@Parameters
+	@Parameters(name = "{index}: distance(srcPos:({0}, {1}), srcR: {2}, destPos:({3}, {4}), destR: {5})={6}")
 	public static Collection<Object[]> generateData() {
 		return Arrays.asList(
 			new Object[][] {

@@ -28,7 +28,7 @@ public class TorpedoDestinationAngleTest {
 		this.expected = expected;
 	}
 
-	@Parameters
+	@Parameters(name = "{index}: torpedoDestinationAngle(srcPos:({0}, {1}), destPos:({2}, {3}))={4}")
 	public static Collection<Object[]> generateData() {
 		return Arrays.asList(
 			new Object[][] {
