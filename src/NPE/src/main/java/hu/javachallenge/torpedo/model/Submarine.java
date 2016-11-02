@@ -4,7 +4,7 @@ public class Submarine {
 
 	private String type;
 	private long id;
-	private SubmarinePosition position;
+	private Position position;
 	private Owner owner;
 	private int velocity;
 	private double angle;
@@ -15,11 +15,11 @@ public class Submarine {
 
 	public Submarine() {
 		super();
-		this.position = new SubmarinePosition();
+		this.position = new Position();
 		this.owner = new Owner();
 	}
 
-	public Submarine(String type, long id, SubmarinePosition position, Owner owner, int velocity, double angle, int hp,
+	public Submarine(String type, long id, Position position, Owner owner, int velocity, double angle, int hp,
 			int sonarCooldown, int torpedoCooldown, int sonarExtended) {
 		super();
 		this.type = type;
@@ -50,11 +50,11 @@ public class Submarine {
 		this.id = id;
 	}
 
-	public SubmarinePosition getPosition() {
+	public Position getPosition() {
 		return position;
 	}
 
-	public void setPosition(SubmarinePosition position) {
+	public void setPosition(Position position) {
 		this.position = position;
 	}
 

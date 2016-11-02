@@ -19,7 +19,7 @@ public class DistanceTest {
 	private Position destPos;
 	private double destR;
 	private double expected;
-
+	
 	public DistanceTest(double srcX, double srcY, double srcR, double destX, double destY, double destR, double expected) {
 		this(new Position(srcX, srcY), srcR, new Position(destX, destY), destR, expected);
 	}

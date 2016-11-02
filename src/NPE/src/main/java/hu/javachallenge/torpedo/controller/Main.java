@@ -174,6 +174,40 @@ public class Main {
 		return Math.tan(Math.toRadians(angle));
 	}
 
+	// amit célzunk és köztünk van-e sziget
+	public static List<Submarine> getPossibleTargets(GameInfoResponse gameInfoResponse, Position[] islandPositions,
+			Position sourcePosition, Submarine[] submarines, double bulletVelocity) {
+		List<Submarine> possibleSubmarineTargets = new ArrayList<>();
+
+		for (Submarine submarine : submarines) {
+			double theta = aimAtMovingTarget(sourcePosition, submarine.getPosition(), submarine.getAngle(), submarine.getVelocity(), bulletVelocity);
+			for (Position islandPosition : islandsInDirection(gameInfoResponse, sourcePosition, theta)) {
+				int submarineSize = gameInfoResponse.getGame().getMapConfiguration().getSubmarineSize();
+				int islandSize = gameInfoResponse.getGame().getMapConfiguration().getIslandSize();
+
+				double islandDistance = distance(sourcePosition, submarineSize, islandPosition, islandSize);
+
+				double submarineXMovement = xMovement(submarine.getVelocity(), submarine.getAngle());
+				double submarineYMovement = yMovement(submarine.getVelocity(), submarine.getAngle());
+				Position newSubmarinePosition = new Position(submarineXMovement, submarineYMovement);
+
+				double submarineDistance = distance(sourcePosition, submarineSize, newSubmarinePosition, submarineSize);
+
+				if (islandDistance > submarineDistance) {
+					possibleSubmarineTargets.add(submarine);
+				}
+			}
+		}
+
+		return possibleSubmarineTargets;
+	}
+	
+	// TODO mi veszélyben vagyunk-e ha célzunk-e valamit, azaz, magunkat lőjük-e.
+	public static boolean isDanger() {
+		// TODO
+		return false;
+	}
+
 	public static List<Position> islandsInDirection(GameInfoResponse gameInfoResponse, Position sourcePosition,
 			double angle) {
 		List<Position> islandsInDirection = new ArrayList<>();
@@ -196,7 +230,7 @@ public class Main {
 			double b = 2 * (meredekség * c2 - meredekség * islandY - islandX);
 			double c1 = Math.pow(islandY, 2) - Math.pow(islandSize, 2) + Math.pow(islandX, 2) - 2 * c2 * islandY
 					+ Math.pow(c2, 2);
-			
+
 			if (Math.pow(b, 2) - 4 * a * c1 >= 0) {
 				islandsInDirection.add(islandPosition);
 			}
