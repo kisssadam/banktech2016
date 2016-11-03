@@ -271,7 +271,14 @@ public class Main {
 		double a = Vab.getX().pow(2).add(Vab.getY().pow(2)).doubleValue();
 		double b = 2 * (Vab.getX().multiply(Pab.getX()).add(Vab.getY().multiply(Pab.getY()))).doubleValue();
 		double c = Pab.getX().pow(2).add(Pab.getY().pow(2)).doubleValue() - Math.pow(submarineSize, 2);
-		double disc = Math.sqrt(Math.pow(b, 2) - 4 * a * c);
+		
+		double q = Math.pow(b, 2) - 4 * a * c;
+		if (q < 0.0) {
+			log.warn("collisionPoisition q={}", q);
+			return null;
+		}
+		
+		double disc = Math.sqrt(q);
 		if (disc < 0) {
 			return null;
 		}
