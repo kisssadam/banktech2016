@@ -3,7 +3,9 @@ package hu.javachallenge.torpedo.controller;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -203,17 +205,35 @@ public class Main {
 	}
 	
 	// TODO mi veszélyben vagyunk-e ha célzunk-e valamit, azaz, magunkat lőjük-e.
-	public static boolean isDanger() {
-		// TODO
-		return false;
+//	public static boolean isTorpedoDangerous(GameInfoResponse gameInfoResponse, Position submarinePosition, double submarineAngle, double submarineVelocity, Position torpedoPosition, double torpedoAngle) {
+//		int torpedoSpeed = gameInfoResponse.getGame().getMapConfiguration().getTorpedoSpeed();
+//		double theta = aimAtMovingTarget(torpedoPosition, submarinePosition, submarineAngle, submarineVelocity, torpedoSpeed);
+//		
+//		return false;
+//	}
+	
+	
+	public static Position getNearestIslandInDirection(List<Position> islandsInDirection) {
+		return islandsInDirection.isEmpty() ? null : islandsInDirection.get(0);
 	}
-
+	
+	private static class Island {
+		private Position position;
+		private double distance;
+		
+		public Island(Position position, double distance) {
+			this.position = position;
+			this.distance = distance;
+		}
+	}
+	
 	public static List<Position> islandsInDirection(GameInfoResponse gameInfoResponse, Position sourcePosition,
 			double angle) {
-		List<Position> islandsInDirection = new ArrayList<>();
+		List<Island> islandsInDirection = new ArrayList<>();
 
 		Position[] islandPositions = gameInfoResponse.getGame().getMapConfiguration().getIslandPositions();
 		int islandSize = gameInfoResponse.getGame().getMapConfiguration().getIslandSize();
+		int submarineSize = gameInfoResponse.getGame().getMapConfiguration().getSubmarineSize();
 
 		for (Position islandPosition : islandPositions) {
 			double meredekség = meredekség(angle);
@@ -232,33 +252,49 @@ public class Main {
 					+ Math.pow(c2, 2);
 
 			if (Math.pow(b, 2) - 4 * a * c1 >= 0) {
-				islandsInDirection.add(islandPosition);
+				double distance = distance(sourcePosition, submarineSize, islandPosition, islandSize);
+				islandsInDirection.add(new Island(islandPosition, distance));
 			}
 		}
 
-		return islandsInDirection;
-		//
-		//
-		// List<Position> submarines = new ArrayList<>();
-		// List<Position> torpedos = new ArrayList<>();
-		//
-		// for (Entity entity : sonarResponse.getEntities()) {
-		// switch (entity.getType()) {
-		// case "Submarine":
-		//
-		// radius = gameInfoResponse.getGame().getMapConfiguration().getSubmarineSize();
-		// break;
-		//
-		// case "Torpedo":
-		// radius = 0.0;
-		// break;
-		//
-		// default:
-		// break;
-		// }
-		// }
-		//
-		//
+		Collections.sort(islandsInDirection, (island1, island2) -> island1.distance <= island2.distance ? -1 : 1);
+		
+		return islandsInDirection.stream().map(island -> island.position).collect(Collectors.toList());
+	}
+	
+	public static Position collisionPosition(int submarineSize, Position submarinePosition, double submarineVelocity, double submarineAngle, Position torpedoPosition, double torpedoVelocity, double torpedoAngle) {
+		Position Pab = subtract(torpedoPosition, submarinePosition);
+		Position torpedoVelocityVector = new Position(xMovement(torpedoVelocity, Math.toRadians(torpedoAngle)), yMovement(torpedoVelocity, Math.toRadians(torpedoAngle)));
+		Position submarineVelocityVector = new Position(xMovement(submarineVelocity, Math.toRadians(submarineAngle)), yMovement(submarineVelocity, Math.toRadians(submarineAngle)));
+		
+		Position Vab = subtract(torpedoVelocityVector, submarineVelocityVector);
+		double a = Vab.getX().pow(2).add(Vab.getY().pow(2)).doubleValue();
+		double b = 2 * (Vab.getX().multiply(Pab.getX()).add(Vab.getY().multiply(Pab.getY()))).doubleValue();
+		double c = Pab.getX().pow(2).add(Pab.getY().pow(2)).doubleValue() - Math.pow(submarineSize, 2);
+		double disc = Math.sqrt(Math.pow(b, 2) - 4 * a * c);
+		if (disc < 0) {
+			return null;
+		}
+		
+		double root_1 = (-b + disc) / (2 * a);
+		double root_2 = (-b - disc) / (2 * a);
+		if (root_1 < 0.0 && root_2 < 0.0) {
+			return null;
+		}
+		double min = root_1 <= root_2 ? root_1 : root_2;
+		if (min < 0.0) {
+			if (root_1 >= 0.0) {
+				min = root_1;
+			} else {
+				min = root_2;
+			}
+		}
+		return new Position(torpedoPosition.getX().doubleValue() + torpedoVelocityVector.getX().doubleValue() * min,
+				torpedoPosition.getY().add(torpedoVelocityVector.getY().multiply(BigDecimal.valueOf(min))).doubleValue());
+	}
+	
+	public static Position subtract(Position lhs, Position rhs) {
+		return new Position(lhs.getX().subtract(rhs.getX()), lhs.getY().subtract(rhs.getY()));
 	}
 
 }
