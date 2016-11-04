@@ -12,7 +12,7 @@ import org.junit.runners.Parameterized.Parameters;
 import hu.javachallenge.torpedo.model.Position;
 
 @RunWith(Parameterized.class)
-public class CollisionPositionTest {
+public class CollisionPositionTest extends AbstractTest {
 
 	private int submarineSize;
 	private Position submarinePosition;

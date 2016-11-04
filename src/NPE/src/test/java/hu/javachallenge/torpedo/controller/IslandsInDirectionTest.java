@@ -15,7 +15,7 @@ import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.response.GameInfoResponse;
 
 @RunWith(Parameterized.class)
-public class IslandsInDirectionTest {
+public class IslandsInDirectionTest extends AbstractTest {
 	
 	private GameInfoResponse gameInfoResponse;
 	private Position sourcePosition;

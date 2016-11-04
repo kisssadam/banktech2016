@@ -269,7 +269,7 @@ public class Main {
 		Position position = new Position(
 				submarinePosition.getX().doubleValue() + mennyikoronbelultudmegallni * xMovement(submarineVelocity / 2, submarineAngle),
 				submarinePosition.getY().doubleValue() + mennyikoronbelultudmegallni * yMovement(submarineVelocity / 2, submarineAngle));
-		System.out.println(position);
+		
 		return minDistanceFromEdge(position, submarineSize, width, height) < 0.0;
 	}
 	

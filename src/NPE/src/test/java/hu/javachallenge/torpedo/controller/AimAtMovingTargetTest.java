@@ -12,7 +12,7 @@ import org.junit.runners.Parameterized.Parameters;
 import hu.javachallenge.torpedo.model.Position;
 
 @RunWith(Parameterized.class)
-public class AimAtMovingTargetTest {
+public class AimAtMovingTargetTest extends AbstractTest {
 
 	private Position sourcePosition;
 	private Position targetPosition;
