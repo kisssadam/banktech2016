@@ -37,7 +37,7 @@ public class IsSubmarineLeavingSpaceTest {
 	}
 	
 
-	@Parameters(name = "{index}: isSubmarineLeavingSpace(submarinePos: ({0}, {1}) subSize: {2}, subVel: {3}, subAngle: {4}, width: {5}, height: {6}, maxAccPerRound: {7})={8}")
+	@Parameters(name = "{index}: isSubmarineLeavingSpace(submarinePos: ({0}) subSize: {1}, subVel: {2}, subAngle: {3}, width: {4}, height: {5}, maxAccPerRound: {6})={7}")
 	public static Collection<Object[]> generateData() {
 		return Arrays.asList(new Object[][] {
 			{ new Position(200, 200), 10, 50, 180, 1200, 700, 5, true },
