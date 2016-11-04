@@ -42,7 +42,8 @@ public class IsSubmarineLeavingSpaceTest extends AbstractTest {
 		return Arrays.asList(new Object[][] {
 			{ new Position(200, 200), 10, 50, 180, 1200, 700, 5, true },
 			{ new Position(200, 200), 10, 50, 270, 1200, 700, 5, true },
-			{ new Position(200, 200), 10, 10, 270, 1200, 700, 5, false }
+			{ new Position(200, 200), 10, 10, 270, 1200, 700, 5, false },
+			{ new Position(20, 20), 10, 10, 270, 1200, 700, 10, true }
 		});
 	}
 

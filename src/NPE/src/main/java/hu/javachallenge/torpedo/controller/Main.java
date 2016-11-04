@@ -82,6 +82,9 @@ public class Main {
 		return distance(sourcePosition, 0.0, destinationPosition, destinationR);
 	}
 
+	/**
+	 * Milyen irányban kell kilőni a torpedót, hogy eltalálja a célt.
+	 */
 	public static double torpedoDestinationAngle(Position sourcePosition, Position destinationPosition) {
 		double srcX = sourcePosition.getX().doubleValue();
 		double srcY = sourcePosition.getY().doubleValue();
@@ -262,15 +265,51 @@ public class Main {
 		return islandsInDirection.stream().map(island -> island.position).collect(Collectors.toList());
 	}
 	
+	public static boolean willTorpedoHitAnyIsland(Position[] islandPositions, double islandSize, Position torpedoPosition, double torpedoRange, double torpedoVelocity, double torpedoAngle) {
+		for (Position islandPosition : islandPositions) {
+			Position collisionPosition = collisionPosition(islandSize, islandPosition, 0, 0, torpedoPosition, torpedoVelocity, torpedoAngle);
+			System.out.println("collisionPosition: " + collisionPosition);
+			if (collisionPosition == null) {
+				continue;
+			}
+			double time = Math.abs(torpedoDistance(torpedoPosition, collisionPosition, 0)) / torpedoVelocity;
+			System.out.println("time: " + time);
+			if (time < torpedoRange) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public static boolean willTorpedoHitAnySubmarine(Submarine[] submarines, double submarineSize, Position torpedoPosition, double torpedoRange, double torpedoVelocity, double torpedoAngle) {
+		for (Submarine submarine : submarines) {
+			Position collisionPosition = collisionPosition(submarineSize, submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), torpedoPosition, torpedoVelocity, torpedoAngle);
+			if (collisionPosition == null) {
+				continue;
+			}
+			double time = Math.abs(torpedoDistance(torpedoPosition, collisionPosition, 0)) / torpedoVelocity;
+			if (time < torpedoRange) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	public static boolean isSubmarineLeavingSpace(Position submarinePosition, double submarineSize, double submarineVelocity, double submarineAngle,
 			double width, double height, double maxAccelerationPerRound) {
 		double mennyikoronbelultudmegallni = mennyikoronbelultudmegallni(maxAccelerationPerRound, submarineVelocity);
 		
-		Position position = new Position(
-				submarinePosition.getX().doubleValue() + mennyikoronbelultudmegallni * xMovement(submarineVelocity / 2, submarineAngle),
-				submarinePosition.getY().doubleValue() + mennyikoronbelultudmegallni * yMovement(submarineVelocity / 2, submarineAngle));
+		Position newSubmarinePosition = new Position(
+				submarinePosition.getX().doubleValue() + xMovement(submarineVelocity, submarineAngle),
+				submarinePosition.getY().doubleValue() + yMovement(submarineVelocity, submarineAngle));
 		
-		return minDistanceFromEdge(position, submarineSize, width, height) < 0.0;
+		Position position = new Position(
+				newSubmarinePosition.getX().doubleValue() + mennyikoronbelultudmegallni * xMovement(submarineVelocity / 2, submarineAngle),
+				newSubmarinePosition.getY().doubleValue() + mennyikoronbelultudmegallni * yMovement(submarineVelocity / 2, submarineAngle));
+		
+		return minDistanceFromEdge(position, submarineSize, width, height) < TestConstants.EPSILON;
 	}
 	
 	public static double minDistanceFromEdge(Position submarinePosition, double submarineSize, double width, double height) {
@@ -286,8 +325,10 @@ public class Main {
 		return velocity / maxAccelerationPerRound;
 	}
 	
-	public static Position collisionPosition(double submarineSize, Position submarinePosition, double submarineVelocity, double submarineAngle, Position torpedoPosition, double torpedoVelocity, double torpedoAngle) {
-		return movingCircleCollisionDetection(torpedoPosition, torpedoVelocity, torpedoAngle, 0, submarinePosition, submarineVelocity, submarineAngle, submarineSize);
+	public static Position collisionPosition(double targetSize, Position targetPosition, double targetVelocity, double targetAngle,
+			Position torpedoPosition, double torpedoVelocity, double torpedoAngle) {
+		
+		return movingCircleCollisionDetection(torpedoPosition, torpedoVelocity, torpedoAngle, 0, targetPosition, targetVelocity, targetAngle, targetSize);
 	}
 
 	public static List<Position> islandsInSubmarineDirection(Position submarinePosition, double submarineVelocity, double submarineAngle,

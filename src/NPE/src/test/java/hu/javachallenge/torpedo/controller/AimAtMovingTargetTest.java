@@ -49,7 +49,7 @@ public class AimAtMovingTargetTest extends AbstractTest {
 	@Test
 	public void testAimAtMovingTarget() {
 		double actual = Main.aimAtMovingTarget(sourcePosition, targetPosition, targetMovementAngle, targetVelocity, bulletVelocity);
-		Assert.assertEquals(expected, actual, TestConstants.DELTA);
+		Assert.assertEquals(expected, actual, TestConstants.EPSILON);
 	}
 
 }

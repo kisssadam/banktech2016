@@ -59,7 +59,7 @@ public class TorpedoDestinationAngleTest extends AbstractTest {
 
 	@Test
 	public void testTorpedoDestinationAngle() {
-		Assert.assertEquals(expected, Main.torpedoDestinationAngle(sourcePosition, destinationPosition), TestConstants.DELTA);
+		Assert.assertEquals(expected, Main.torpedoDestinationAngle(sourcePosition, destinationPosition), TestConstants.EPSILON);
 	}
 
 }

@@ -46,7 +46,7 @@ public class DistanceTest extends AbstractTest {
 
 	@Test
 	public void testDistance() {
-		Assert.assertEquals(expected, Main.distance(srcPos, srcR, destPos, destR), TestConstants.DELTA);
+		Assert.assertEquals(expected, Main.distance(srcPos, srcR, destPos, destR), TestConstants.EPSILON);
 	}
 
 }

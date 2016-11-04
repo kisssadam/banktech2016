@@ -46,8 +46,8 @@ public class CollisionPositionTest extends AbstractTest {
 	@Test
 	public void testCollisionPosition() {
 		 Position actual = Main.collisionPosition(submarineSize, submarinePosition, submarineVelocity, submarineAngle, torpedoPosition, torpedoVelocity, torpedoAngle);
-		 Assert.assertEquals(expected.getX().doubleValue(), actual.getX().doubleValue(), TestConstants.DELTA);
-		 Assert.assertEquals(expected.getY().doubleValue(), actual.getY().doubleValue(), TestConstants.DELTA);
+		 Assert.assertEquals(expected.getX().doubleValue(), actual.getX().doubleValue(), TestConstants.EPSILON);
+		 Assert.assertEquals(expected.getY().doubleValue(), actual.getY().doubleValue(), TestConstants.EPSILON);
 	}
 
 }
