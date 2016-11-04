@@ -133,11 +133,11 @@ public class Main {
 	 * @return szomszédos befogó
 	 */
 	public static double xMovement(double velocity, double angle) {
-		return velocity * Math.cos(angle);
+		return velocity * Math.cos(Math.toRadians(angle));
 	}
 
 	public static double yMovement(double velocity, double angle) {
-		return velocity * Math.sin(angle);
+		return velocity * Math.sin(Math.toRadians(angle));
 	}
 
 	// https://www.kirupa.com/forum/showthread.php?347334-Aiming-and-hitting-a-moving-target
@@ -146,8 +146,8 @@ public class Main {
 		double dX = targetPosition.getX().subtract(sourcePosition.getX()).doubleValue();
 		double dY = targetPosition.getY().subtract(sourcePosition.getY()).doubleValue();
 
-		double xMovementResult = xMovement(targetVelocity, Math.toRadians(targetMovementAngle));
-		double yMovementResult = yMovement(targetVelocity, Math.toRadians(targetMovementAngle));
+		double xMovementResult = xMovement(targetVelocity, targetMovementAngle);
+		double yMovementResult = yMovement(targetVelocity, targetMovementAngle);
 
 		double a = Math.pow(xMovementResult, 2) + Math.pow(yMovementResult, 2) - Math.pow(bulletVelocity, 2);
 		double b = 2 * (xMovementResult * dX + yMovementResult * dY);
@@ -262,6 +262,30 @@ public class Main {
 		return islandsInDirection.stream().map(island -> island.position).collect(Collectors.toList());
 	}
 	
+	public static boolean isSubmarineLeavingSpace(Position submarinePosition, double submarineSize, double submarineVelocity, double submarineAngle,
+			double width, double height, double maxAccelerationPerRound) {
+		double mennyikoronbelultudmegallni = mennyikoronbelultudmegallni(maxAccelerationPerRound, submarineVelocity);
+		
+		Position position = new Position(
+				submarinePosition.getX().doubleValue() + mennyikoronbelultudmegallni * xMovement(submarineVelocity / 2, submarineAngle),
+				submarinePosition.getY().doubleValue() + mennyikoronbelultudmegallni * yMovement(submarineVelocity / 2, submarineAngle));
+		System.out.println(position);
+		return minDistanceFromEdge(position, submarineSize, width, height) < 0.0;
+	}
+	
+	public static double minDistanceFromEdge(Position submarinePosition, double submarineSize, double width, double height) {
+		double egyik = width - submarinePosition.getX().doubleValue() - submarineSize;
+		double masik = height - submarinePosition.getY().doubleValue() - submarineSize;
+		double harmadik = submarinePosition.getX().doubleValue() - submarineSize;
+		double negyedik = submarinePosition.getY().doubleValue() - submarineSize;
+		
+		return Math.min(egyik, Math.min(masik, Math.min(harmadik, negyedik)));
+	}
+	
+	public static double mennyikoronbelultudmegallni(double maxAccelerationPerRound, double velocity) {
+		return velocity / maxAccelerationPerRound;
+	}
+	
 	public static Position collisionPosition(double submarineSize, Position submarinePosition, double submarineVelocity, double submarineAngle, Position torpedoPosition, double torpedoVelocity, double torpedoAngle) {
 		return movingCircleCollisionDetection(torpedoPosition, torpedoVelocity, torpedoAngle, 0, submarinePosition, submarineVelocity, submarineAngle, submarineSize);
 	}
@@ -282,8 +306,8 @@ public class Main {
 			Position targetPosition, double targetVelocity, double targetAngle, double targetSize) {
 		
 		Position Pab = subtract(sourcePosition, targetPosition);
-		Position sourceVelocityVector = new Position(xMovement(sourceVelocity, Math.toRadians(sourceAngle)), yMovement(sourceVelocity, Math.toRadians(sourceAngle)));
-		Position targetVelocityVector = new Position(xMovement(targetVelocity, Math.toRadians(targetAngle)), yMovement(targetVelocity, Math.toRadians(targetAngle)));
+		Position sourceVelocityVector = new Position(xMovement(sourceVelocity, sourceAngle), yMovement(sourceVelocity, sourceAngle));
+		Position targetVelocityVector = new Position(xMovement(targetVelocity, targetAngle), yMovement(targetVelocity, targetAngle));
 		
 		Position Vab = subtract(sourceVelocityVector, targetVelocityVector);
 		double a = Vab.getX().pow(2).add(Vab.getY().pow(2)).doubleValue();
