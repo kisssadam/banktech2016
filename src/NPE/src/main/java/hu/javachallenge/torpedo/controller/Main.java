@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.model.Submarine;
 import hu.javachallenge.torpedo.response.CreateGameResponse;
 import hu.javachallenge.torpedo.response.GameInfoResponse;
+import hu.javachallenge.torpedo.response.GameListResponse;
 import hu.javachallenge.torpedo.response.SubmarinesResponse;
 import hu.javachallenge.torpedo.service.ServiceGenerator;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -22,6 +24,7 @@ public class Main {
 
 	private static final Logger log = LoggerFactory.getLogger(Main.class);
 	private static final String TEAMTOKEN = "4906CD1A4718F0B4F315BDE34B5FE430";
+	private static final String TEAMNAME = "NPE";
 
 	public static void main(String[] args) {
 		log.debug("Commad line arguments: {}", Arrays.toString(args));
@@ -47,11 +50,27 @@ public class Main {
 		CallHandler callHandler = new CallHandler(serviceGenerator);
 
 		try {
-			CreateGameResponse game = callHandler.createGame();
-			long gameId = game.getId();
-			// callHandler.gameList();
-			// callHandler.joinGame(gameId);
-			callHandler.gameInfo(gameId);
+			GameListResponse gameList = callHandler.gameList();
+			long[] games = gameList.getGames();
+			
+			Long gameId = null;
+			
+			if (games == null || games.length == 0) {
+				CreateGameResponse createGameResponse = callHandler.createGame();
+				gameId = createGameResponse.getId();
+			} else {
+				gameId = games[0];
+			}
+			
+			GameInfoResponse gameInfo = callHandler.gameInfo(gameId);
+			
+			Map<String, Boolean> connected = gameInfo.getGame().getConnectionStatus().getConnected();
+			if (connected.get(TEAMNAME) == false) {
+				callHandler.joinGame(gameId);
+			}
+			
+			gameInfo = callHandler.gameInfo(gameId);
+			
 			SubmarinesResponse submarinesResponse = callHandler.submarinesInGame(gameId);
 			Submarine[] submarines = submarinesResponse.getSubmarines();
 			callHandler.shoot(gameId, submarines[0].getId(), 0.0);
@@ -341,6 +360,21 @@ public class Main {
 		return islandsInSubmarineDirections;
 	}
 	
+	public static boolean isDangerousToShoot(double torpedoHitPenalty, Position submarinePosition, double submarineSize, double submarineVelocity, double submarineAngle,
+			Position targetPosition, double targetVelocity, double targetAngle, double torpedoVelocity, double torpedoAngle, double torpedoRange) {
+		if (torpedoHitPenalty == 0.0) {
+			return false;
+		}
+		Position torpedoCollisionPosition = collisionPosition(submarineSize, targetPosition, targetVelocity, targetAngle, submarinePosition, torpedoVelocity, torpedoAngle);
+		if (torpedoCollisionPosition != null) {
+			Position detectedPosition = movingCircleCollisionDetection(submarinePosition, submarineVelocity, submarineAngle, submarineSize, torpedoCollisionPosition, 0, 0, torpedoRange);
+			if (detectedPosition != null) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private static Position movingCircleCollisionDetection(Position sourcePosition, double sourceVelocity, double sourceAngle, double sourceSize,
 			Position targetPosition, double targetVelocity, double targetAngle, double targetSize) {
 		
@@ -361,6 +395,10 @@ public class Main {
 		
 		double disc = Math.sqrt(q);
 		if (disc < 0) {
+			return null;
+		}
+		
+		if (a == 0) {
 			return null;
 		}
 		
