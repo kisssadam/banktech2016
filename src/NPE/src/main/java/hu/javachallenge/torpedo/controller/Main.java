@@ -268,13 +268,11 @@ public class Main {
 	public static boolean willTorpedoHitAnyIsland(Position[] islandPositions, double islandSize, Position torpedoPosition, double torpedoRange, double torpedoVelocity, double torpedoAngle) {
 		for (Position islandPosition : islandPositions) {
 			Position collisionPosition = collisionPosition(islandSize, islandPosition, 0, 0, torpedoPosition, torpedoVelocity, torpedoAngle);
-			System.out.println("collisionPosition: " + collisionPosition);
 			if (collisionPosition == null) {
 				continue;
 			}
 			double time = Math.abs(torpedoDistance(torpedoPosition, collisionPosition, 0)) / torpedoVelocity;
-			System.out.println("time: " + time);
-			if (time < torpedoRange) {
+			if (time <= torpedoRange) {
 				return true;
 			}
 		}
@@ -289,7 +287,7 @@ public class Main {
 				continue;
 			}
 			double time = Math.abs(torpedoDistance(torpedoPosition, collisionPosition, 0)) / torpedoVelocity;
-			if (time < torpedoRange) {
+			if (time <= torpedoRange) {
 				return true;
 			}
 		}

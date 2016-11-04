@@ -42,6 +42,7 @@ public class WillTorpedoHitAnyIslandTest extends AbstractTest {
 				{ new Position[] { new Position(20, 20) }, 10, new Position(20, 40), 1, 20, 270, true },
 				{ new Position[] { new Position(20, 20) }, 10, new Position(20, 40), 1, 19, 270, true },
 				{ new Position[] { new Position(20, 20) }, 10, new Position(20, 40), 1, 10.01, 270, true },
+				{ new Position[] { new Position(20, 20) }, 10, new Position(20, 40), 1, 10, 270, true },
 				{ new Position[] { new Position(20, 20) }, 10, new Position(20, 40), 2, 10, 270, true },
 				{ new Position[] { new Position(20, 20) }, 10, new Position(20, 40), 2, 10, 90, false },
 				{ new Position[] { new Position(20, 20) }, 10, new Position(2000, 4000), 2, 10, 270, false },
