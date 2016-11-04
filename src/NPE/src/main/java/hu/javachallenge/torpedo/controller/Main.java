@@ -263,14 +263,32 @@ public class Main {
 	}
 	
 	public static Position collisionPosition(double submarineSize, Position submarinePosition, double submarineVelocity, double submarineAngle, Position torpedoPosition, double torpedoVelocity, double torpedoAngle) {
-		Position Pab = subtract(torpedoPosition, submarinePosition);
-		Position torpedoVelocityVector = new Position(xMovement(torpedoVelocity, Math.toRadians(torpedoAngle)), yMovement(torpedoVelocity, Math.toRadians(torpedoAngle)));
-		Position submarineVelocityVector = new Position(xMovement(submarineVelocity, Math.toRadians(submarineAngle)), yMovement(submarineVelocity, Math.toRadians(submarineAngle)));
+		return movingCircleCollisionDetection(torpedoPosition, torpedoVelocity, torpedoAngle, 0, submarinePosition, submarineVelocity, submarineAngle, submarineSize);
+	}
+
+	public static List<Position> islandsInSubmarineDirection(Position submarinePosition, double submarineVelocity, double submarineAngle,
+			double submarineSize, Position[] islandPositions, double islandSize) {
+		List<Position> islandsInSubmarineDirections = new ArrayList<>();
 		
-		Position Vab = subtract(torpedoVelocityVector, submarineVelocityVector);
+		for (Position islandPosition : islandPositions) {
+			Position position = movingCircleCollisionDetection(submarinePosition, submarineVelocity, submarineAngle, submarineSize, islandPosition, 0, 0, islandSize);
+			islandsInSubmarineDirections.add(position);
+		}
+		
+		return islandsInSubmarineDirections;
+	}
+	
+	private static Position movingCircleCollisionDetection(Position sourcePosition, double sourceVelocity, double sourceAngle, double sourceSize,
+			Position targetPosition, double targetVelocity, double targetAngle, double targetSize) {
+		
+		Position Pab = subtract(sourcePosition, targetPosition);
+		Position sourceVelocityVector = new Position(xMovement(sourceVelocity, Math.toRadians(sourceAngle)), yMovement(sourceVelocity, Math.toRadians(sourceAngle)));
+		Position targetVelocityVector = new Position(xMovement(targetVelocity, Math.toRadians(targetAngle)), yMovement(targetVelocity, Math.toRadians(targetAngle)));
+		
+		Position Vab = subtract(sourceVelocityVector, targetVelocityVector);
 		double a = Vab.getX().pow(2).add(Vab.getY().pow(2)).doubleValue();
 		double b = 2 * (Vab.getX().multiply(Pab.getX()).add(Vab.getY().multiply(Pab.getY()))).doubleValue();
-		double c = Pab.getX().pow(2).add(Pab.getY().pow(2)).doubleValue() - Math.pow(submarineSize, 2);
+		double c = Pab.getX().pow(2).add(Pab.getY().pow(2)).doubleValue() - Math.pow(targetSize + sourceSize, 2);
 		
 		double q = Math.pow(b, 2) - 4 * a * c;
 		if (q < 0.0) {
@@ -296,8 +314,30 @@ public class Main {
 				min = root_2;
 			}
 		}
-		return new Position(torpedoPosition.getX().doubleValue() + torpedoVelocityVector.getX().doubleValue() * min,
-				torpedoPosition.getY().add(torpedoVelocityVector.getY().multiply(BigDecimal.valueOf(min))).doubleValue());
+		
+		Position newSourcePosition = new Position(
+				sourcePosition.getX().add(sourceVelocityVector.getX().multiply(BigDecimal.valueOf(min))).doubleValue(),
+				sourcePosition.getY().add(sourceVelocityVector.getY().multiply(BigDecimal.valueOf(min))).doubleValue());
+		
+		Position newTargetPosition = new Position(
+				targetPosition.getX().add(targetVelocityVector.getX().multiply(BigDecimal.valueOf(min))).doubleValue(),
+				targetPosition.getY().add(targetVelocityVector.getY().multiply(BigDecimal.valueOf(min))).doubleValue());
+		
+		if (targetSize == 0.0) {
+			return newTargetPosition;
+		}
+		
+		if (sourceSize == 0.0) {
+			return newSourcePosition;
+		}
+
+		Position position = subtract(newSourcePosition, newTargetPosition);
+		
+		double pX = position.getX().doubleValue() * (sourceSize / targetSize);
+		double pY = position.getY().doubleValue() * (sourceSize / targetSize);
+		Position p = new Position(pX, pY);
+		
+		return subtract(newSourcePosition, p);
 	}
 	
 	public static Position subtract(Position lhs, Position rhs) {
