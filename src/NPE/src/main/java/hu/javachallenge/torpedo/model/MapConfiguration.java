@@ -4,8 +4,8 @@ import java.util.Arrays;
 
 public class MapConfiguration {
 
-	private int width;
-	private int height;
+	private double width;
+	private double height;
 	private Position[] islandPositions;
 	private int teamCount;
 	private int submarinesPerTeam;
@@ -13,20 +13,20 @@ public class MapConfiguration {
 	private int torpedoHitScore;
 	private int torpedoHitPenalty;
 	private int torpedoCooldown;
-	private int sonarRange;
-	private int extendedSonarRange;
+	private double sonarRange;
+	private double extendedSonarRange;
 	private int extendedSonarRounds;
 	private int extendedSonarCooldown;
-	private int torpedoSpeed;
-	private int torpedoExplosionRadius;
+	private double torpedoSpeed;
+	private double torpedoExplosionRadius;
 	private int roundLength;
-	private int islandSize;
-	private int submarineSize;
+	private double islandSize;
+	private double submarineSize;
 	private int rounds;
-	private int maxSteeringPerRound;
-	private int maxAccelerationPerRound;
-	private int maxSpeed;
-	private int torpedoRange;
+	private double maxSteeringPerRound;
+	private double maxAccelerationPerRound;
+	private double maxSpeed;
+	private double torpedoRange;
 	private int rateLimitedPenalty;
 	private int torpedoDestroyScore;
 
@@ -34,12 +34,12 @@ public class MapConfiguration {
 		this.islandPositions = new Position[0];
 	}
 
-	public MapConfiguration(int width, int height, Position[] islandPositions, int teamCount,
+	public MapConfiguration(double width, double height, Position[] islandPositions, int teamCount,
 			int submarinesPerTeam, int torpedoDamage, int torpedoHitScore, int torpedoHitPenalty, int torpedoCooldown,
-			int sonarRange, int extendedSonarRange, int extendedSonarRounds, int extendedSonarCooldown,
-			int torpedoSpeed, int torpedoExplosionRadius, int roundLength, int islandSize, int submarineSize,
-			int rounds, int maxSteeringPerRound, int maxAccelerationPerRound, int maxSpeed, int torpedoRange,
-			int rateLimitedPenalty, int torpedoDestroyScore) {
+			double sonarRange, double extendedSonarRange, int extendedSonarRounds, int extendedSonarCooldown,
+			double torpedoSpeed, double torpedoExplosionRadius, int roundLength, double islandSize,
+			double submarineSize, int rounds, double maxSteeringPerRound, double maxAccelerationPerRound,
+			double maxSpeed, double torpedoRange, int rateLimitedPenalty, int torpedoDestroyScore) {
 		super();
 		this.width = width;
 		this.height = height;
@@ -68,19 +68,19 @@ public class MapConfiguration {
 		this.torpedoDestroyScore = torpedoDestroyScore;
 	}
 
-	public int getWidth() {
+	public double getWidth() {
 		return width;
 	}
 
-	public void setWidth(int width) {
+	public void setWidth(double width) {
 		this.width = width;
 	}
 
-	public int getHeight() {
+	public double getHeight() {
 		return height;
 	}
 
-	public void setHeight(int height) {
+	public void setHeight(double height) {
 		this.height = height;
 	}
 
@@ -140,19 +140,19 @@ public class MapConfiguration {
 		this.torpedoCooldown = torpedoCooldown;
 	}
 
-	public int getSonarRange() {
+	public double getSonarRange() {
 		return sonarRange;
 	}
 
-	public void setSonarRange(int sonarRange) {
+	public void setSonarRange(double sonarRange) {
 		this.sonarRange = sonarRange;
 	}
 
-	public int getExtendedSonarRange() {
+	public double getExtendedSonarRange() {
 		return extendedSonarRange;
 	}
 
-	public void setExtendedSonarRange(int extendedSonarRange) {
+	public void setExtendedSonarRange(double extendedSonarRange) {
 		this.extendedSonarRange = extendedSonarRange;
 	}
 
@@ -172,19 +172,19 @@ public class MapConfiguration {
 		this.extendedSonarCooldown = extendedSonarCooldown;
 	}
 
-	public int getTorpedoSpeed() {
+	public double getTorpedoSpeed() {
 		return torpedoSpeed;
 	}
 
-	public void setTorpedoSpeed(int torpedoSpeed) {
+	public void setTorpedoSpeed(double torpedoSpeed) {
 		this.torpedoSpeed = torpedoSpeed;
 	}
 
-	public int getTorpedoExplosionRadius() {
+	public double getTorpedoExplosionRadius() {
 		return torpedoExplosionRadius;
 	}
 
-	public void setTorpedoExplosionRadius(int torpedoExplosionRadius) {
+	public void setTorpedoExplosionRadius(double torpedoExplosionRadius) {
 		this.torpedoExplosionRadius = torpedoExplosionRadius;
 	}
 
@@ -196,19 +196,19 @@ public class MapConfiguration {
 		this.roundLength = roundLength;
 	}
 
-	public int getIslandSize() {
+	public double getIslandSize() {
 		return islandSize;
 	}
 
-	public void setIslandSize(int islandSize) {
+	public void setIslandSize(double islandSize) {
 		this.islandSize = islandSize;
 	}
 
-	public int getSubmarineSize() {
+	public double getSubmarineSize() {
 		return submarineSize;
 	}
 
-	public void setSubmarineSize(int submarineSize) {
+	public void setSubmarineSize(double submarineSize) {
 		this.submarineSize = submarineSize;
 	}
 
@@ -220,35 +220,35 @@ public class MapConfiguration {
 		this.rounds = rounds;
 	}
 
-	public int getMaxSteeringPerRound() {
+	public double getMaxSteeringPerRound() {
 		return maxSteeringPerRound;
 	}
 
-	public void setMaxSteeringPerRound(int maxSteeringPerRound) {
+	public void setMaxSteeringPerRound(double maxSteeringPerRound) {
 		this.maxSteeringPerRound = maxSteeringPerRound;
 	}
 
-	public int getMaxAccelerationPerRound() {
+	public double getMaxAccelerationPerRound() {
 		return maxAccelerationPerRound;
 	}
 
-	public void setMaxAccelerationPerRound(int maxAccelerationPerRound) {
+	public void setMaxAccelerationPerRound(double maxAccelerationPerRound) {
 		this.maxAccelerationPerRound = maxAccelerationPerRound;
 	}
 
-	public int getMaxSpeed() {
+	public double getMaxSpeed() {
 		return maxSpeed;
 	}
 
-	public void setMaxSpeed(int maxSpeed) {
+	public void setMaxSpeed(double maxSpeed) {
 		this.maxSpeed = maxSpeed;
 	}
 
-	public int getTorpedoRange() {
+	public double getTorpedoRange() {
 		return torpedoRange;
 	}
 
-	public void setTorpedoRange(int torpedoRange) {
+	public void setTorpedoRange(double torpedoRange) {
 		this.torpedoRange = torpedoRange;
 	}
 
@@ -270,33 +270,46 @@ public class MapConfiguration {
 
 	@Override
 	public int hashCode() {
-		final int prime = 11321;
+		final int prime = 31;
 		int result = 1;
 		result = prime * result + extendedSonarCooldown;
-		result = prime * result + extendedSonarRange;
+		long temp;
+		temp = Double.doubleToLongBits(extendedSonarRange);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + extendedSonarRounds;
-		result = prime * result + height;
+		temp = Double.doubleToLongBits(height);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + Arrays.hashCode(islandPositions);
-		result = prime * result + islandSize;
-		result = prime * result + maxAccelerationPerRound;
-		result = prime * result + maxSpeed;
-		result = prime * result + maxSteeringPerRound;
+		temp = Double.doubleToLongBits(islandSize);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(maxAccelerationPerRound);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(maxSpeed);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(maxSteeringPerRound);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + rateLimitedPenalty;
 		result = prime * result + roundLength;
 		result = prime * result + rounds;
-		result = prime * result + sonarRange;
-		result = prime * result + submarineSize;
+		temp = Double.doubleToLongBits(sonarRange);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(submarineSize);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + submarinesPerTeam;
 		result = prime * result + teamCount;
 		result = prime * result + torpedoCooldown;
 		result = prime * result + torpedoDamage;
 		result = prime * result + torpedoDestroyScore;
-		result = prime * result + torpedoExplosionRadius;
+		temp = Double.doubleToLongBits(torpedoExplosionRadius);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		result = prime * result + torpedoHitPenalty;
 		result = prime * result + torpedoHitScore;
-		result = prime * result + torpedoRange;
-		result = prime * result + torpedoSpeed;
-		result = prime * result + width;
+		temp = Double.doubleToLongBits(torpedoRange);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(torpedoSpeed);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
+		temp = Double.doubleToLongBits(width);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
 
@@ -315,28 +328,29 @@ public class MapConfiguration {
 		if (extendedSonarCooldown != other.extendedSonarCooldown) {
 			return false;
 		}
-		if (extendedSonarRange != other.extendedSonarRange) {
+		if (Double.doubleToLongBits(extendedSonarRange) != Double.doubleToLongBits(other.extendedSonarRange)) {
 			return false;
 		}
 		if (extendedSonarRounds != other.extendedSonarRounds) {
 			return false;
 		}
-		if (height != other.height) {
+		if (Double.doubleToLongBits(height) != Double.doubleToLongBits(other.height)) {
 			return false;
 		}
 		if (!Arrays.equals(islandPositions, other.islandPositions)) {
 			return false;
 		}
-		if (islandSize != other.islandSize) {
+		if (Double.doubleToLongBits(islandSize) != Double.doubleToLongBits(other.islandSize)) {
 			return false;
 		}
-		if (maxAccelerationPerRound != other.maxAccelerationPerRound) {
+		if (Double.doubleToLongBits(maxAccelerationPerRound) != Double
+				.doubleToLongBits(other.maxAccelerationPerRound)) {
 			return false;
 		}
-		if (maxSpeed != other.maxSpeed) {
+		if (Double.doubleToLongBits(maxSpeed) != Double.doubleToLongBits(other.maxSpeed)) {
 			return false;
 		}
-		if (maxSteeringPerRound != other.maxSteeringPerRound) {
+		if (Double.doubleToLongBits(maxSteeringPerRound) != Double.doubleToLongBits(other.maxSteeringPerRound)) {
 			return false;
 		}
 		if (rateLimitedPenalty != other.rateLimitedPenalty) {
@@ -348,10 +362,10 @@ public class MapConfiguration {
 		if (rounds != other.rounds) {
 			return false;
 		}
-		if (sonarRange != other.sonarRange) {
+		if (Double.doubleToLongBits(sonarRange) != Double.doubleToLongBits(other.sonarRange)) {
 			return false;
 		}
-		if (submarineSize != other.submarineSize) {
+		if (Double.doubleToLongBits(submarineSize) != Double.doubleToLongBits(other.submarineSize)) {
 			return false;
 		}
 		if (submarinesPerTeam != other.submarinesPerTeam) {
@@ -369,7 +383,7 @@ public class MapConfiguration {
 		if (torpedoDestroyScore != other.torpedoDestroyScore) {
 			return false;
 		}
-		if (torpedoExplosionRadius != other.torpedoExplosionRadius) {
+		if (Double.doubleToLongBits(torpedoExplosionRadius) != Double.doubleToLongBits(other.torpedoExplosionRadius)) {
 			return false;
 		}
 		if (torpedoHitPenalty != other.torpedoHitPenalty) {
@@ -378,13 +392,13 @@ public class MapConfiguration {
 		if (torpedoHitScore != other.torpedoHitScore) {
 			return false;
 		}
-		if (torpedoRange != other.torpedoRange) {
+		if (Double.doubleToLongBits(torpedoRange) != Double.doubleToLongBits(other.torpedoRange)) {
 			return false;
 		}
-		if (torpedoSpeed != other.torpedoSpeed) {
+		if (Double.doubleToLongBits(torpedoSpeed) != Double.doubleToLongBits(other.torpedoSpeed)) {
 			return false;
 		}
-		if (width != other.width) {
+		if (Double.doubleToLongBits(width) != Double.doubleToLongBits(other.width)) {
 			return false;
 		}
 		return true;

@@ -6,7 +6,7 @@ public class Submarine {
 	private long id;
 	private Position position;
 	private Owner owner;
-	private int velocity;
+	private double velocity;
 	private double angle;
 	private int hp;
 	private int sonarCooldown;
@@ -19,7 +19,7 @@ public class Submarine {
 		this.owner = new Owner();
 	}
 
-	public Submarine(String type, long id, Position position, Owner owner, int velocity, double angle, int hp,
+	public Submarine(String type, long id, Position position, Owner owner, double velocity, double angle, int hp,
 			int sonarCooldown, int torpedoCooldown, int sonarExtended) {
 		super();
 		this.type = type;
@@ -66,11 +66,11 @@ public class Submarine {
 		this.owner = owner;
 	}
 
-	public int getVelocity() {
+	public double getVelocity() {
 		return velocity;
 	}
 
-	public void setVelocity(int velocity) {
+	public void setVelocity(double velocity) {
 		this.velocity = velocity;
 	}
 
@@ -116,7 +116,7 @@ public class Submarine {
 
 	@Override
 	public int hashCode() {
-		final int prime = 11321;
+		final int prime = 31;
 		int result = 1;
 		long temp;
 		temp = Double.doubleToLongBits(angle);
@@ -129,7 +129,8 @@ public class Submarine {
 		result = prime * result + sonarExtended;
 		result = prime * result + torpedoCooldown;
 		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		result = prime * result + velocity;
+		temp = Double.doubleToLongBits(velocity);
+		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
 
@@ -184,7 +185,7 @@ public class Submarine {
 		} else if (!type.equals(other.type)) {
 			return false;
 		}
-		if (velocity != other.velocity) {
+		if (Double.doubleToLongBits(velocity) != Double.doubleToLongBits(other.velocity)) {
 			return false;
 		}
 		return true;

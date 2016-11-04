@@ -184,8 +184,8 @@ public class Main {
 		for (Submarine submarine : submarines) {
 			double theta = aimAtMovingTarget(sourcePosition, submarine.getPosition(), submarine.getAngle(), submarine.getVelocity(), bulletVelocity);
 			for (Position islandPosition : islandsInDirection(gameInfoResponse, sourcePosition, theta)) {
-				int submarineSize = gameInfoResponse.getGame().getMapConfiguration().getSubmarineSize();
-				int islandSize = gameInfoResponse.getGame().getMapConfiguration().getIslandSize();
+				double submarineSize = gameInfoResponse.getGame().getMapConfiguration().getSubmarineSize();
+				double islandSize = gameInfoResponse.getGame().getMapConfiguration().getIslandSize();
 
 				double islandDistance = distance(sourcePosition, submarineSize, islandPosition, islandSize);
 
@@ -206,7 +206,7 @@ public class Main {
 	
 	// TODO mi veszélyben vagyunk-e ha célzunk-e valamit, azaz, magunkat lőjük-e.
 //	public static boolean isTorpedoDangerous(GameInfoResponse gameInfoResponse, Position submarinePosition, double submarineAngle, double submarineVelocity, Position torpedoPosition, double torpedoAngle) {
-//		int torpedoSpeed = gameInfoResponse.getGame().getMapConfiguration().getTorpedoSpeed();
+//		double torpedoSpeed = gameInfoResponse.getGame().getMapConfiguration().getTorpedoSpeed();
 //		double theta = aimAtMovingTarget(torpedoPosition, submarinePosition, submarineAngle, submarineVelocity, torpedoSpeed);
 //		
 //		return false;
@@ -232,8 +232,8 @@ public class Main {
 		List<Island> islandsInDirection = new ArrayList<>();
 
 		Position[] islandPositions = gameInfoResponse.getGame().getMapConfiguration().getIslandPositions();
-		int islandSize = gameInfoResponse.getGame().getMapConfiguration().getIslandSize();
-		int submarineSize = gameInfoResponse.getGame().getMapConfiguration().getSubmarineSize();
+		double islandSize = gameInfoResponse.getGame().getMapConfiguration().getIslandSize();
+		double submarineSize = gameInfoResponse.getGame().getMapConfiguration().getSubmarineSize();
 
 		for (Position islandPosition : islandPositions) {
 			double meredekség = meredekség(angle);
@@ -262,7 +262,7 @@ public class Main {
 		return islandsInDirection.stream().map(island -> island.position).collect(Collectors.toList());
 	}
 	
-	public static Position collisionPosition(int submarineSize, Position submarinePosition, double submarineVelocity, double submarineAngle, Position torpedoPosition, double torpedoVelocity, double torpedoAngle) {
+	public static Position collisionPosition(double submarineSize, Position submarinePosition, double submarineVelocity, double submarineAngle, Position torpedoPosition, double torpedoVelocity, double torpedoAngle) {
 		Position Pab = subtract(torpedoPosition, submarinePosition);
 		Position torpedoVelocityVector = new Position(xMovement(torpedoVelocity, Math.toRadians(torpedoAngle)), yMovement(torpedoVelocity, Math.toRadians(torpedoAngle)));
 		Position submarineVelocityVector = new Position(xMovement(submarineVelocity, Math.toRadians(submarineAngle)), yMovement(submarineVelocity, Math.toRadians(submarineAngle)));
