@@ -121,7 +121,7 @@ public class Main {
 									submarineSize, enemySubmarine.getPosition(), enemySubmarine.getVelocity(),
 									enemySubmarine.getAngle(), torpedoSpeed, theta, torpedoRange)) {
 								if (submarine.getTorpedoCooldown() == 0.0) {
-									callHandler.shoot(gameId, submarine.getId(), theta);
+									callHandler.shoot(gameId, submarine.getId(), normalizeAngle(theta));
 									break;
 								}
 							}
@@ -165,7 +165,7 @@ public class Main {
 								}
 							} else {
 								// TODO valamit csinalni kell akkor is, ha nem hagyjuk el a helyet es nem megyunk szigetnek.
-//								callHandler.move(gameId, submarine.getId(), speed, turn)
+								callHandler.move(gameId, submarine.getId(), normalizeVelocity(submarine.getVelocity() + maxAccelerationPerRound, maxSpeed) - submarine.getVelocity(), 0);
 							}
 						}
 					}
@@ -185,6 +185,7 @@ public class Main {
 			// callHandler.sonar(gameId, submarines[0].getId());
 			// callHandler.extendSonar(gameId, submarines[0].getId());
 		} catch (Exception e) {
+			e.printStackTrace();
 			log.error(e.toString());
 		}
 	}
@@ -434,6 +435,10 @@ public class Main {
 	
 	public static boolean isSubmarineHeadingToIsland(Position islandPosition, double islandSize, Position submarinePosition, double submarineSize, 
 			double submarineVelocity, double submarineAngle, double maxAccelerationPerRound) {
+		if (islandPosition == null) {
+			return false;
+		}
+		
 		double mennyikoronbelultudmegallni = mennyikoronbelultudmegallni(maxAccelerationPerRound, submarineVelocity);
 		
 		Position newSubmarinePosition = new Position(
@@ -581,6 +586,8 @@ public class Main {
 	}
 	
 	public static Position subtract(Position lhs, Position rhs) {
+		System.out.println("lhs: " + lhs);
+		System.out.println("rhs: " + rhs);
 		return new Position(lhs.getX().subtract(rhs.getX()), lhs.getY().subtract(rhs.getY()));
 	}
 
