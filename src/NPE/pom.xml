@@ -6,6 +6,20 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>NPE Torpedo</name>
 	<developers>
+                <developer>
+			<id>czuczi</id>
+			<name>Gergo Czuczo</name>
+			<email>czuczorgergo@gmail.com</email>
+			<organization>University of Debrecen - Faculty of Informatics</organization>
+			<organizationUrl>https://www.inf.unideb.hu/</organizationUrl>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>Europe/Budapest</timezone>
+			<properties>
+				<linkedin>https://www.linkedin.com/in/gergő-czuczor-577990b9</linkedin>
+			</properties>
+		</developer>
 		<developer>
 			<id>kisssandoradam</id>
 			<name>Adam Kiss</name>
