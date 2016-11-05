@@ -586,8 +586,6 @@ public class Main {
 	}
 	
 	public static Position subtract(Position lhs, Position rhs) {
-		System.out.println("lhs: " + lhs);
-		System.out.println("rhs: " + rhs);
 		return new Position(lhs.getX().subtract(rhs.getX()), lhs.getY().subtract(rhs.getY()));
 	}
 
