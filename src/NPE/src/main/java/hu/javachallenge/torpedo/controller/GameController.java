@@ -34,6 +34,7 @@ public class GameController implements Runnable {
 	private String teamName;
 	private GameInfoResponse gameInfo;
 	
+	private long gameId;
 	private int torpedoHitPenalty;
 	private double submarineSize;
 	private double torpedoSpeed;
@@ -44,6 +45,9 @@ public class GameController implements Runnable {
 	private double maxSteeringPerRound;
 	private double maxSpeed;
 	private double islandSize;
+	
+	private long actualRound;
+	private long previousRound;
 
 	private List<Submarine> enemySubmarines;
 	
@@ -55,6 +59,11 @@ public class GameController implements Runnable {
 
 	@Override
 	public void run() {
+		startGame();
+		playGame();
+	}
+
+	private void startGame() {
 		GameListResponse gameList = callHandler.gameList();
 		long[] games = gameList.getGames();
 		
@@ -74,12 +83,11 @@ public class GameController implements Runnable {
 			callHandler.joinGame(gameId);
 		}
 		
-		gameInfo = callHandler.gameInfo(gameId);
-		
-		while (gameInfo.getGame().getStatus().equals(Status.WAITING)) {
+		do {
 			gameInfo = callHandler.gameInfo(gameId);
-		}
+		} while (gameInfo.getGame().getStatus().equals(Status.WAITING));
 		
+		this.gameId = gameInfo.getGame().getId();
 		this.torpedoHitPenalty = gameInfo.getGame().getMapConfiguration().getTorpedoHitPenalty();
 		this.submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize();
 		this.torpedoSpeed = gameInfo.getGame().getMapConfiguration().getTorpedoSpeed();
@@ -90,10 +98,13 @@ public class GameController implements Runnable {
 		this.maxSteeringPerRound = gameInfo.getGame().getMapConfiguration().getMaxSteeringPerRound();
 		this.maxSpeed = gameInfo.getGame().getMapConfiguration().getMaxSpeed();
 		this.islandSize = gameInfo.getGame().getMapConfiguration().getIslandSize();
-		
-		long previousRound = gameInfo.getGame().getRound() - 1;
+		this.actualRound = gameInfo.getGame().getRound();
+		this.previousRound = actualRound - 1;
+	}
+	
+	private void playGame() {
 		while (!gameInfo.getGame().getStatus().equals(Status.ENDED)) {
-			long actualRound = gameInfo.getGame().getRound();
+			actualRound = gameInfo.getGame().getRound();
 			if (actualRound > previousRound) {
 				previousRound = actualRound;
 				enemySubmarines.clear();
