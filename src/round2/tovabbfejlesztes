@@ -1,0 +1,34 @@
+TOVÁBBFEJLESZTÉSI ÖTLETEK:
+
+csak akkor csinaljon valamit a hajo, ha a hp > 0
+
+
+ha az adott hajóhoz tartozó sonar az előző körben nem talált semmit, akkor tejessze ki a hatáskörét
+
+
+ha talált több hajót, akkor forduljon arra, amelyikre kevesebb erőfeszítéssel tud
+(nincs útban sziget (mindig maxot fordulunk + kiszámoljuk, hogy utána hol lenne vagy mi????, kisebb szöget zár be)
+
+
+ha közel vannak a hajók egymáshoz, akkor csak az egyik extended sonarozzon.
+
+
+
+
+ha jön felénk torpedó az is veszélyes 
+Ha lehet, akkor ne determinisztikusan cselekedjünk! Néha balra, néha jobbra.
+
+
+
+GameInfoResponse [game=Game [id=403605190, round=98, scores=Scores [scores={NPE=700, BOT=0}], connectionStatus=ConnectionStatus [connected={NPE=true, BOT=true}], mapConfiguration=MapConfiguration [width=1700.0, height=800.0, islandPositions=[Position [x=850.0, y=400.0]], teamCount=1, submarinesPerTeam=2, torpedoDamage=34, torpedoHitScore=100, torpedoHitPenalty=0, torpedoCooldown=6, sonarRange=150.0, extendedSonarRange=230.0, extendedSonarRounds=10, extendedSonarCooldown=20, torpedoSpeed=40.0, torpedoExplosionRadius=50.0, roundLength=2000, islandSize=100.0, submarineSize=15.0, rounds=150, maxSteeringPerRound=20.0, maxAccelerationPerRound=5.0, maxSpeed=20.0, torpedoRange=10.0, rateLimitedPenalty=10, torpedoDestroyScore=50], status=RUNNING, createdTime=2016-11-05T18:16:39.536], getMessage()=OK, getCode()=0]
+
+2016-11-05 18:16:43,152 [TRACE] [main] h.j.torpedo.controller.CallHandler: GameInfoResponse GameInfoResponse [game=Game [id=403605190, round=0, scores=Scores [scores={NPE=0, BOT=0}], connectionStatus=ConnectionStatus [connected={NPE=true, BOT=true}], mapConfiguration=MapConfiguration [width=1700.0, height=800.0, islandPositions=[Position [x=850.0, y=400.0]], teamCount=1, submarinesPerTeam=2, torpedoDamage=34, torpedoHitScore=100, torpedoHitPenalty=0, torpedoCooldown=6, sonarRange=150.0, extendedSonarRange=230.0, extendedSonarRounds=10, extendedSonarCooldown=20, torpedoSpeed=40.0, torpedoExplosionRadius=50.0, roundLength=2000, islandSize=100.0, submarineSize=15.0, rounds=150, maxSteeringPerRound=20.0, maxAccelerationPerRound=5.0, maxSpeed=20.0, torpedoRange=10.0, rateLimitedPenalty=10, torpedoDestroyScore=50], status=RUNNING, createdTime=2016-11-05T18:16:39.536], getMessage()=OK, getCode()=0]
+
+
+Pontok
+100
+200
+350
+450
+550
+700
