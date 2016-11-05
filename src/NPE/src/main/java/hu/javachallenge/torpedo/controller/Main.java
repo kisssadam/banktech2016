@@ -20,6 +20,7 @@ import hu.javachallenge.torpedo.response.GameListResponse;
 import hu.javachallenge.torpedo.response.SonarResponse;
 import hu.javachallenge.torpedo.response.SubmarinesResponse;
 import hu.javachallenge.torpedo.service.ServiceGenerator;
+import hu.javachallenge.torpedo.util.MathConstants;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 public class Main {
@@ -48,7 +49,7 @@ public class Main {
 		}
 
 		ServiceGenerator serviceGenerator = new ServiceGenerator(serverAddress, TEAMTOKEN,
-				HttpLoggingInterceptor.Level.NONE);
+				HttpLoggingInterceptor.Level.BODY);
 		CallHandler callHandler = new CallHandler(serviceGenerator);
 
 		try {
@@ -87,7 +88,7 @@ public class Main {
 			long previousRound = gameInfo.getGame().getRound() - 1;
 			while (gameInfo.getGame().getRound() != gameInfo.getGame().getMapConfiguration().getRounds()) {
 				long actualRound = gameInfo.getGame().getRound();
-				if (actualRound >= previousRound + 1) {
+				if (actualRound > previousRound) {
 					previousRound = actualRound;
 					List<Submarine> enemySubmarines = new ArrayList<>();
 	
@@ -468,7 +469,7 @@ public class Main {
 				newSubmarinePosition.getX().doubleValue() + mennyikoronbelultudmegallni * xMovement(submarineVelocity / 2, submarineAngle),
 				newSubmarinePosition.getY().doubleValue() + mennyikoronbelultudmegallni * yMovement(submarineVelocity / 2, submarineAngle));
 		
-		return minDistanceFromEdge(position, submarineSize, width, height) < TestConstants.EPSILON;
+		return minDistanceFromEdge(position, submarineSize, width, height) < MathConstants.EPSILON;
 	}
 	
 	public static double minDistanceFromEdge(Position submarinePosition, double submarineSize, double width, double height) {

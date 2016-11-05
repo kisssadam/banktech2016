@@ -10,6 +10,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import hu.javachallenge.torpedo.model.Position;
+import hu.javachallenge.torpedo.util.MathConstants;
 
 @RunWith(Parameterized.class)
 public class DistanceTest extends AbstractTest {
@@ -46,7 +47,7 @@ public class DistanceTest extends AbstractTest {
 
 	@Test
 	public void testDistance() {
-		Assert.assertEquals(expected, Main.distance(srcPos, srcR, destPos, destR), TestConstants.EPSILON);
+		Assert.assertEquals(expected, Main.distance(srcPos, srcR, destPos, destR), MathConstants.EPSILON);
 	}
 
 }
