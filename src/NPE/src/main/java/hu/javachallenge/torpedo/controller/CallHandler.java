@@ -1,7 +1,5 @@
 package hu.javachallenge.torpedo.controller;
 
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +45,7 @@ public class CallHandler {
 		this.converter = serviceGenerator.getConverter();
 	}
 
-	public CreateGameResponse createGame() throws Exception {
+	public CreateGameResponse createGame() {
 		Call<CreateGameResponse> createGameCall = torpedoApi.createGame();
 		try {
 			Response<CreateGameResponse> response = createGameCall.execute();
@@ -60,14 +58,14 @@ public class CallHandler {
 				log.trace("CreateGameResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("CreateGameResponse {}", e.toString());
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	public GameListResponse gameList() throws Exception {
+	public GameListResponse gameList() {
 		Call<GameListResponse> gameListCall = torpedoApi.gameList();
 		try {
 			Response<GameListResponse> response = gameListCall.execute();
@@ -80,14 +78,14 @@ public class CallHandler {
 				log.trace("GameListResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("GameListResponse {}", e.toString());
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	public JoinGameResponse joinGame(long gameId) throws Exception {
+	public JoinGameResponse joinGame(long gameId) {
 		Call<JoinGameResponse> joinGameCall = torpedoApi.joinGame(gameId);
 		try {
 			Response<JoinGameResponse> response = joinGameCall.execute();
@@ -100,14 +98,14 @@ public class CallHandler {
 				log.trace("JoinGameResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("JoinGameResponse {}", e.toString());
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	public GameInfoResponse gameInfo(long gameId) throws Exception {
+	public GameInfoResponse gameInfo(long gameId) {
 		Call<GameInfoResponse> gameInfoCall = torpedoApi.gameInfo(gameId);
 		try {
 			Response<GameInfoResponse> response = gameInfoCall.execute();
@@ -120,14 +118,14 @@ public class CallHandler {
 				log.trace("GameInfoResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("GameInfoResponse {}", e.toString());
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	public SubmarinesResponse submarinesInGame(long gameId) throws Exception {
+	public SubmarinesResponse submarinesInGame(long gameId) {
 		Call<SubmarinesResponse> submarinesCall = torpedoApi.submarines(gameId);
 		try {
 			Response<SubmarinesResponse> response = submarinesCall.execute();
@@ -140,14 +138,14 @@ public class CallHandler {
 				log.trace("SubmarinesResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("SubmarinesResponse {}", e.toString());
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	public MoveResponse move(long gameId, long submarineId, double speed, double turn) throws Exception {
+	public MoveResponse move(long gameId, long submarineId, double speed, double turn) {
 		Call<MoveResponse> moveCall = torpedoApi.move(gameId, submarineId, new MoveRequest(speed, turn));
 		try {
 			Response<MoveResponse> response = moveCall.execute();
@@ -160,14 +158,14 @@ public class CallHandler {
 				log.trace("MoveResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("MoveResponse {}", e.toString());
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	public ShootResponse shoot(long gameId, long submarineId, double angle) throws Exception {
+	public ShootResponse shoot(long gameId, long submarineId, double angle) {
 		Call<ShootResponse> shootCall = torpedoApi.shoot(gameId, submarineId, new ShootRequest(angle));
 		try {
 			Response<ShootResponse> response = shootCall.execute();
@@ -180,14 +178,14 @@ public class CallHandler {
 				log.trace("ShootResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("ShootResponse {}", e.toString());
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	public SonarResponse sonar(long gameId, long submarineId) throws Exception {
+	public SonarResponse sonar(long gameId, long submarineId) {
 		Call<SonarResponse> sonarCall = torpedoApi.sonar(gameId, submarineId);
 		try {
 			Response<SonarResponse> response = sonarCall.execute();
@@ -200,14 +198,14 @@ public class CallHandler {
 				log.trace("SonarResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("SonarResponse {}", e.toString());
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	public ExtendSonarResponse extendSonar(long gameId, long submarineId) throws Exception {
+	public ExtendSonarResponse extendSonar(long gameId, long submarineId) {
 		Call<ExtendSonarResponse> extendSonarCall = torpedoApi.extendSonar(gameId, submarineId);
 		try {
 			Response<ExtendSonarResponse> response = extendSonarCall.execute();
@@ -220,7 +218,7 @@ public class CallHandler {
 				log.trace("ExtendSonarResponse {}", commonResponse);
 				testCode(commonResponse);
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			log.error("ExtendSonarResponse {}", e.toString());
 			e.printStackTrace();
 		}

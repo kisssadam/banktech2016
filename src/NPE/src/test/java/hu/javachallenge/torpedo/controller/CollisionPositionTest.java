@@ -11,6 +11,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.util.MathConstants;
+import hu.javachallenge.torpedo.util.MathUtil;
 
 @RunWith(Parameterized.class)
 public class CollisionPositionTest extends AbstractTest {
@@ -46,7 +47,7 @@ public class CollisionPositionTest extends AbstractTest {
 
 	@Test
 	public void testCollisionPosition() {
-		 Position actual = Main.collisionPosition(submarineSize, submarinePosition, submarineVelocity, submarineAngle, torpedoPosition, torpedoVelocity, torpedoAngle);
+		 Position actual = MathUtil.collisionPosition(submarineSize, submarinePosition, submarineVelocity, submarineAngle, torpedoPosition, torpedoVelocity, torpedoAngle);
 		 Assert.assertEquals(expected.getX().doubleValue(), actual.getX().doubleValue(), MathConstants.EPSILON);
 		 Assert.assertEquals(expected.getY().doubleValue(), actual.getY().doubleValue(), MathConstants.EPSILON);
 	}

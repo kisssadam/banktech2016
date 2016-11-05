@@ -13,6 +13,7 @@ import hu.javachallenge.torpedo.model.Game;
 import hu.javachallenge.torpedo.model.MapConfiguration;
 import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.response.GameInfoResponse;
+import hu.javachallenge.torpedo.util.MathUtil;
 
 @RunWith(Parameterized.class)
 public class IslandsInDirectionTest extends AbstractTest {
@@ -56,6 +57,6 @@ public class IslandsInDirectionTest extends AbstractTest {
 	
 	@Test
 	public void testIslandsInDirection() {
-		Assert.assertEquals(expected, Main.islandsInDirection(gameInfoResponse, sourcePosition, angle).size());
+		Assert.assertEquals(expected, MathUtil.islandsInDirection(gameInfoResponse, sourcePosition, angle).size());
 	}
 }

@@ -11,6 +11,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.util.MathConstants;
+import hu.javachallenge.torpedo.util.MathUtil;
 
 @RunWith(Parameterized.class)
 public class AimAtMovingTargetTest extends AbstractTest {
@@ -49,7 +50,7 @@ public class AimAtMovingTargetTest extends AbstractTest {
 	
 	@Test
 	public void testAimAtMovingTarget() {
-		double actual = Main.aimAtMovingTarget(sourcePosition, targetPosition, targetMovementAngle, targetVelocity, bulletVelocity);
+		double actual = MathUtil.aimAtMovingTarget(sourcePosition, targetPosition, targetMovementAngle, targetVelocity, bulletVelocity);
 		Assert.assertEquals(expected, actual, MathConstants.EPSILON);
 	}
 

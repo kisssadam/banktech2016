@@ -11,6 +11,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.util.MathConstants;
+import hu.javachallenge.torpedo.util.MathUtil;
 
 @RunWith(Parameterized.class)
 public class TorpedoDestinationAngleTest extends AbstractTest {
@@ -60,7 +61,7 @@ public class TorpedoDestinationAngleTest extends AbstractTest {
 
 	@Test
 	public void testTorpedoDestinationAngle() {
-		Assert.assertEquals(expected, Main.torpedoDestinationAngle(sourcePosition, destinationPosition), MathConstants.EPSILON);
+		Assert.assertEquals(expected, MathUtil.torpedoDestinationAngle(sourcePosition, destinationPosition), MathConstants.EPSILON);
 	}
 
 }

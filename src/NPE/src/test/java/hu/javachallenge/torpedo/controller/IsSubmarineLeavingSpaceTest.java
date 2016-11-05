@@ -10,6 +10,7 @@ import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
 import hu.javachallenge.torpedo.model.Position;
+import hu.javachallenge.torpedo.util.MathUtil;
 
 @RunWith(Parameterized.class)
 public class IsSubmarineLeavingSpaceTest extends AbstractTest {
@@ -49,7 +50,7 @@ public class IsSubmarineLeavingSpaceTest extends AbstractTest {
 
 	@Test
 	public void testIsSubmarineLeavingSpaceTest() {
-		boolean actual = Main.isSubmarineLeavingSpace(submarinePosition, submarineSize, submarineVelocity, submarineAngle, width, height, maxAccelerationPerRound); 
+		boolean actual = MathUtil.isSubmarineLeavingSpace(submarinePosition, submarineSize, submarineVelocity, submarineAngle, width, height, maxAccelerationPerRound); 
 		Assert.assertEquals(expected, actual);
 	}
 	
