@@ -1,14 +1,20 @@
 package hu.javachallenge.torpedo.util;
 
+import static hu.javachallenge.torpedo.util.MathUtil.getNearestIslandInDirection;
+import static hu.javachallenge.torpedo.util.MathUtil.islandsInDirection;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import hu.javachallenge.torpedo.model.Entity;
 import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.model.Submarine;
 import hu.javachallenge.torpedo.response.GameInfoResponse;
@@ -256,6 +262,46 @@ public class MathUtil {
 		return false;
 	}
 	
+	public static boolean isSubmarineHeadingToTorpedoExplosion(List<Entity> torpedos, Position submarinePosition, double submarineVelocity, double submarineAngle,
+			double submarineSize, List<Submarine> enemySubmarines, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
+		for (Entity torpedo : torpedos) {
+			if (isSubmarineHeadingToTorpedoExplosion(torpedo.getPosition(), submarinePosition, submarineVelocity, submarineAngle, submarineSize, enemySubmarines, torpedo.getVelocity(), torpedo.getAngle(), torpedoExplosionRadius, islandPositions, islandSize)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public static boolean isSubmarineHeadingToTorpedoExplosion(Position torpedoPosition, Position submarinePosition,
+			double submarineVelocity, double submarineAngle, double submarineSize, List<Submarine> enemySubmarines, double torpedoVelocity, double torpedoAngle,
+			double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
+		
+		Position torpedoSubmarineCollisionPosition = collisionPosition(submarineSize, submarinePosition, submarineVelocity, submarineAngle, torpedoPosition, torpedoVelocity, torpedoAngle);
+		if (torpedoSubmarineCollisionPosition != null) {
+			return true;
+		}
+		for (Submarine enemy : enemySubmarines) {
+			Position torpedoCollisionPosition = collisionPosition(submarineSize, enemy.getPosition(), enemy.getVelocity(), enemy.getAngle(), torpedoPosition, torpedoVelocity, torpedoAngle);
+			if (torpedoCollisionPosition != null) {
+				Position detectedPosition = movingCircleCollisionDetection(submarinePosition, submarineVelocity, submarineAngle, submarineSize, torpedoCollisionPosition, 0, 0, torpedoExplosionRadius);
+				if (detectedPosition != null) {
+					return true;
+				}
+			}
+		}
+		for (Position islandPosition : islandPositions) {
+			Position torpedoCollisionPosition = collisionPosition(islandSize, islandPosition, 0, 0, torpedoPosition, torpedoVelocity, torpedoAngle);
+			if (torpedoCollisionPosition != null) {
+				Position detectedPosition = movingCircleCollisionDetection(submarinePosition, submarineVelocity, submarineAngle, submarineSize, torpedoCollisionPosition, 0, 0, torpedoExplosionRadius);
+				if (detectedPosition != null) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+	
 	public static boolean isSubmarineHeadingToIsland(Position islandPosition, double islandSize, Position submarinePosition, double submarineSize, 
 			double submarineVelocity, double submarineAngle, double maxAccelerationPerRound) {
 		if (islandPosition == null) {
@@ -325,16 +371,20 @@ public class MathUtil {
 		return islandsInSubmarineDirections;
 	}
 	
-	public static boolean isDangerousToShoot(double torpedoHitPenalty, Position torpedoPosition, List<Submarine> submarines, double submarineSize,
-			Position targetPosition, double targetVelocity, double targetAngle, double torpedoVelocity, double torpedoAngle, double torpedoRange) {
-		if (torpedoHitPenalty == 0.0) {
-			return false;
-		}
+	public static boolean isDangerousToShoot(Position torpedoPosition, List<Submarine> submarines, double submarineSize,
+			Position targetPosition, double targetVelocity, double targetAngle, double torpedoVelocity, double torpedoAngle, double torpedoExplosionRadius) {
 		Position torpedoCollisionPosition = collisionPosition(submarineSize, targetPosition, targetVelocity, targetAngle, torpedoPosition, torpedoVelocity, torpedoAngle);
 		if (torpedoCollisionPosition != null) {
 			for (Submarine submarine : submarines) {
-				Position detectedPosition = movingCircleCollisionDetection(submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, torpedoCollisionPosition, 0, 0, torpedoRange);
+				Position detectedPosition = movingCircleCollisionDetection(submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, torpedoCollisionPosition, 0, 0, torpedoExplosionRadius);
 				if (detectedPosition != null) {
+					return true;
+				}
+			}
+		} else {
+			for (Submarine submarine : submarines) {
+				Position torpedoSubmarineCollisionPosition = collisionPosition(submarineSize, submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), torpedoPosition, torpedoVelocity, torpedoAngle);
+				if (torpedoSubmarineCollisionPosition != null) {
 					return true;
 				}
 			}
@@ -410,6 +460,29 @@ public class MathUtil {
 	
 	public static Position subtract(Position lhs, Position rhs) {
 		return new Position(lhs.getX().subtract(rhs.getX()), lhs.getY().subtract(rhs.getY()));
+	}
+	
+	public static Set<DangerType> getDangerTypes(GameInfoResponse gameInfo, List<Position> islandPositions, double islandSize, Position submarinePosition,
+			double submarineSize, double submarineVelocity, double submarineAngle, double maxAccelerationPerRound, double width, double height,
+			List<Entity> torpedos, List<Submarine> enemySubmarines, double torpedoExplosionRadius) {
+		Set<DangerType> dangerTypes = new HashSet<>();
+		
+		List<Position> islandsInDirection = islandsInDirection(gameInfo, submarinePosition, submarineAngle);
+		Position nearestIslandInDirection = getNearestIslandInDirection(islandsInDirection);
+		
+		if (isSubmarineHeadingToIsland(nearestIslandInDirection, islandSize, submarinePosition, submarineSize, submarineVelocity, submarineAngle, maxAccelerationPerRound)) {
+			dangerTypes.add(DangerType.HEADING_TO_ISLAND);
+		}
+		
+		if (isSubmarineLeavingSpace(submarinePosition, submarineSize, submarineVelocity, submarineAngle, width, height, maxAccelerationPerRound)) {
+			dangerTypes.add(DangerType.LEAVING_SPACE);
+		}
+		
+		if (isSubmarineHeadingToTorpedoExplosion(torpedos, submarinePosition, submarineVelocity, submarineAngle, submarineSize, enemySubmarines, torpedoExplosionRadius, islandPositions, islandSize)) {
+			dangerTypes.add(DangerType.HEADING_TO_TORPEDO_EXPLOSION);
+		}
+		
+		return dangerTypes;
 	}
 	
 }

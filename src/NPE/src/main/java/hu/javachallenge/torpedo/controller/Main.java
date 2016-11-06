@@ -34,7 +34,7 @@ public class Main {
 		}
 
 		ServiceGenerator serviceGenerator = new ServiceGenerator(serverAddress, TEAMTOKEN,
-				HttpLoggingInterceptor.Level.BODY);
+				HttpLoggingInterceptor.Level.NONE);
 		CallHandler callHandler = new CallHandler(serviceGenerator);
 
 		Thread gameControllerThread = new Thread(new GameController(callHandler, TEAMNAME));
