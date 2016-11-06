@@ -19,6 +19,7 @@ import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.model.Status;
 import hu.javachallenge.torpedo.model.Submarine;
 import hu.javachallenge.torpedo.response.CreateGameResponse;
+import hu.javachallenge.torpedo.response.ExtendSonarResponse;
 import hu.javachallenge.torpedo.response.GameInfoResponse;
 import hu.javachallenge.torpedo.response.GameListResponse;
 import hu.javachallenge.torpedo.response.SonarResponse;
@@ -128,6 +129,9 @@ public class GameController implements Runnable {
 				
 				SubmarinesResponse submarinesInGame = callHandler.submarinesInGame(gameId);
 				for (Submarine submarine : submarinesInGame.getSubmarines()) {
+                                    if(submarine.getSonarCooldown() == 0) {
+                                        ExtendSonarResponse extendSonarResponse = callHandler.extendSonar(gameId, submarine.getId());
+                                    }
 					SonarResponse sonar = callHandler.sonar(gameId, submarine.getId());
 
 					for (Entity entity : sonar.getEntities()) {
@@ -209,6 +213,11 @@ public class GameController implements Runnable {
 								moveParameters.add(new MoveParameter(minusVelocity - submarine.getVelocity(), maxSteeringPerRound));
 							}
 						}
+                                                
+                                                if(dangerTypes.contains(DangerType.HEADING_TO_ISLAND) || dangerTypes.contains(DangerType.LEAVING_SPACE)) {
+                                                    callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), 0);
+                                                    moved = true;
+                                                }
 					}
 					
 					if (!moved) {
@@ -219,7 +228,11 @@ public class GameController implements Runnable {
 							moved = true;
 						} else {
 							double newNormalizedVelocity = normalizeVelocity(submarine.getVelocity() + maxAccelerationPerRound, maxSpeed);
-							callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), 0);
+                                                        if(MathUtil.isSubmarineMovingInLineWithOtherSubmarine(submarine, submarinesInGame.getSubmarines(), submarineSize, maxSpeed)) {
+                                                                callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), maxSteeringPerRound);
+                                                        } else {
+                                                                callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), 0);
+                                                        }
 							moved = true;
 						}
 					}

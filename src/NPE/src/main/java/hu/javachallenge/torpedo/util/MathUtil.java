@@ -262,6 +262,18 @@ public class MathUtil {
 		return false;
 	}
 	
+        public static boolean isSubmarineMovingInLineWithOtherSubmarine(Submarine actualSubmarine, Submarine[] allSubmarine, double submarineSize, double maxSpeed) {
+            for (Submarine submarine : allSubmarine) {
+                if(!actualSubmarine.equals(submarine)) {
+                    Position p = movingCircleCollisionDetection(submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, actualSubmarine.getPosition(), maxSpeed + 10, actualSubmarine.getAngle(), submarineSize);
+                    if(p != null) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        
 	public static boolean isSubmarineHeadingToTorpedoExplosion(List<Entity> torpedos, Position submarinePosition, double submarineVelocity, double submarineAngle,
 			double submarineSize, List<Submarine> enemySubmarines, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
 		for (Entity torpedo : torpedos) {
@@ -275,15 +287,17 @@ public class MathUtil {
 	public static boolean isSubmarineHeadingToTorpedoExplosion(Position torpedoPosition, Position submarinePosition,
 			double submarineVelocity, double submarineAngle, double submarineSize, List<Submarine> enemySubmarines, double torpedoVelocity, double torpedoAngle,
 			double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
-		
-		Position torpedoSubmarineCollisionPosition = collisionPosition(submarineSize, submarinePosition, submarineVelocity, submarineAngle, torpedoPosition, torpedoVelocity, torpedoAngle);
+		Position newSubmarinePosition = new Position(
+				submarinePosition.getX().doubleValue() + xMovement(submarineVelocity, submarineAngle),
+				submarinePosition.getY().doubleValue() + yMovement(submarineVelocity, submarineAngle));
+		Position torpedoSubmarineCollisionPosition = collisionPosition(submarineSize, newSubmarinePosition, submarineVelocity, submarineAngle, torpedoPosition, torpedoVelocity, torpedoAngle);
 		if (torpedoSubmarineCollisionPosition != null) {
 			return true;
 		}
 		for (Submarine enemy : enemySubmarines) {
 			Position torpedoCollisionPosition = collisionPosition(submarineSize, enemy.getPosition(), enemy.getVelocity(), enemy.getAngle(), torpedoPosition, torpedoVelocity, torpedoAngle);
 			if (torpedoCollisionPosition != null) {
-				Position detectedPosition = movingCircleCollisionDetection(submarinePosition, submarineVelocity, submarineAngle, submarineSize, torpedoCollisionPosition, 0, 0, torpedoExplosionRadius);
+				Position detectedPosition = movingCircleCollisionDetection(newSubmarinePosition, submarineVelocity, submarineAngle, submarineSize, torpedoCollisionPosition, 0, 0, torpedoExplosionRadius);
 				if (detectedPosition != null) {
 					return true;
 				}
@@ -292,7 +306,7 @@ public class MathUtil {
 		for (Position islandPosition : islandPositions) {
 			Position torpedoCollisionPosition = collisionPosition(islandSize, islandPosition, 0, 0, torpedoPosition, torpedoVelocity, torpedoAngle);
 			if (torpedoCollisionPosition != null) {
-				Position detectedPosition = movingCircleCollisionDetection(submarinePosition, submarineVelocity, submarineAngle, submarineSize, torpedoCollisionPosition, 0, 0, torpedoExplosionRadius);
+				Position detectedPosition = movingCircleCollisionDetection(newSubmarinePosition, submarineVelocity, submarineAngle, submarineSize, torpedoCollisionPosition, 0, 0, torpedoExplosionRadius);
 				if (detectedPosition != null) {
 					return true;
 				}
@@ -481,7 +495,7 @@ public class MathUtil {
 		if (isSubmarineHeadingToTorpedoExplosion(torpedos, submarinePosition, submarineVelocity, submarineAngle, submarineSize, enemySubmarines, torpedoExplosionRadius, islandPositions, islandSize)) {
 			dangerTypes.add(DangerType.HEADING_TO_TORPEDO_EXPLOSION);
 		}
-		
+
 		return dangerTypes;
 	}
 	
