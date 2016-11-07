@@ -36,7 +36,7 @@ public class MainPanel extends JPanel {
 	public void addSubmarine(Submarine submarine) {
 		try {
                     SubmarineComponent submarineComponent = new SubmarineComponent(submarine, teamName);
-                    submarineComponent.setPosition(new Position(submarineComponent.getPosition().getX().doubleValue() * scale, submarineComponent.getPosition().getY().doubleValue() * scale));
+                    submarineComponent.setPosition(new Position(submarineComponent.getPosition().getX().doubleValue() * scale, 600 - submarineComponent.getPosition().getY().doubleValue() * scale));
 			submarineComponents.add(submarineComponent);
 		} catch (Exception e) {
 		}
@@ -49,7 +49,7 @@ public class MainPanel extends JPanel {
 					submarineComponent.setAngle(angle);
 					submarineComponent.setHp(hp);
 					submarineComponent.setOwner(owner);
-					submarineComponent.setPosition(new Position(position.getX().doubleValue() * scale, position.getY().doubleValue() * scale));
+					submarineComponent.setPosition(new Position(position.getX().doubleValue() * scale, 600 - position.getY().doubleValue() * scale));
 					submarineComponent.setSonarCooldown(sonarCooldown);
 					submarineComponent.setSonarExtended(sonarExtended);
 					submarineComponent.setTorpedoCooldown(torpedoCooldown);
