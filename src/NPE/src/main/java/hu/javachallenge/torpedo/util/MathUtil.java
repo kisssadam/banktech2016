@@ -341,7 +341,7 @@ public class MathUtil {
 	
 	public static boolean isSubmarineLeavingSpace(Position submarinePosition, double submarineSize, double submarineVelocity, double submarineAngle,
 			double width, double height, double maxAccelerationPerRound) {
-		double mennyikoronbelultudmegallni = mennyikoronbelultudmegallni(maxAccelerationPerRound, submarineVelocity);
+		double mennyikoronbelultudmegallni = Math.ceil(mennyikoronbelultudmegallni(maxAccelerationPerRound, submarineVelocity));
 		
 		Position newSubmarinePosition = new Position(
 				submarinePosition.getX().doubleValue() + xMovement(submarineVelocity, submarineAngle),
@@ -355,12 +355,12 @@ public class MathUtil {
 	}
 	
 	public static double minDistanceFromEdge(Position submarinePosition, double submarineSize, double width, double height) {
-		double egyik = width - submarinePosition.getX().doubleValue() - submarineSize;
-		double masik = height - submarinePosition.getY().doubleValue() - submarineSize;
-		double harmadik = submarinePosition.getX().doubleValue() - submarineSize;
-		double negyedik = submarinePosition.getY().doubleValue() - submarineSize;
+		double fromRight = width - submarinePosition.getX().doubleValue() - submarineSize;
+		double fromTop = height - submarinePosition.getY().doubleValue() - submarineSize;
+		double fromLeft = submarinePosition.getX().doubleValue() - submarineSize;
+		double fromBottom = submarinePosition.getY().doubleValue() - submarineSize;
 		
-		return Math.min(egyik, Math.min(masik, Math.min(harmadik, negyedik)));
+		return Math.min(fromRight, Math.min(fromTop, Math.min(fromLeft, fromBottom)));
 	}
 	
 	public static double mennyikoronbelultudmegallni(double maxAccelerationPerRound, double velocity) {

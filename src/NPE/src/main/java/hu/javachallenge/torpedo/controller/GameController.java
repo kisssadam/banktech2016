@@ -114,16 +114,16 @@ public class GameController implements Runnable {
 		this.previousRound = actualRound - 1;
 		this.torpedoExplosionRadius = gameInfo.getGame().getMapConfiguration().getTorpedoExplosionRadius();
 		this.islandPositions = Arrays.asList(gameInfo.getGame().getMapConfiguration().getIslandPositions());
-                
-                mainPanel.scalingInit(this.height, this.width);
-                
+
+		mainPanel.scalingInit(this.height, this.width, this.submarineSize);
+
 		submarinesInGame = callHandler.submarinesInGame(gameId);
 		for (Submarine submarine : submarinesInGame.getSubmarines()) {
 			mainPanel.addSubmarine(submarine);
-                        mainPanel.addSubmarine(new Submarine("", 1, new Position(0, 0), new Owner(teamName), 0, 0, 0, 0, 0, 0));
-                        mainPanel.addSubmarine(new Submarine("", 2, new Position(1600, 0), new Owner(teamName), 0, 0, 0, 0, 0, 0));
-                        mainPanel.addSubmarine(new Submarine("", 2, new Position(0, 800), new Owner(teamName), 0, 0, 0, 0, 0, 0));
-                        mainPanel.addSubmarine(new Submarine("", 2, new Position(1600, 800), new Owner(teamName), 0, 0, 0, 0, 0, 0));
+			mainPanel.addSubmarine(new Submarine("", 1, new Position(0, 0), new Owner(teamName), 0, 0, 0, 0, 0, 0));
+			mainPanel.addSubmarine(new Submarine("", 2, new Position(1700, 0), new Owner(teamName), 0, 0, 0, 0, 0, 0));
+			mainPanel.addSubmarine(new Submarine("", 2, new Position(0, 800), new Owner(teamName), 0, 0, 0, 0, 0, 0));
+			mainPanel.addSubmarine(new Submarine("", 2, new Position(1700, 800), new Owner(teamName), 0, 0, 0, 0, 0, 0));
 		}
 		mainPanel.repaint();
 		mainPanel.revalidate();
@@ -148,6 +148,26 @@ public class GameController implements Runnable {
 				torpedos.clear();
 
 				submarinesInGame = callHandler.submarinesInGame(gameId);
+				for (Submarine submarine : submarinesInGame.getSubmarines()) {
+					double newX = submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(submarine.getVelocity(), submarine.getAngle());
+					double newY = submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(submarine.getVelocity(), submarine.getAngle());
+
+					String type = submarine.getType();
+					Position newPosition = new Position(newX, newY);
+					Owner owner = submarine.getOwner();
+					double newVelocity = submarine.getVelocity() + submarine.getVelocity();
+					double newAngle = submarine.getAngle() + submarine.getAngle();
+					int hp = submarine.getHp();
+					int sonarCooldown = submarine.getSonarCooldown();
+					int torpedoCooldown = submarine.getTorpedoCooldown();
+					int sonarExtended = submarine.getSonarExtended();
+
+					mainPanel.updateSubmarine(type, submarine.getId(), newPosition, owner, newVelocity, newAngle, hp, sonarCooldown, torpedoCooldown, sonarExtended);
+
+					mainPanel.repaint();
+					mainPanel.revalidate();
+				}
+				
 				for (Submarine submarine : submarinesInGame.getSubmarines()) {
 					if (submarine.getSonarCooldown() == 0) {
 						ExtendSonarResponse extendSonarResponse = callHandler.extendSonar(gameId, submarine.getId());
@@ -191,46 +211,46 @@ public class GameController implements Runnable {
 						double minusVelocity = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed);
 
 						Set<DangerType> dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, submarine.getPosition(), submarineSize, submarine.getVelocity(), plusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
-						if (!moved && dangerTypes.isEmpty()) {
-							move(gameId, submarine.getId(), 0, maxSteeringPerRound);
-							moved = true;
-						} else {
-							if (dangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
+						if (!moved) {
+							if (dangerTypes.isEmpty()) {
+								move(gameId, submarine.getId(), 0, maxSteeringPerRound);
+								moved = true;
+							} else if (dangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
 								moveParameters.add(new MoveParameter(0, maxSteeringPerRound));
 							}
 						}
 
 						dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, submarine.getPosition(), submarineSize, submarine.getVelocity(), minusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
-						if (!moved && dangerTypes.isEmpty()) {
-							move(gameId, submarine.getId(), 0, -maxSteeringPerRound);
-							moved = true;
-						} else {
-							if (dangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
+						if (!moved) {
+							if (dangerTypes.isEmpty()) {
+								move(gameId, submarine.getId(), 0, -maxSteeringPerRound);
+								moved = true;
+							} else if (dangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
 								moveParameters.add(new MoveParameter(0, -maxSteeringPerRound));
 							}
 						}
 
 						dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, submarine.getPosition(), submarineSize, minusVelocity, minusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
-						if (!moved && dangerTypes.isEmpty()) {
-							move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), -maxSteeringPerRound);
-							moved = true;
-						} else {
-							if (dangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
+						if (!moved) {
+							if (dangerTypes.isEmpty()) {
+								move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), -maxSteeringPerRound);
+								moved = true;
+							} else if (dangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
 								moveParameters.add(new MoveParameter(minusVelocity - submarine.getVelocity(), -maxSteeringPerRound));
 							}
 						}
 
 						dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, submarine.getPosition(), submarineSize, minusVelocity, plusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
-						if (!moved && dangerTypes.isEmpty()) {
-							move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), maxSteeringPerRound);
-							moved = true;
-						} else {
-							if (dangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
+						if (!moved) {
+							if (dangerTypes.isEmpty()) {
+								move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), maxSteeringPerRound);
+								moved = true;
+							} else if (dangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
 								moveParameters.add(new MoveParameter(minusVelocity - submarine.getVelocity(), maxSteeringPerRound));
 							}
 						}
 
-						if (dangerTypes.contains(DangerType.HEADING_TO_ISLAND) || dangerTypes.contains(DangerType.LEAVING_SPACE)) {
+						if (!moved && (dangerTypes.contains(DangerType.HEADING_TO_ISLAND) || dangerTypes.contains(DangerType.LEAVING_SPACE))) {
 							move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), 0);
 							moved = true;
 						}
@@ -261,29 +281,7 @@ public class GameController implements Runnable {
 	private void move(long gameId, long submarineId, double velocity, double angle) {
 		MoveResponse move = callHandler.move(gameId, submarineId, velocity, angle);
 		if (move != null) {
-			for (Submarine submarine : submarinesInGame.getSubmarines()) {
-				if (submarine.getId() == submarineId) {
-					double newX = submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(velocity, angle);
-					double newY = submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(velocity, angle);
-
-					String type = submarine.getType();
-					Position newPosition = new Position(newX, newY);
-					Owner owner = submarine.getOwner();
-					double newVelocity = submarine.getVelocity() + velocity;
-					double newAngle = submarine.getAngle() + angle;
-					int hp = submarine.getHp();
-					int sonarCooldown = submarine.getSonarCooldown();
-					int torpedoCooldown = submarine.getTorpedoCooldown();
-					int sonarExtended = submarine.getSonarExtended();
-
-					mainPanel.updateSubmarine(type, submarineId, newPosition, owner, newVelocity, newAngle, hp, sonarCooldown, torpedoCooldown, sonarExtended);
-
-					mainPanel.repaint();
-					mainPanel.revalidate();
-
-					return;
-				}
-			}
+			
 		}
 	}
 

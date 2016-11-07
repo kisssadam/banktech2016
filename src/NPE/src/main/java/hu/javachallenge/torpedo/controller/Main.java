@@ -51,13 +51,13 @@ public class Main {
 
 		BorderLayout layout = new BorderLayout();
 
-		JPanel statusPanel = new JPanel();
-		statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
-		statusPanel.setPreferredSize(new Dimension(mainFrame.getWidth(), 20));
+//		JPanel statusPanel = new JPanel();
+//		statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+//		statusPanel.setPreferredSize(new Dimension(mainFrame.getWidth(), 20));
 
-		MainPanel mainPanel = new MainPanel(100, TEAMNAME);
+		MainPanel mainPanel = new MainPanel(TEAMNAME);
 		mainPanel.setLayout(layout);
-		mainPanel.add(statusPanel, BorderLayout.SOUTH);
+//		mainPanel.add(statusPanel, BorderLayout.SOUTH);
 		mainFrame.add(mainPanel);
 		mainFrame.setVisible(true);
 

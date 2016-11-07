@@ -14,29 +14,29 @@ public class MainPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
 	private double submarineSize;
-        private double scale;
+	private double scale;
 	private String teamName;
 	private List<SubmarineComponent> submarineComponents;
 
-	public MainPanel(double submarineSize, String teamName) {
+	public MainPanel(String teamName) {
 		this.submarineComponents = new ArrayList<>();
-		this.submarineSize = submarineSize;
 		this.teamName = teamName;
 	}
-        
-        public void scalingInit(double heigth, double width) {
-            if(1275 / width < 600 / heigth) {
-                    this.scale = 1275 / width;
-                } else {
-                    this.scale = 600 / heigth;
-                }
-            this.submarineSize = scale * submarineSize;
-        }
+
+	public void scalingInit(double heigth, double width, double submarineSize) {
+		if (1275 / width < 600 / heigth) {
+			this.scale = 1275 / width;
+		} else {
+			this.scale = 600 / heigth;
+		}
+		this.submarineSize = scale * submarineSize;
+		System.out.println("submarineSize: " + this.submarineSize);
+	}
 
 	public void addSubmarine(Submarine submarine) {
 		try {
-                    SubmarineComponent submarineComponent = new SubmarineComponent(submarine, teamName);
-                    submarineComponent.setPosition(new Position(submarineComponent.getPosition().getX().doubleValue() * scale, 600 - submarineComponent.getPosition().getY().doubleValue() * scale));
+			SubmarineComponent submarineComponent = new SubmarineComponent(submarine, teamName);
+			submarineComponent.setPosition(new Position(submarineComponent.getPosition().getX().doubleValue() * scale, 600 - submarineComponent.getPosition().getY().doubleValue() * scale));
 			submarineComponents.add(submarineComponent);
 		} catch (Exception e) {
 		}
@@ -71,8 +71,8 @@ public class MainPanel extends JPanel {
 
 			double x = submarineComponent.getPosition().getX().doubleValue();
 			double y = submarineComponent.getPosition().getY().doubleValue();
-                        g.fillOval((int) (x - submarineSize), (int) (y - submarineSize), (int) submarineSize * 2, (int) submarineSize * 2);
-//			g.fillOval((int) x / 2, (int) (getHeight() - (y / 2)), (int) submarineSize / 2, (int) submarineSize / 2);
+			g.fillOval((int) (x - submarineSize), (int) (y - submarineSize), (int) submarineSize * 2, (int) submarineSize * 2);
+			// g.fillOval((int) x / 2, (int) (getHeight() - (y / 2)), (int) submarineSize / 2, (int) submarineSize / 2);
 		}
 	}
 
