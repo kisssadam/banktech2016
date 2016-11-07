@@ -48,7 +48,7 @@ public class DistanceTest extends AbstractTest {
 
 	@Test
 	public void testDistance() {
-		Assert.assertEquals(expected, MathUtil.distance(srcPos, srcR, destPos, destR), MathConstants.EPSILON);
+		Assert.assertEquals(expected, MathUtil.distanceOfCircles(srcPos, srcR, destPos, destR), MathConstants.EPSILON);
 	}
 
 }

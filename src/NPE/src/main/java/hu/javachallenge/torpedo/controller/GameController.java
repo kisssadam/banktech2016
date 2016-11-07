@@ -9,6 +9,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import hu.javachallenge.torpedo.gui.MainPanel;
 import hu.javachallenge.torpedo.model.Entity;
-import hu.javachallenge.torpedo.model.Owner;
 import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.model.Status;
 import hu.javachallenge.torpedo.model.Submarine;
@@ -135,12 +135,13 @@ public class GameController implements Runnable {
 		for (Submarine submarine : submarinesInGame.getSubmarines()) {
 			mainPanel.addSubmarine(submarine);
 		}
-		
+
 		mainPanel.repaint();
 		mainPanel.revalidate();
 	}
 
 	private static class MoveParameter {
+
 		private double speed;
 		private double angle;
 
@@ -166,6 +167,9 @@ public class GameController implements Runnable {
 				mainPanel.repaint();
 				mainPanel.revalidate();
 
+				HashSet<Submarine> enemySubmarinesSet = new HashSet<>();
+				HashSet<Entity> torpedosSet = new HashSet<>();
+
 				for (Submarine submarine : submarinesInGame.getSubmarines()) {
 					if (submarine.getSonarCooldown() == 0) {
 						ExtendSonarResponse extendSonarResponse = callHandler.extendSonar(gameId, submarine.getId());
@@ -176,22 +180,25 @@ public class GameController implements Runnable {
 						switch (entity.getType()) {
 						case "Submarine":
 							if (!entity.getOwner().getName().equals(teamName)) {
-								enemySubmarines.add(new Submarine("Submarine", entity.getId(), entity.getPosition(), entity.getOwner(), entity.getVelocity(), entity.getAngle(), 0, 0, 0, 0));
+								enemySubmarinesSet.add(new Submarine("Submarine", entity.getId(), entity.getPosition(), entity.getOwner(), entity.getVelocity(), entity.getAngle(), 0, 0, 0, 0));
 							}
 							break;
 						case "Torpedo":
-							torpedos.add(entity);
+							torpedosSet.add(entity);
 							break;
 						}
 					}
 				}
+				enemySubmarines.addAll(enemySubmarinesSet);
+				torpedos.addAll(torpedosSet);
+
 				log.trace("Detected enemy submarines: {}", enemySubmarines);
 				log.trace("Detected torpedos: {}", torpedos);
 
 				for (Submarine submarine : submarinesInGame.getSubmarines()) {
 					for (Submarine enemySubmarine : enemySubmarines) {
 						double theta = aimAtMovingTarget(submarine.getPosition(), enemySubmarine.getPosition(), enemySubmarine.getAngle(), enemySubmarine.getVelocity(), torpedoSpeed);
-						if (!isDangerousToShoot(submarine.getPosition(), Arrays.asList(submarinesInGame.getSubmarines()), submarineSize, enemySubmarine.getPosition(), enemySubmarine.getVelocity(), enemySubmarine.getAngle(), torpedoSpeed, theta, torpedoExplosionRadius)) {
+						if (!isDangerousToShoot(submarine.getPosition(), Arrays.asList(submarinesInGame.getSubmarines()), submarineSize, enemySubmarine.getPosition(), enemySubmarine.getVelocity(), enemySubmarine.getAngle(), torpedoSpeed, theta, torpedoExplosionRadius, islandPositions, islandSize)) {
 							if (submarine.getTorpedoCooldown() == 0.0) {
 								callHandler.shoot(gameId, submarine.getId(), normalizeAngle(theta));
 								break;

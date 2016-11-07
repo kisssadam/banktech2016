@@ -39,7 +39,7 @@ public class MathUtil {
 		return velocity < 0 ? 0 : (velocity > maxSpeed ? maxSpeed : velocity);
 	}
 	
-	public static double distance(Position sourcePosition, double sourceR, Position destinationPosition,
+	public static double distanceOfCircles(Position sourcePosition, double sourceR, Position destinationPosition,
 			double destinationR) {
 		BigDecimal xSubtract = sourcePosition.getX().subtract(destinationPosition.getX());
 		BigDecimal xSquare = xSubtract.multiply(xSubtract);
@@ -51,7 +51,7 @@ public class MathUtil {
 	}
 
 	public static double torpedoDistance(Position sourcePosition, Position destinationPosition, double destinationR) {
-		return distance(sourcePosition, 0.0, destinationPosition, destinationR);
+		return distanceOfCircles(sourcePosition, 0.0, destinationPosition, destinationR);
 	}
 
 	/**
@@ -162,13 +162,13 @@ public class MathUtil {
 				double submarineSize = gameInfoResponse.getGame().getMapConfiguration().getSubmarineSize();
 				double islandSize = gameInfoResponse.getGame().getMapConfiguration().getIslandSize();
 
-				double islandDistance = distance(sourcePosition, submarineSize, islandPosition, islandSize);
+				double islandDistance = distanceOfCircles(sourcePosition, submarineSize, islandPosition, islandSize);
 
 				double submarineXMovement = xMovement(submarine.getVelocity(), submarine.getAngle());
 				double submarineYMovement = yMovement(submarine.getVelocity(), submarine.getAngle());
 				Position newSubmarinePosition = new Position(submarineXMovement, submarineYMovement);
 
-				double submarineDistance = distance(sourcePosition, submarineSize, newSubmarinePosition, submarineSize);
+				double submarineDistance = distanceOfCircles(sourcePosition, submarineSize, newSubmarinePosition, submarineSize);
 
 				if (islandDistance > submarineDistance) {
 					possibleSubmarineTargets.add(submarine);
@@ -218,7 +218,7 @@ public class MathUtil {
 					+ Math.pow(c2, 2);
 
 			if (Math.pow(b, 2) - 4 * a * c1 >= 0) {
-				double distance = distance(sourcePosition, submarineSize, islandPosition, islandSize);
+				double distance = distanceOfCircles(sourcePosition, submarineSize, islandPosition, islandSize);
 				islandsInDirection.add(new Island(islandPosition, distance));
 			}
 		}
@@ -332,7 +332,7 @@ public class MathUtil {
 		if (collisionPosition == null) {
 			return false;
 		}
-		double time = Math.abs(distance(newSubmarinePosition, submarineSize, collisionPosition, 0)) / (submarineVelocity / 2);
+		double time = Math.abs(distanceOfCircles(newSubmarinePosition, submarineSize, collisionPosition, 0)) / (submarineVelocity / 2);
 		if (time >= mennyikoronbelultudmegallni) {
 			return true;
 		}
@@ -402,7 +402,7 @@ public class MathUtil {
 	}
 	
 	public static boolean isDangerousToShoot(Position torpedoPosition, List<Submarine> submarines, double submarineSize,
-			Position targetPosition, double targetVelocity, double targetAngle, double torpedoVelocity, double torpedoAngle, double torpedoExplosionRadius) {
+			Position targetPosition, double targetVelocity, double targetAngle, double torpedoVelocity, double torpedoAngle, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
 		Position torpedoCollisionPosition = collisionPosition(submarineSize, targetPosition, targetVelocity, targetAngle, torpedoPosition, torpedoVelocity, torpedoAngle);
 		if (torpedoCollisionPosition != null) {
 			for (Submarine submarine : submarines) {
@@ -413,9 +413,27 @@ public class MathUtil {
 			}
 		} else {
 			for (Submarine submarine : submarines) {
+				if(submarine.getPosition().equals(torpedoPosition)) {
+					continue;
+				}
+				if(distanceOfCircles(torpedoPosition, submarineSize, submarine.getPosition(), submarineSize) < 0) {
+					return true;
+				}
 				Position torpedoSubmarineCollisionPosition = collisionPosition(submarineSize, submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), torpedoPosition, torpedoVelocity, torpedoAngle);
 				if (torpedoSubmarineCollisionPosition != null) {
 					return true;
+				}
+			}
+			
+			for (Position islandPosition : islandPositions) {
+				torpedoCollisionPosition = collisionPosition(islandSize, islandPosition, 0, 0, torpedoPosition, torpedoVelocity, torpedoAngle);
+				if(torpedoCollisionPosition != null) {
+					for (Submarine submarine : submarines) {
+				Position detectedPosition = movingCircleCollisionDetection(submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, torpedoCollisionPosition, 0, 0, torpedoExplosionRadius);
+				if (detectedPosition != null) {
+					return true;
+				}
+			}
 				}
 			}
 		}
