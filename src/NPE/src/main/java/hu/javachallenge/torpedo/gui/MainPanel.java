@@ -162,6 +162,7 @@ public class MainPanel extends JPanel {
 			double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize() * scale;
 
 			paintCircle(g, ENEMY_SUBMARINE_COLOR, x, y, submarineSize, scale);
+			g.drawString(String.valueOf(submarine.getId()), (int) (x - submarineSize * 1.5), (int) (y - submarineSize));
 		}
 	}
 
@@ -178,5 +179,4 @@ public class MainPanel extends JPanel {
 		g.setColor(color);
 		g.fillOval((int) (x - size), (int) (y - size), (int) size * 2, (int) size * 2);
 	}
-
 }
