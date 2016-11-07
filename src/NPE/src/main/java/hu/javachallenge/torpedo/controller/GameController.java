@@ -81,8 +81,6 @@ public class GameController implements Runnable {
 		GameListResponse gameList = callHandler.gameList();
 		long[] games = gameList.getGames();
 
-		Long gameId = null;
-
 		if (games == null || games.length == 0) {
 			CreateGameResponse createGameResponse = callHandler.createGame();
 			gameId = createGameResponse.getId();
@@ -90,7 +88,7 @@ public class GameController implements Runnable {
 			gameId = games[0];
 		}
 
-		gameInfo = callHandler.gameInfo(gameId);
+		updateGameInfo();
 
 		Map<String, Boolean> connected = gameInfo.getGame().getConnectionStatus().getConnected();
 		if (connected.get(teamName) == false) {
@@ -98,7 +96,7 @@ public class GameController implements Runnable {
 		}
 
 		do {
-			gameInfo = callHandler.gameInfo(gameId);
+			updateGameInfo();
 		} while (gameInfo.getGame().getStatus().equals(Status.WAITING));
 
 		this.gameId = gameInfo.getGame().getId();
@@ -116,11 +114,12 @@ public class GameController implements Runnable {
 		this.previousRound = actualRound - 1;
 		this.torpedoExplosionRadius = gameInfo.getGame().getMapConfiguration().getTorpedoExplosionRadius();
 		this.islandPositions = Arrays.asList(gameInfo.getGame().getMapConfiguration().getIslandPositions());
+		this.submarinesInGame = callHandler.submarinesInGame(gameId);
 
-		Dimension dimension = new Dimension(1275, 600);
 		mainPanel = new MainPanel(gameInfo);
 		mainPanel.setLayout(new BorderLayout());
-		mainPanel.setPreferredSize(dimension);
+		mainPanel.setPreferredSize(new Dimension(1275, 600));
+		mainPanel.addSubmarines(Arrays.asList(submarinesInGame.getSubmarines()));
 
 		JFrame mainFrame = new JFrame("NPE - BankTech Java Challenge 2016");
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -128,9 +127,6 @@ public class GameController implements Runnable {
 		mainFrame.setResizable(false);
 		mainFrame.setVisible(true);
 		mainFrame.pack();
-
-		submarinesInGame = callHandler.submarinesInGame(gameId);
-		mainPanel.addSubmarines(Arrays.asList(submarinesInGame.getSubmarines()));
 
 		mainPanel.repaint();
 		mainPanel.revalidate();
@@ -191,7 +187,7 @@ public class GameController implements Runnable {
 
 				mainPanel.repaint();
 				mainPanel.revalidate();
-				
+
 				log.trace("Detected enemy submarines: {}", enemySubmarines);
 				log.trace("Detected torpedos: {}", torpedos);
 
@@ -292,7 +288,14 @@ public class GameController implements Runnable {
 					}
 				}
 			}
-			gameInfo = callHandler.gameInfo(gameId);
+			updateGameInfo();
+		}
+	}
+
+	private void updateGameInfo() {
+		GameInfoResponse gameInfo = callHandler.gameInfo(gameId);
+		if (gameInfo != null) {
+			this.gameInfo = gameInfo;
 		}
 	}
 
