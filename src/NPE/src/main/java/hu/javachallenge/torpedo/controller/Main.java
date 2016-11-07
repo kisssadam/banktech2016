@@ -1,17 +1,10 @@
 package hu.javachallenge.torpedo.controller;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.util.Arrays;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.BevelBorder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import hu.javachallenge.torpedo.gui.MainPanel;
 import hu.javachallenge.torpedo.service.ServiceGenerator;
 import okhttp3.logging.HttpLoggingInterceptor;
 
@@ -43,25 +36,7 @@ public class Main {
 		ServiceGenerator serviceGenerator = new ServiceGenerator(serverAddress, TEAMTOKEN, HttpLoggingInterceptor.Level.NONE);
 		CallHandler callHandler = new CallHandler(serviceGenerator);
 
-		JFrame mainFrame = new JFrame("NPE - BankTech Java Challenge 2016");
-		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-		Dimension dimension = new Dimension(1275, 640);
-		mainFrame.setSize(dimension);
-
-		BorderLayout layout = new BorderLayout();
-
-//		JPanel statusPanel = new JPanel();
-//		statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
-//		statusPanel.setPreferredSize(new Dimension(mainFrame.getWidth(), 20));
-
-		MainPanel mainPanel = new MainPanel(TEAMNAME);
-		mainPanel.setLayout(layout);
-//		mainPanel.add(statusPanel, BorderLayout.SOUTH);
-		mainFrame.add(mainPanel);
-		mainFrame.setVisible(true);
-
-		Thread gameControllerThread = new Thread(new GameController(callHandler, TEAMNAME, mainPanel));
+		Thread gameControllerThread = new Thread(new GameController(callHandler, TEAMNAME));
 		gameControllerThread.start();
 
 		// TODO ha a jatek veget ert, loje ki az alkalmazas magat!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
