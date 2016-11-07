@@ -30,6 +30,7 @@ import hu.javachallenge.torpedo.response.SubmarinesResponse;
 import hu.javachallenge.torpedo.util.DangerType;
 import hu.javachallenge.torpedo.util.MathConstants;
 import hu.javachallenge.torpedo.util.MathUtil;
+import java.util.HashSet;
 
 public class GameController implements Runnable {
 
@@ -168,7 +169,10 @@ public class GameController implements Runnable {
 					mainPanel.repaint();
 					mainPanel.revalidate();
 				}
-
+                                
+                                HashSet<Submarine> enemySubmarinesSet = new HashSet<>();
+                                HashSet<Entity> torpedosSet = new HashSet<>();
+                                
 				for (Submarine submarine : submarinesInGame.getSubmarines()) {
 					if (submarine.getSonarCooldown() == 0) {
 						ExtendSonarResponse extendSonarResponse = callHandler.extendSonar(gameId, submarine.getId());
@@ -179,15 +183,18 @@ public class GameController implements Runnable {
 						switch (entity.getType()) {
 						case "Submarine":
 							if (!entity.getOwner().getName().equals(teamName)) {
-								enemySubmarines.add(new Submarine("Submarine", entity.getId(), entity.getPosition(), entity.getOwner(), entity.getVelocity(), entity.getAngle(), 0, 0, 0, 0));
+								enemySubmarinesSet.add(new Submarine("Submarine", entity.getId(), entity.getPosition(), entity.getOwner(), entity.getVelocity(), entity.getAngle(), 0, 0, 0, 0));
 							}
 							break;
 						case "Torpedo":
-							torpedos.add(entity);
+							torpedosSet.add(entity);
 							break;
 						}
 					}
 				}
+                                enemySubmarines.addAll(enemySubmarinesSet);
+                                torpedos.addAll(torpedosSet);
+                                
 				log.trace("Detected enemy submarines: {}", enemySubmarines);
 				log.trace("Detected torpedos: {}", torpedos);
 
