@@ -1,7 +1,9 @@
 package hu.javachallenge.torpedo.gui;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
@@ -12,6 +14,7 @@ import hu.javachallenge.torpedo.model.Entity;
 import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.model.Submarine;
 import hu.javachallenge.torpedo.response.GameInfoResponse;
+import hu.javachallenge.torpedo.util.MathUtil;
 
 public class MainPanel extends JPanel {
 
@@ -154,6 +157,14 @@ public class MainPanel extends JPanel {
 			double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize() * scale;
 
 			paintCircle(g, SUBMARINE_COLOR, x, y, submarineSize, scale);
+			
+			int dirX = (int) (x + MathUtil.xMovement(submarine.getVelocity(), submarine.getAngle()) * scale);
+			int dirY = (int) (y - MathUtil.yMovement(submarine.getVelocity(), submarine.getAngle()) * scale );
+
+			g.setColor(Color.RED);
+			Graphics2D g2 = (Graphics2D) g;
+			g2.setStroke(new BasicStroke(3.0f));
+			g2.drawLine((int) x, (int) y, dirX, dirY);
 		}
 
 		for (Submarine submarine : enemySubmarines) {
@@ -179,4 +190,5 @@ public class MainPanel extends JPanel {
 		g.setColor(color);
 		g.fillOval((int) (x - size), (int) (y - size), (int) size * 2, (int) size * 2);
 	}
+
 }
