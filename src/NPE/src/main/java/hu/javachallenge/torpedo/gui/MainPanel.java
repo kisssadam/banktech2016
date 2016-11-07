@@ -3,10 +3,12 @@ package hu.javachallenge.torpedo.gui;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JPanel;
 
+import hu.javachallenge.torpedo.model.Entity;
 import hu.javachallenge.torpedo.model.Owner;
 import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.model.Submarine;
@@ -18,10 +20,15 @@ public class MainPanel extends JPanel {
 	private GameInfoResponse gameInfo;
 	private String teamName;
 	private List<SubmarineComponent> submarineComponents;
+	
+	private List<SubmarineComponent> enemySubmarineComponents;
+	private List<Position> torpedos;
 
 	public MainPanel(String teamName, GameInfoResponse gameInfo) {
 		this.gameInfo = gameInfo;
 		this.submarineComponents = new ArrayList<>();
+		this.enemySubmarineComponents = new ArrayList<>();
+		this.torpedos = new ArrayList<>();
 		this.teamName = teamName;
 	}
 
@@ -36,11 +43,46 @@ public class MainPanel extends JPanel {
 		}
 	}
 
-	public void addSubmarine(Submarine submarine) {
+	public void addSubmarines(List<Submarine> submarines) {
+		this.submarineComponents.clear();
+		for (Submarine submarine : submarines) {
+			addSubmarine(submarine);
+		}
+	}
+	
+	private void addSubmarine(Submarine submarine) {
 		try {
 			submarineComponents.add(new SubmarineComponent(submarine, teamName));
 		} catch (Exception e) {
 		}
+	}
+
+	public void addEnemySubmarines(List<Submarine> enemySubmarines) {
+		this.enemySubmarineComponents.clear();
+		for (Submarine submarine : enemySubmarines) {
+			addEnemySubmarine(submarine);
+		}
+	}
+	
+	private void addEnemySubmarine(Submarine submarine) {
+		try {
+			enemySubmarineComponents.add(new SubmarineComponent(submarine, submarine.getOwner().getName()));
+		} catch (Exception e) {
+		}
+	}
+	
+	public void addTorpedos(List<Entity> torpedos) {
+		this.torpedos.clear();
+		for (Entity entity : torpedos) {
+			addTorpedo(entity.getPosition());
+		}
+	}
+	
+	private void addTorpedo(Position position) {
+		try {
+			torpedos.add(position);
+		} catch (Exception e) {
+		}		
 	}
 
 	public void updateSubmarine(Submarine submarine) {
@@ -62,6 +104,7 @@ public class MainPanel extends JPanel {
 		paintSubmarineComponent(g, scale);
 		paintIslands(g, scale);
 		paintCorners(g, scale);
+		paintTorpedos(g, scale);
 	}
 
 	private void paintCorners(Graphics g, double scale) {
@@ -113,8 +156,26 @@ public class MainPanel extends JPanel {
 			
 			paintCircle(g, submarineComponent.getColor(), x, y, submarineSize, scale);
 		}
+		
+		for (SubmarineComponent submarineComponent : enemySubmarineComponents) {
+			double x = submarineComponent.getSubmarine().getPosition().getX().doubleValue() * scale;
+			double y = getHeight() - submarineComponent.getSubmarine().getPosition().getY().doubleValue() * scale;
+			double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize() * scale;
+			
+			paintCircle(g, Color.RED, x, y, submarineSize, scale);
+		}
 	}
 
+	private void paintTorpedos(Graphics g, double scale) {
+		for (Position position : torpedos) {
+			double x = position.getX().doubleValue() * scale;
+			double y = getHeight() - position.getY().doubleValue() * scale;
+			double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize() * scale;
+			
+			paintCircle(g, Color.BLACK, x, y, 5, scale);
+		}
+	}
+	
 	private void paintCircle(Graphics g, Color color, double x, double y, double size, double scale) {
 		g.setColor(color);
 		g.fillOval((int) (x - size), (int) (y - size), (int) size * 2, (int) size * 2);

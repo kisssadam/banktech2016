@@ -132,9 +132,7 @@ public class GameController implements Runnable {
 		mainFrame.pack();
 
 		submarinesInGame = callHandler.submarinesInGame(gameId);
-		for (Submarine submarine : submarinesInGame.getSubmarines()) {
-			mainPanel.addSubmarine(submarine);
-		}
+		mainPanel.addSubmarines(Arrays.asList(submarinesInGame.getSubmarines()));
 
 		mainPanel.repaint();
 		mainPanel.revalidate();
@@ -164,8 +162,6 @@ public class GameController implements Runnable {
 				for (Submarine submarine : submarinesInGame.getSubmarines()) {
 					mainPanel.updateSubmarine(submarine);
 				}
-				mainPanel.repaint();
-				mainPanel.revalidate();
 
 				HashSet<Submarine> enemySubmarinesSet = new HashSet<>();
 				HashSet<Entity> torpedosSet = new HashSet<>();
@@ -190,8 +186,14 @@ public class GameController implements Runnable {
 					}
 				}
 				enemySubmarines.addAll(enemySubmarinesSet);
-				torpedos.addAll(torpedosSet);
+				mainPanel.addEnemySubmarines(enemySubmarines);
 
+				torpedos.addAll(torpedosSet);
+				mainPanel.addTorpedos(torpedos);
+
+				mainPanel.repaint();
+				mainPanel.revalidate();
+				
 				log.trace("Detected enemy submarines: {}", enemySubmarines);
 				log.trace("Detected torpedos: {}", torpedos);
 
