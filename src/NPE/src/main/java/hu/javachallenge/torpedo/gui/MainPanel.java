@@ -16,9 +16,12 @@ import hu.javachallenge.torpedo.response.GameInfoResponse;
 public class MainPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
+	private static final Color GROUND_COLOR = new Color(255, 255, 153);
+	private static final Color TERRAIN_COLOR = new Color(0, 153, 0);
+	private static final Color SONAR_COLOR = new Color(204, 229, 255);
+
 	private GameInfoResponse gameInfo;
 	private List<Submarine> submarines;
-
 	private List<Submarine> enemySubmarines;
 	private List<Position> torpedos;
 
@@ -119,22 +122,17 @@ public class MainPanel extends JPanel {
 	}
 
 	private void paintIslands(Graphics g, double scale) {
-		Color groundColor = new Color(255, 255, 153);
-		Color terrainColor = new Color(0, 153, 0);
-
 		for (Position islandPosition : gameInfo.getGame().getMapConfiguration().getIslandPositions()) {
 			double x = islandPosition.getX().doubleValue() * scale;
 			double y = getHeight() - islandPosition.getY().doubleValue() * scale;
 			double islandSize = gameInfo.getGame().getMapConfiguration().getIslandSize() * scale;
 
-			paintCircle(g, groundColor, x, y, islandSize, scale);
-			paintCircle(g, terrainColor, x, y, islandSize * 0.8, scale);
+			paintCircle(g, GROUND_COLOR, x, y, islandSize, scale);
+			paintCircle(g, TERRAIN_COLOR, x, y, islandSize * 0.8, scale);
 		}
 	}
 
 	private void paintSubmarineComponent(Graphics g, double scale) {
-		Color sonarColor = new Color(204, 229, 255);
-
 		for (Submarine submarine : submarines) {
 			double x = submarine.getPosition().getX().doubleValue() * scale;
 			double y = getHeight() - submarine.getPosition().getY().doubleValue() * scale;
@@ -143,7 +141,7 @@ public class MainPanel extends JPanel {
 			double sonarRange = gameInfo.getGame().getMapConfiguration().getSonarRange();
 			double extSonarRange = gameInfo.getGame().getMapConfiguration().getExtendedSonarRange();
 
-			paintCircle(g, sonarColor, x, y, hasExtSonar ? extSonarRange : sonarRange, scale);
+			paintCircle(g, SONAR_COLOR, x, y, hasExtSonar ? extSonarRange : sonarRange, scale);
 		}
 
 		for (Submarine submarine : submarines) {
