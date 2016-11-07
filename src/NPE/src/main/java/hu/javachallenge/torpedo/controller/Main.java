@@ -46,7 +46,7 @@ public class Main {
 		JFrame mainFrame = new JFrame("NPE - BankTech Java Challenge 2016");
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		Dimension dimension = new Dimension(1300, 600);
+		Dimension dimension = new Dimension(1275, 640);
 		mainFrame.setSize(dimension);
 
 		BorderLayout layout = new BorderLayout();

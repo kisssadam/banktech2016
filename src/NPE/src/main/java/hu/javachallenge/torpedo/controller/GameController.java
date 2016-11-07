@@ -114,10 +114,16 @@ public class GameController implements Runnable {
 		this.previousRound = actualRound - 1;
 		this.torpedoExplosionRadius = gameInfo.getGame().getMapConfiguration().getTorpedoExplosionRadius();
 		this.islandPositions = Arrays.asList(gameInfo.getGame().getMapConfiguration().getIslandPositions());
-
+                
+                mainPanel.scalingInit(this.height, this.width);
+                
 		submarinesInGame = callHandler.submarinesInGame(gameId);
 		for (Submarine submarine : submarinesInGame.getSubmarines()) {
 			mainPanel.addSubmarine(submarine);
+                        mainPanel.addSubmarine(new Submarine("", 1, new Position(0, 0), new Owner(teamName), 0, 0, 0, 0, 0, 0));
+                        mainPanel.addSubmarine(new Submarine("", 2, new Position(1600, 0), new Owner(teamName), 0, 0, 0, 0, 0, 0));
+                        mainPanel.addSubmarine(new Submarine("", 2, new Position(0, 800), new Owner(teamName), 0, 0, 0, 0, 0, 0));
+                        mainPanel.addSubmarine(new Submarine("", 2, new Position(1600, 800), new Owner(teamName), 0, 0, 0, 0, 0, 0));
 		}
 		mainPanel.repaint();
 		mainPanel.revalidate();
