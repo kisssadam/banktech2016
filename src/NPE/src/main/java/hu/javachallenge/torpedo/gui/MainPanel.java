@@ -59,8 +59,9 @@ public class MainPanel extends JPanel {
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		double scale = getScale();
-		paintCorners(g, scale);
 		paintSubmarineComponent(g, scale);
+		paintIslands(g, scale);
+		paintCorners(g, scale);
 	}
 
 	private void paintCorners(Graphics g, double scale) {
@@ -76,14 +77,40 @@ public class MainPanel extends JPanel {
 		paintCircle(g, color, 0, mapHeight * scale, size, scale);
 	}
 
+	private void paintIslands(Graphics g, double scale) {
+		Color groundColor = new Color(255, 255, 153);
+		Color terrainColor = new Color(0, 153, 0);
+		
+		for (Position islandPosition : gameInfo.getGame().getMapConfiguration().getIslandPositions()) {
+			double x = islandPosition.getX().doubleValue() * scale;
+			double y = getHeight() - islandPosition.getY().doubleValue() * scale;
+			double islandSize = gameInfo.getGame().getMapConfiguration().getIslandSize() * scale;
+			
+			paintCircle(g, groundColor, x, y, islandSize, scale);
+			paintCircle(g, terrainColor, x, y, islandSize * 0.8, scale);
+		}
+	}
+	
 	private void paintSubmarineComponent(Graphics g, double scale) {
+		
+		Color sonarColor = new Color(204, 229, 255);
+		
+		for (SubmarineComponent submarineComponent : submarineComponents) {			
+			double x = submarineComponent.getSubmarine().getPosition().getX().doubleValue() * scale;
+			double y = getHeight() - submarineComponent.getSubmarine().getPosition().getY().doubleValue() * scale;
+			
+			boolean hasExtSonar = submarineComponent.getSubmarine().getSonarExtended() > 0;
+			double sonarRange = gameInfo.getGame().getMapConfiguration().getSonarRange();
+			double extSonarRange = gameInfo.getGame().getMapConfiguration().getExtendedSonarRange();
+			
+			paintCircle(g, sonarColor, x, y, hasExtSonar ? extSonarRange : sonarRange, scale);
+		}
+		
 		for (SubmarineComponent submarineComponent : submarineComponents) {
-			g.setColor(submarineComponent.getColor());
-
 			double x = submarineComponent.getSubmarine().getPosition().getX().doubleValue() * scale;
 			double y = getHeight() - submarineComponent.getSubmarine().getPosition().getY().doubleValue() * scale;
 			double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize() * scale;
-
+			
 			paintCircle(g, submarineComponent.getColor(), x, y, submarineSize, scale);
 		}
 	}
