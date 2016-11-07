@@ -167,7 +167,7 @@ public class GameController implements Runnable {
 					mainPanel.repaint();
 					mainPanel.revalidate();
 				}
-				
+
 				for (Submarine submarine : submarinesInGame.getSubmarines()) {
 					if (submarine.getSonarCooldown() == 0) {
 						ExtendSonarResponse extendSonarResponse = callHandler.extendSonar(gameId, submarine.getId());
@@ -210,7 +210,11 @@ public class GameController implements Runnable {
 						double minusAngle = normalizeAngle(submarine.getAngle() - maxSteeringPerRound);
 						double minusVelocity = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed);
 
-						Set<DangerType> dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, submarine.getPosition(), submarineSize, submarine.getVelocity(), plusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
+						Position newSubmarinePosition = new Position(
+								submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(submarine.getVelocity(), plusAngle),
+								submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(submarine.getVelocity(), plusAngle));
+
+						Set<DangerType> dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, submarine.getVelocity(), plusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
 						if (!moved) {
 							if (dangerTypes.isEmpty()) {
 								move(gameId, submarine.getId(), 0, maxSteeringPerRound);
@@ -220,7 +224,11 @@ public class GameController implements Runnable {
 							}
 						}
 
-						dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, submarine.getPosition(), submarineSize, submarine.getVelocity(), minusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
+						newSubmarinePosition = new Position(
+								submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(submarine.getVelocity(), minusAngle),
+								submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(submarine.getVelocity(), minusAngle));
+						
+						dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, submarine.getVelocity(), minusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
 						if (!moved) {
 							if (dangerTypes.isEmpty()) {
 								move(gameId, submarine.getId(), 0, -maxSteeringPerRound);
@@ -230,7 +238,11 @@ public class GameController implements Runnable {
 							}
 						}
 
-						dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, submarine.getPosition(), submarineSize, minusVelocity, minusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
+						newSubmarinePosition = new Position(
+								submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(minusVelocity, minusAngle),
+								submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(minusVelocity, minusAngle));
+						
+						dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, minusVelocity, minusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
 						if (!moved) {
 							if (dangerTypes.isEmpty()) {
 								move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), -maxSteeringPerRound);
@@ -240,7 +252,11 @@ public class GameController implements Runnable {
 							}
 						}
 
-						dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, submarine.getPosition(), submarineSize, minusVelocity, plusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
+						newSubmarinePosition = new Position(
+								submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(minusVelocity, plusAngle),
+								submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(minusVelocity, plusAngle));
+
+						dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, minusVelocity, plusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
 						if (!moved) {
 							if (dangerTypes.isEmpty()) {
 								move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), maxSteeringPerRound);
@@ -281,7 +297,7 @@ public class GameController implements Runnable {
 	private void move(long gameId, long submarineId, double velocity, double angle) {
 		MoveResponse move = callHandler.move(gameId, submarineId, velocity, angle);
 		if (move != null) {
-			
+
 		}
 	}
 

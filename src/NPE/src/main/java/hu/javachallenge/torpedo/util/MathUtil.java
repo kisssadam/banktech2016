@@ -351,16 +351,32 @@ public class MathUtil {
 				newSubmarinePosition.getX().doubleValue() + mennyikoronbelultudmegallni * xMovement(submarineVelocity / 2, submarineAngle),
 				newSubmarinePosition.getY().doubleValue() + mennyikoronbelultudmegallni * yMovement(submarineVelocity / 2, submarineAngle));
 		
-		return minDistanceFromEdge(position, submarineSize, width, height) < MathConstants.EPSILON;
+		return minDistanceFromEdgeInWay(position, submarineSize, width, height, submarineAngle) < 2 * submarineSize;
 	}
 	
-	public static double minDistanceFromEdge(Position submarinePosition, double submarineSize, double width, double height) {
+	public static double minDistanceFromEdgeInWay(Position submarinePosition, double submarineSize, double width, double height, double submarineAngle) {
 		double fromRight = width - submarinePosition.getX().doubleValue() - submarineSize;
 		double fromTop = height - submarinePosition.getY().doubleValue() - submarineSize;
 		double fromLeft = submarinePosition.getX().doubleValue() - submarineSize;
 		double fromBottom = submarinePosition.getY().doubleValue() - submarineSize;
 		
-		return Math.min(fromRight, Math.min(fromTop, Math.min(fromLeft, fromBottom)));
+		if (submarineAngle == 0.0) {
+			return fromRight;
+		} else if (submarineAngle == 90.0) {
+			return fromTop;
+		} else if (submarineAngle == 180.0) {
+			return fromLeft;
+		} else if (submarineAngle == 270.0) {
+			return fromBottom;
+		} else if (submarineAngle > 0.0 && submarineAngle < 90.0) {
+			return Math.min(fromRight, fromTop);
+		} else if (submarineAngle > 90.0 && submarineAngle < 180.0) {
+			return Math.min(fromLeft, fromTop);
+		} else if (submarineAngle > 180.0 && submarineAngle < 270.0) {
+			return Math.min(fromLeft, fromBottom);
+		} else {
+			return Math.min(fromRight, fromBottom);
+		}
 	}
 	
 	public static double mennyikoronbelultudmegallni(double maxAccelerationPerRound, double velocity) {
