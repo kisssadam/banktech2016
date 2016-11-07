@@ -38,8 +38,12 @@ public class Main {
 
 		Thread gameControllerThread = new Thread(new GameController(callHandler, TEAMNAME));
 		gameControllerThread.start();
-
-		// TODO ha a jatek veget ert, loje ki az alkalmazas magat!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		try {
+			gameControllerThread.join();
+		} catch (Exception e) {
+		} finally {
+			System.exit(0);
+		}
 	}
 
 }
