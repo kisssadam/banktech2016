@@ -1,35 +1,43 @@
 package hu.javachallenge.torpedo.gui;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import javax.swing.JPanel;
 
 import hu.javachallenge.torpedo.model.Entity;
-import hu.javachallenge.torpedo.model.Owner;
 import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.model.Submarine;
 import hu.javachallenge.torpedo.response.GameInfoResponse;
+import hu.javachallenge.torpedo.util.MathUtil;
 
 public class MainPanel extends JPanel {
 
 	private static final long serialVersionUID = 1L;
+
+	private static final Color GROUND_COLOR = new Color(255, 255, 153);
+	private static final Color TERRAIN_COLOR = new Color(0, 153, 0);
+	private static final Color SONAR_COLOR = new Color(204, 229, 255);
+	private static final Color CORNER_COLOR = Color.BLACK;
+	private static final Color SUBMARINE_COLOR = Color.BLUE;
+	private static final Color ENEMY_SUBMARINE_COLOR = Color.RED;
+	private static final Color TORPEDO_COLOR = Color.BLACK;
+
 	private GameInfoResponse gameInfo;
-	private String teamName;
-	private List<SubmarineComponent> submarineComponents;
-	
-	private List<SubmarineComponent> enemySubmarineComponents;
+	private List<Submarine> submarines;
+	private List<Submarine> enemySubmarines;
 	private List<Position> torpedos;
 
-	public MainPanel(String teamName, GameInfoResponse gameInfo) {
+	public MainPanel(GameInfoResponse gameInfo) {
 		this.gameInfo = gameInfo;
-		this.submarineComponents = new ArrayList<>();
-		this.enemySubmarineComponents = new ArrayList<>();
+		this.submarines = new ArrayList<>();
+		this.enemySubmarines = new ArrayList<>();
 		this.torpedos = new ArrayList<>();
-		this.teamName = teamName;
 	}
 
 	private double getScale() {
@@ -44,52 +52,53 @@ public class MainPanel extends JPanel {
 	}
 
 	public void addSubmarines(List<Submarine> submarines) {
-		this.submarineComponents.clear();
+		this.submarines.clear();
 		for (Submarine submarine : submarines) {
 			addSubmarine(submarine);
 		}
 	}
-	
+
 	private void addSubmarine(Submarine submarine) {
 		try {
-			submarineComponents.add(new SubmarineComponent(submarine, teamName));
+			submarines.add(submarine);
 		} catch (Exception e) {
 		}
 	}
 
 	public void addEnemySubmarines(List<Submarine> enemySubmarines) {
-		this.enemySubmarineComponents.clear();
+		this.enemySubmarines.clear();
 		for (Submarine submarine : enemySubmarines) {
 			addEnemySubmarine(submarine);
 		}
 	}
-	
+
 	private void addEnemySubmarine(Submarine submarine) {
 		try {
-			enemySubmarineComponents.add(new SubmarineComponent(submarine, submarine.getOwner().getName()));
+			enemySubmarines.add(submarine);
 		} catch (Exception e) {
 		}
 	}
-	
+
 	public void addTorpedos(List<Entity> torpedos) {
 		this.torpedos.clear();
 		for (Entity entity : torpedos) {
 			addTorpedo(entity.getPosition());
 		}
 	}
-	
+
 	private void addTorpedo(Position position) {
 		try {
 			torpedos.add(position);
 		} catch (Exception e) {
-		}		
+		}
 	}
 
 	public void updateSubmarine(Submarine submarine) {
 		try {
-			for (SubmarineComponent submarineComponent : submarineComponents) {
-				if (submarineComponent.getSubmarine().getId() == submarine.getId()) {
-					submarineComponent.setSubmarine(submarine);
+			for (ListIterator<Submarine> iterator = submarines.listIterator(); iterator.hasNext();) {
+				Submarine s = iterator.next();
+				if (s.getId() == submarine.getId()) {
+					iterator.set(submarine);
 					return;
 				}
 			}
@@ -109,60 +118,62 @@ public class MainPanel extends JPanel {
 
 	private void paintCorners(Graphics g, double scale) {
 		int size = 10;
-		Color color = Color.BLACK;
 
 		double mapWidth = gameInfo.getGame().getMapConfiguration().getWidth();
 		double mapHeight = gameInfo.getGame().getMapConfiguration().getHeight();
 
-		paintCircle(g, color, 0, 0, size, scale);
-		paintCircle(g, color, mapWidth * scale, getHeight() - mapHeight * scale, size, scale);
-		paintCircle(g, color, mapWidth * scale, mapHeight * scale, size, scale);
-		paintCircle(g, color, 0, mapHeight * scale, size, scale);
+		paintCircle(g, CORNER_COLOR, 0, 0, size, scale);
+		paintCircle(g, CORNER_COLOR, mapWidth * scale, getHeight() - mapHeight * scale, size, scale);
+		paintCircle(g, CORNER_COLOR, mapWidth * scale, mapHeight * scale, size, scale);
+		paintCircle(g, CORNER_COLOR, 0, mapHeight * scale, size, scale);
 	}
 
 	private void paintIslands(Graphics g, double scale) {
-		Color groundColor = new Color(255, 255, 153);
-		Color terrainColor = new Color(0, 153, 0);
-		
 		for (Position islandPosition : gameInfo.getGame().getMapConfiguration().getIslandPositions()) {
 			double x = islandPosition.getX().doubleValue() * scale;
 			double y = getHeight() - islandPosition.getY().doubleValue() * scale;
 			double islandSize = gameInfo.getGame().getMapConfiguration().getIslandSize() * scale;
-			
-			paintCircle(g, groundColor, x, y, islandSize, scale);
-			paintCircle(g, terrainColor, x, y, islandSize * 0.8, scale);
+
+			paintCircle(g, GROUND_COLOR, x, y, islandSize, scale);
+			paintCircle(g, TERRAIN_COLOR, x, y, islandSize * 0.8, scale);
 		}
 	}
-	
+
 	private void paintSubmarineComponent(Graphics g, double scale) {
-		
-		Color sonarColor = new Color(204, 229, 255);
-		
-		for (SubmarineComponent submarineComponent : submarineComponents) {			
-			double x = submarineComponent.getSubmarine().getPosition().getX().doubleValue() * scale;
-			double y = getHeight() - submarineComponent.getSubmarine().getPosition().getY().doubleValue() * scale;
-			
-			boolean hasExtSonar = submarineComponent.getSubmarine().getSonarExtended() > 0;
+		for (Submarine submarine : submarines) {
+			double x = submarine.getPosition().getX().doubleValue() * scale;
+			double y = getHeight() - submarine.getPosition().getY().doubleValue() * scale;
+
+			boolean hasExtSonar = submarine.getSonarExtended() > 0;
 			double sonarRange = gameInfo.getGame().getMapConfiguration().getSonarRange();
 			double extSonarRange = gameInfo.getGame().getMapConfiguration().getExtendedSonarRange();
-			
-			paintCircle(g, sonarColor, x, y, hasExtSonar ? extSonarRange : sonarRange, scale);
+
+			paintCircle(g, SONAR_COLOR, x, y, hasExtSonar ? extSonarRange : sonarRange, scale);
 		}
-		
-		for (SubmarineComponent submarineComponent : submarineComponents) {
-			double x = submarineComponent.getSubmarine().getPosition().getX().doubleValue() * scale;
-			double y = getHeight() - submarineComponent.getSubmarine().getPosition().getY().doubleValue() * scale;
+
+		for (Submarine submarine : submarines) {
+			double x = submarine.getPosition().getX().doubleValue() * scale;
+			double y = getHeight() - submarine.getPosition().getY().doubleValue() * scale;
 			double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize() * scale;
+
+			paintCircle(g, SUBMARINE_COLOR, x, y, submarineSize, scale);
 			
-			paintCircle(g, submarineComponent.getColor(), x, y, submarineSize, scale);
+			int dirX = (int) (x + MathUtil.xMovement(submarine.getVelocity(), submarine.getAngle()) * scale);
+			int dirY = (int) (y - MathUtil.yMovement(submarine.getVelocity(), submarine.getAngle()) * scale );
+
+			g.setColor(Color.RED);
+			Graphics2D g2 = (Graphics2D) g;
+			g2.setStroke(new BasicStroke(3.0f));
+			g2.drawLine((int) x, (int) y, dirX, dirY);
 		}
-		
-		for (SubmarineComponent submarineComponent : enemySubmarineComponents) {
-			double x = submarineComponent.getSubmarine().getPosition().getX().doubleValue() * scale;
-			double y = getHeight() - submarineComponent.getSubmarine().getPosition().getY().doubleValue() * scale;
+
+		for (Submarine submarine : enemySubmarines) {
+			double x = submarine.getPosition().getX().doubleValue() * scale;
+			double y = getHeight() - submarine.getPosition().getY().doubleValue() * scale;
 			double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize() * scale;
-			
-			paintCircle(g, Color.RED, x, y, submarineSize, scale);
+
+			paintCircle(g, ENEMY_SUBMARINE_COLOR, x, y, submarineSize, scale);
+			g.drawString(String.valueOf(submarine.getId()), (int) (x - submarineSize * 1.5), (int) (y - submarineSize));
 		}
 	}
 
@@ -170,12 +181,11 @@ public class MainPanel extends JPanel {
 		for (Position position : torpedos) {
 			double x = position.getX().doubleValue() * scale;
 			double y = getHeight() - position.getY().doubleValue() * scale;
-			double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize() * scale;
-			
-			paintCircle(g, Color.BLACK, x, y, 5, scale);
+
+			paintCircle(g, TORPEDO_COLOR, x, y, 5, scale);
 		}
 	}
-	
+
 	private void paintCircle(Graphics g, Color color, double x, double y, double size, double scale) {
 		g.setColor(color);
 		g.fillOval((int) (x - size), (int) (y - size), (int) size * 2, (int) size * 2);

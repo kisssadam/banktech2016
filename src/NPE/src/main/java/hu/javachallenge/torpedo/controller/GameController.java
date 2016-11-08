@@ -24,10 +24,8 @@ import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.model.Status;
 import hu.javachallenge.torpedo.model.Submarine;
 import hu.javachallenge.torpedo.response.CreateGameResponse;
-import hu.javachallenge.torpedo.response.ExtendSonarResponse;
 import hu.javachallenge.torpedo.response.GameInfoResponse;
 import hu.javachallenge.torpedo.response.GameListResponse;
-import hu.javachallenge.torpedo.response.MoveResponse;
 import hu.javachallenge.torpedo.response.SonarResponse;
 import hu.javachallenge.torpedo.response.SubmarinesResponse;
 import hu.javachallenge.torpedo.util.DangerType;
@@ -83,8 +81,6 @@ public class GameController implements Runnable {
 		GameListResponse gameList = callHandler.gameList();
 		long[] games = gameList.getGames();
 
-		Long gameId = null;
-
 		if (games == null || games.length == 0) {
 			CreateGameResponse createGameResponse = callHandler.createGame();
 			gameId = createGameResponse.getId();
@@ -92,7 +88,7 @@ public class GameController implements Runnable {
 			gameId = games[0];
 		}
 
-		gameInfo = callHandler.gameInfo(gameId);
+		updateGameInfo();
 
 		Map<String, Boolean> connected = gameInfo.getGame().getConnectionStatus().getConnected();
 		if (connected.get(teamName) == false) {
@@ -100,7 +96,7 @@ public class GameController implements Runnable {
 		}
 
 		do {
-			gameInfo = callHandler.gameInfo(gameId);
+			updateGameInfo();
 		} while (gameInfo.getGame().getStatus().equals(Status.WAITING));
 
 		this.gameId = gameInfo.getGame().getId();
@@ -118,11 +114,12 @@ public class GameController implements Runnable {
 		this.previousRound = actualRound - 1;
 		this.torpedoExplosionRadius = gameInfo.getGame().getMapConfiguration().getTorpedoExplosionRadius();
 		this.islandPositions = Arrays.asList(gameInfo.getGame().getMapConfiguration().getIslandPositions());
+		this.submarinesInGame = callHandler.submarinesInGame(gameId);
 
-		Dimension dimension = new Dimension(1275, 600);
-		mainPanel = new MainPanel(teamName, gameInfo);
+		mainPanel = new MainPanel(gameInfo);
 		mainPanel.setLayout(new BorderLayout());
-		mainPanel.setPreferredSize(dimension);
+		mainPanel.setPreferredSize(new Dimension(1275, 600));
+		mainPanel.addSubmarines(Arrays.asList(submarinesInGame.getSubmarines()));
 
 		JFrame mainFrame = new JFrame("NPE - BankTech Java Challenge 2016");
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -130,9 +127,6 @@ public class GameController implements Runnable {
 		mainFrame.setResizable(false);
 		mainFrame.setVisible(true);
 		mainFrame.pack();
-
-		submarinesInGame = callHandler.submarinesInGame(gameId);
-		mainPanel.addSubmarines(Arrays.asList(submarinesInGame.getSubmarines()));
 
 		mainPanel.repaint();
 		mainPanel.revalidate();
@@ -147,6 +141,7 @@ public class GameController implements Runnable {
 			this.speed = speed;
 			this.angle = angle;
 		}
+
 	}
 
 	private void playGame() {
@@ -159,16 +154,35 @@ public class GameController implements Runnable {
 
 				submarinesInGame = callHandler.submarinesInGame(gameId);
 
-				for (Submarine submarine : submarinesInGame.getSubmarines()) {
-					mainPanel.updateSubmarine(submarine);
-				}
-
-				HashSet<Submarine> enemySubmarinesSet = new HashSet<>();
-				HashSet<Entity> torpedosSet = new HashSet<>();
+				Set<Submarine> enemySubmarinesSet = new HashSet<>();
+				Set<Entity> torpedosSet = new HashSet<>();
 
 				for (Submarine submarine : submarinesInGame.getSubmarines()) {
+					
+					/**
+					 * Na ez az a pont, ami kicsit nehezebb lesz az extendedSonar-ral kapcsolatban.
+					 * Most ide írom le a gondolataimat, mert már kibaszott fáradt vagyok. Délután, mire együtt belevágunk,
+					 * már remélhetőleg itt a működő kód fog állni.
+					 * 
+					 * - Kész van a matematikai művelet arra, hogy kiszámítsuk a megnövelt szonárok átfedését.
+					 * - Minden hajó esetén meg kell nézni, hogy van-e a közelében egy másik olyan hajó, aminek
+					 * éppen aktív a kiterjesztett szonárja.
+					 * - Ha igen, ki kell számítani az ő működő és a mi képzeletbeli kiterjesztett szonárjaink átfedését.
+					 * - Ha nincs olyan hajó, amivel ez az (átfedés / kiterjesztett szonár területe) arány meghaladja
+					 * a MathUtils-ben definiált küszöbértéket, akkor aktiváljuk az aktuális hajóét, különben nem
+					 * (KIVÉTEL: az összes szignifikáns átfedéssel rendelkező hajó kiterjesztett szonárja 1, esetleg néhány
+					 * körön belül lejár).
+					 * - Probléma: tárolni kell, hogy mely hajók esetén hívtuk már meg az extendedSonar()-t, és azokat a
+					 * kimaradt hajók vizsgálatakor már belekalkulálni az aktív szonárral rendelkező hajókba.
+					 * Újabb for ciklus kerül be az alábbi if-be. Lehetséges ezt esetleg távolság alapján szűrni?
+					 * Mindenképpen gyorsítsuk a működését az előbb említett tárolással.
+					 * 
+					 * Ha lehetséges az, hogy olyan hajópárokat ellenőrzünk, amik már szerepeltek, akkor ezt el kellene
+					 * kerülni.
+					 */
+					
 					if (submarine.getSonarCooldown() == 0) {
-						ExtendSonarResponse extendSonarResponse = callHandler.extendSonar(gameId, submarine.getId());
+						callHandler.extendSonar(gameId, submarine.getId());
 					}
 					SonarResponse sonar = callHandler.sonar(gameId, submarine.getId());
 
@@ -185,15 +199,19 @@ public class GameController implements Runnable {
 						}
 					}
 				}
+				
 				enemySubmarines.addAll(enemySubmarinesSet);
-				mainPanel.addEnemySubmarines(enemySubmarines);
-
 				torpedos.addAll(torpedosSet);
-				mainPanel.addTorpedos(torpedos);
 
+				for (Submarine submarine : submarinesInGame.getSubmarines()) {
+					mainPanel.updateSubmarine(submarine);
+				}
+				mainPanel.addEnemySubmarines(enemySubmarines);
+				mainPanel.addTorpedos(torpedos);
+				
 				mainPanel.repaint();
 				mainPanel.revalidate();
-				
+
 				log.trace("Detected enemy submarines: {}", enemySubmarines);
 				log.trace("Detected torpedos: {}", torpedos);
 
@@ -223,7 +241,7 @@ public class GameController implements Runnable {
 						if (!moved) {
 							dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, submarine.getVelocity(), plusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
 							if (dangerTypes.isEmpty()) {
-								move(gameId, submarine.getId(), 0, maxSteeringPerRound);
+								callHandler.move(gameId, submarine.getId(), 0, maxSteeringPerRound);
 								moved = true;
 							} else if (dangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
 								moveParameters.add(new MoveParameter(0, maxSteeringPerRound));
@@ -235,7 +253,7 @@ public class GameController implements Runnable {
 						if (!moved) {
 							dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, submarine.getVelocity(), minusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
 							if (dangerTypes.isEmpty()) {
-								move(gameId, submarine.getId(), 0, -maxSteeringPerRound);
+								callHandler.move(gameId, submarine.getId(), 0, -maxSteeringPerRound);
 								moved = true;
 							} else if (dangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
 								moveParameters.add(new MoveParameter(0, -maxSteeringPerRound));
@@ -247,7 +265,7 @@ public class GameController implements Runnable {
 						if (!moved) {
 							dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, minusVelocity, minusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
 							if (dangerTypes.isEmpty()) {
-								move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), -maxSteeringPerRound);
+								callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), -maxSteeringPerRound);
 								moved = true;
 							} else if (dangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
 								moveParameters.add(new MoveParameter(minusVelocity - submarine.getVelocity(), -maxSteeringPerRound));
@@ -259,7 +277,7 @@ public class GameController implements Runnable {
 						if (!moved) {
 							dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, minusVelocity, plusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
 							if (dangerTypes.isEmpty()) {
-								move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), maxSteeringPerRound);
+								callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), maxSteeringPerRound);
 								moved = true;
 							} else if (dangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
 								moveParameters.add(new MoveParameter(minusVelocity - submarine.getVelocity(), maxSteeringPerRound));
@@ -268,9 +286,9 @@ public class GameController implements Runnable {
 
 						if (!moved && (dangerTypes.contains(DangerType.HEADING_TO_ISLAND) || dangerTypes.contains(DangerType.LEAVING_SPACE))) {
 							if (submarine.getVelocity() < MathConstants.EPSILON) {
-								move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), maxSteeringPerRound);
+								callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), maxSteeringPerRound);
 							} else {
-								move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), 0);
+								callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), 0);
 							}
 							moved = true;
 						}
@@ -280,28 +298,28 @@ public class GameController implements Runnable {
 						if (!moveParameters.isEmpty()) {
 							log.warn("Submarine {} is heading to torpedo.", submarine);
 							MoveParameter moveParameter = moveParameters.get(0);
-							move(gameId, submarine.getId(), moveParameter.speed, moveParameter.angle);
+							callHandler.move(gameId, submarine.getId(), moveParameter.speed, moveParameter.angle);
 							moved = true;
 						} else {
 							double newNormalizedVelocity = normalizeVelocity(submarine.getVelocity() + maxAccelerationPerRound, maxSpeed);
 							if (MathUtil.isSubmarineMovingInLineWithOtherSubmarine(submarine, submarinesInGame.getSubmarines(), submarineSize, maxSpeed)) {
-								move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), maxSteeringPerRound);
+								callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), maxSteeringPerRound);
 							} else {
-								move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), 0);
+								callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), 0);
 							}
 							moved = true;
 						}
 					}
 				}
 			}
-			gameInfo = callHandler.gameInfo(gameId);
+			updateGameInfo();
 		}
 	}
 
-	private void move(long gameId, long submarineId, double velocity, double angle) {
-		MoveResponse move = callHandler.move(gameId, submarineId, velocity, angle);
-		if (move != null) {
-
+	private void updateGameInfo() {
+		GameInfoResponse gameInfo = callHandler.gameInfo(gameId);
+		if (gameInfo != null) {
+			this.gameInfo = gameInfo;
 		}
 	}
 

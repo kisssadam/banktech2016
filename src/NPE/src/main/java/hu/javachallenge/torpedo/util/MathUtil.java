@@ -539,5 +539,20 @@ public class MathUtil {
 
 		return dangerTypes;
 	}
-	
+
+	/**
+	 * Source: http://jwilson.coe.uga.edu/EMAT6680Su12/Carreras/EMAT6690/Essay2/essay2.html
+	 * Csak egyenlő sugarú körökre működik.
+	 * Megmondja, hogy a paraméterül kapott két körnek mekkora területi átfedése van.
+	 */
+	public static double intersectionOfCircles(Position a, Position b, double r) {
+		double distanceOfPoints = distanceOfCircles(a, 0.0, b, 0.0);
+		if (distanceOfPoints >= 2.0 * r) {
+			return 0.0;
+		}
+		
+		double theta = 2 * Math.acos(distanceOfPoints / (2.0 * r));
+		
+		return r * r * (theta - Math.sin(theta));
+	}
 }
