@@ -40,7 +40,7 @@ public class MathUtil {
 		return velocity < 0 ? 0 : (velocity > maxSpeed ? maxSpeed : velocity);
 	}
 	
-	private static double angleDistance(double alpha, double beta) {
+	private static double angleDifference(double alpha, double beta) {
         double phi = normalizeAngle(Math.abs(beta - alpha));       // This is either the distance or 360 - distance
         double distance = phi > 180 ? 360 - phi : phi;
         return distance;
@@ -303,13 +303,111 @@ public class MathUtil {
 	public static double getSteeringHeadingToSubmarine(Submarine actualSubmarine, Submarine otherSubmarine, double maxSteering) {
 		double plusAngle = normalizeAngle(actualSubmarine.getAngle() + maxSteering);
 		double minusAngle = normalizeAngle(actualSubmarine.getAngle() - maxSteering);
-		if(angleDistance(plusAngle, otherSubmarine.getAngle()) > angleDistance(minusAngle, otherSubmarine.getAngle())) {
+		if(angleDifference(plusAngle, otherSubmarine.getAngle()) > angleDifference(minusAngle, otherSubmarine.getAngle())) {
 			return maxSteering;
 		} else {
 			return -maxSteering;
 		}
 	}
+	
+	public static double getSteeringHeadingToEdge(Position submarinePosition, double submarineSize, double width, double height, double submarineAngle, double sonarRange, double maxSteering) {
+		double fromRight = width - submarinePosition.getX().doubleValue() - submarineSize;
+		double fromTop = height - submarinePosition.getY().doubleValue() - submarineSize;
+		double fromLeft = submarinePosition.getX().doubleValue() - submarineSize;
+		double fromBottom = submarinePosition.getY().doubleValue() - submarineSize;
 		
+		if (submarineAngle == 0.0) {
+			if (fromRight < sonarRange) {
+				if (fromTop < fromBottom) {
+					return -maxSteering;
+				} else {
+					return maxSteering;
+				}
+			}
+		} else if (submarineAngle == 90.0) {
+			if (fromTop < sonarRange) {
+				if (fromLeft < fromRight) {
+					return -maxSteering;
+				} else {
+					return maxSteering;
+				}
+			}
+		} else if (submarineAngle == 180.0) {
+			if (fromLeft < sonarRange) {
+				if (fromBottom < fromTop) {
+					return -maxSteering;
+				} else{
+					return maxSteering;
+				}
+			}
+		} else if (submarineAngle == 270.0) {
+			if(fromBottom < sonarRange) {
+				if (fromRight < fromLeft) {
+					return -maxSteering;
+				} else {
+					return maxSteering;
+				}
+			}
+		} else if (submarineAngle > 0.0 && submarineAngle < 90.0) {
+			if (fromTop < sonarRange && fromRight < sonarRange) {
+				if(distanceOfCircles(submarinePosition, submarineSize, new Position(width, height), 0) < sonarRange) {
+					if(fromTop < fromRight) {
+						return -maxSteering;
+					} else {
+						return maxSteering;
+					}
+				}
+			} else if (fromTop < sonarRange) {
+				return -maxSteering;
+			} else if (fromRight < sonarRange) {
+				return  maxSteering;
+			}
+		} else if (submarineAngle > 90.0 && submarineAngle < 180.0) {
+			if (fromLeft < sonarRange && fromTop < sonarRange) {
+				if(distanceOfCircles(submarinePosition, submarineSize, new Position(0, height), 0) < sonarRange) {
+					if(fromLeft < fromTop) {
+						return -maxSteering;
+					} else {
+						return maxSteering;
+					}
+				}
+			} else if (fromLeft < sonarRange) {
+				return -maxSteering;
+			} else if (fromTop < sonarRange) {
+				return  maxSteering;
+			}
+		} else if (submarineAngle > 180.0 && submarineAngle < 270.0) {
+			if (fromBottom < sonarRange && fromLeft < sonarRange) {
+				if(distanceOfCircles(submarinePosition, submarineSize, new Position(0, 0), 0) < sonarRange) {
+					if(fromBottom < fromLeft) {
+						return -maxSteering;
+					} else {
+						return maxSteering;
+					}
+				}
+			} else if (fromBottom < sonarRange) {
+				return -maxSteering;
+			} else if (fromLeft < sonarRange) {
+				return  maxSteering;
+			}
+		} else {
+			if (fromRight < sonarRange && fromBottom < sonarRange) {
+				if(distanceOfCircles(submarinePosition, submarineSize, new Position(0, width), 0) < sonarRange) {
+					if(fromRight < fromBottom) {
+						return -maxSteering;
+					} else {
+						return maxSteering;
+					}
+				}
+			} else if (fromRight < sonarRange) {
+				return -maxSteering;
+			} else if (fromBottom < sonarRange) {
+				return  maxSteering;
+			}
+		}
+		
+		return 0.0;
+	}
         
 	public static boolean isSubmarineHeadingToTorpedoExplosion(List<Entity> torpedos, Position submarinePosition, double submarineVelocity, double submarineAngle,
 			double submarineSize, List<Submarine> enemySubmarines, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
@@ -448,7 +546,6 @@ public class MathUtil {
 			if(!islandTorpedoCollisionPositions.isEmpty()) {
 				for (Position islandTorpedoCollisionPosition : islandTorpedoCollisionPositions) {
 					if(distanceOfCircles(islandTorpedoCollisionPosition, 0, torpedoPosition, 0) < distanceOfCircles(aimedTargetCollisionPosition, 0, torpedoPosition, 0)) {
-						System.out.println("utban van a sziget");
 						return false;
 					}
 				}

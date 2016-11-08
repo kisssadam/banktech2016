@@ -55,6 +55,7 @@ public class GameController implements Runnable {
 	private double maxSpeed;
 	private double islandSize;
 	private double torpedoExplosionRadius;
+	private double sonarRange;
 	private List<Position> islandPositions;
 
 	private long actualRound;
@@ -116,6 +117,7 @@ public class GameController implements Runnable {
 		this.torpedoExplosionRadius = gameInfo.getGame().getMapConfiguration().getTorpedoExplosionRadius();
 		this.islandPositions = Arrays.asList(gameInfo.getGame().getMapConfiguration().getIslandPositions());
 		this.submarinesInGame = callHandler.submarinesInGame(gameId);
+		this.sonarRange = gameInfo.getGame().getMapConfiguration().getSonarRange();
 
 		mainPanel = new MainPanel(gameInfo);
 		mainPanel.setLayout(new BorderLayout());
@@ -315,7 +317,8 @@ public class GameController implements Runnable {
 							if (submarineInOurWay != null) {
 								callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), MathUtil.getSteeringHeadingToSubmarine(submarine, submarineInOurWay, maxSteeringPerRound));
 							} else {
-								callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), 0);
+								double steering = MathUtil.getSteeringHeadingToEdge(submarine.getPosition(), submarineSize, width, height, submarine.getAngle(), sonarRange, maxSteeringPerRound);
+								callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), steering);
 							}
 							moved = true;
 						}
