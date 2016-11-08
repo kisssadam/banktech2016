@@ -141,6 +141,7 @@ public class GameController implements Runnable {
 			this.speed = speed;
 			this.angle = angle;
 		}
+
 	}
 
 	private void playGame() {
@@ -157,6 +158,29 @@ public class GameController implements Runnable {
 				Set<Entity> torpedosSet = new HashSet<>();
 
 				for (Submarine submarine : submarinesInGame.getSubmarines()) {
+					
+					/**
+					 * Na ez az a pont, ami kicsit nehezebb lesz az extendedSonar-ral kapcsolatban.
+					 * Most ide írom le a gondolataimat, mert már kibaszott fáradt vagyok. Délután, mire együtt belevágunk,
+					 * már remélhetőleg itt a működő kód fog állni.
+					 * 
+					 * - Kész van a matematikai művelet arra, hogy kiszámítsuk a megnövelt szonárok átfedését.
+					 * - Minden hajó esetén meg kell nézni, hogy van-e a közelében egy másik olyan hajó, aminek
+					 * éppen aktív a kiterjesztett szonárja.
+					 * - Ha igen, ki kell számítani az ő működő és a mi képzeletbeli kiterjesztett szonárjaink átfedését.
+					 * - Ha nincs olyan hajó, amivel ez az (átfedés / kiterjesztett szonár területe) arány meghaladja
+					 * a MathUtils-ben definiált küszöbértéket, akkor aktiváljuk az aktuális hajóét, különben nem
+					 * (KIVÉTEL: az összes szignifikáns átfedéssel rendelkező hajó kiterjesztett szonárja 1, esetleg néhány
+					 * körön belül lejár).
+					 * - Probléma: tárolni kell, hogy mely hajók esetén hívtuk már meg az extendedSonar()-t, és azokat a
+					 * kimaradt hajók vizsgálatakor már belekalkulálni az aktív szonárral rendelkező hajókba.
+					 * Újabb for ciklus kerül be az alábbi if-be. Lehetséges ezt esetleg távolság alapján szűrni?
+					 * Mindenképpen gyorsítsuk a működését az előbb említett tárolással.
+					 * 
+					 * Ha lehetséges az, hogy olyan hajópárokat ellenőrzünk, amik már szerepeltek, akkor ezt el kellene
+					 * kerülni.
+					 */
+					
 					if (submarine.getSonarCooldown() == 0) {
 						callHandler.extendSonar(gameId, submarine.getId());
 					}
