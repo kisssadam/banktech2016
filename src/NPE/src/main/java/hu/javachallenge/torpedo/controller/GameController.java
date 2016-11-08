@@ -64,6 +64,9 @@ public class GameController implements Runnable {
 	private List<Entity> torpedos;
 
 	private SubmarinesResponse submarinesInGame;
+	
+	private double sonarRange;
+	private double extendedSonarRange;
 
 	public GameController(CallHandler callHandler, String teamName) {
 		this.callHandler = callHandler;
@@ -116,6 +119,8 @@ public class GameController implements Runnable {
 		this.torpedoExplosionRadius = gameInfo.getGame().getMapConfiguration().getTorpedoExplosionRadius();
 		this.islandPositions = Arrays.asList(gameInfo.getGame().getMapConfiguration().getIslandPositions());
 		this.submarinesInGame = callHandler.submarinesInGame(gameId);
+		this.sonarRange = gameInfo.getGame().getMapConfiguration().getSonarRange();
+		this.extendedSonarRange = gameInfo.getGame().getMapConfiguration().getExtendedSonarRange();
 
 		mainPanel = new MainPanel(gameInfo);
 		mainPanel.setLayout(new BorderLayout());
@@ -158,33 +163,33 @@ public class GameController implements Runnable {
 				Set<Submarine> enemySubmarinesSet = new HashSet<>();
 				Set<Entity> torpedosSet = new HashSet<>();
 
+				List<Long> shipsWithActivatedSonar = new ArrayList<>();
+				
 				for (Submarine submarine : submarinesInGame.getSubmarines()) {
-					
-					/**
-					 * Na ez az a pont, ami kicsit nehezebb lesz az extendedSonar-ral kapcsolatban.
-					 * Most ide írom le a gondolataimat, mert már kibaszott fáradt vagyok. Délután, mire együtt belevágunk,
-					 * már remélhetőleg itt a működő kód fog állni.
-					 * 
-					 * - Kész van a matematikai művelet arra, hogy kiszámítsuk a megnövelt szonárok átfedését.
-					 * - Minden hajó esetén meg kell nézni, hogy van-e a közelében egy másik olyan hajó, aminek
-					 * éppen aktív a kiterjesztett szonárja.
-					 * - Ha igen, ki kell számítani az ő működő és a mi képzeletbeli kiterjesztett szonárjaink átfedését.
-					 * - Ha nincs olyan hajó, amivel ez az (átfedés / kiterjesztett szonár területe) arány meghaladja
-					 * a MathUtils-ben definiált küszöbértéket, akkor aktiváljuk az aktuális hajóét, különben nem
-					 * (KIVÉTEL: az összes szignifikáns átfedéssel rendelkező hajó kiterjesztett szonárja 1, esetleg néhány
-					 * körön belül lejár).
-					 * - Probléma: tárolni kell, hogy mely hajók esetén hívtuk már meg az extendedSonar()-t, és azokat a
-					 * kimaradt hajók vizsgálatakor már belekalkulálni az aktív szonárral rendelkező hajókba.
-					 * Újabb for ciklus kerül be az alábbi if-be. Lehetséges ezt esetleg távolság alapján szűrni?
-					 * Mindenképpen gyorsítsuk a működését az előbb említett tárolással.
-					 * 
-					 * Ha lehetséges az, hogy olyan hajópárokat ellenőrzünk, amik már szerepeltek, akkor ezt el kellene
-					 * kerülni.
-					 */
-					
 					if (submarine.getSonarCooldown() == 0) {
-						callHandler.extendSonar(gameId, submarine.getId());
+						boolean useExtendedSonar = true;
+						for (Submarine s : submarinesInGame.getSubmarines()) {
+							if (s.equals(submarine)) {
+								continue;
+							}
+							if (s.getSonarExtended() > 0 || shipsWithActivatedSonar.contains(s.getId())) {
+								// TODO(ZsocaCoder): ez nem tul pontos igy. Improve-oljuk majd. 
+								double commonCoveredAreaByExtSonar =
+									MathUtil.intersectionOfCirclesWithSameRadius(submarine.getPosition(), s.getPosition(), extendedSonarRange);
+								double coverRate = commonCoveredAreaByExtSonar / (Math.pow(extendedSonarRange, 2.0) * Math.PI);
+								if (coverRate > MathConstants.EXT_SONAR_INTERSEPT_THRESHOLD) {
+									useExtendedSonar = false;
+									break;
+								}
+							}
+						}
+						
+						if (useExtendedSonar) {
+							callHandler.extendSonar(gameId, submarine.getId());
+							shipsWithActivatedSonar.add(submarine.getId());
+						}
 					}
+					
 					SonarResponse sonar = callHandler.sonar(gameId, submarine.getId());
 					
 					for (Entity entity : sonar.getEntities()) {

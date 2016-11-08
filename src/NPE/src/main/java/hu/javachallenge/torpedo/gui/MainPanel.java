@@ -22,7 +22,8 @@ public class MainPanel extends JPanel {
 
 	private static final Color GROUND_COLOR = new Color(255, 255, 153);
 	private static final Color TERRAIN_COLOR = new Color(0, 153, 0);
-	private static final Color SONAR_COLOR = new Color(204, 229, 255);
+	private static final Color SONAR_COLOR = new Color(205, 210, 255);
+	private static final Color EXTENDED_SONAR_COLOR = new Color(204, 229, 255);
 	private static final Color CORNER_COLOR = Color.BLACK;
 	private static final Color SUBMARINE_COLOR = Color.BLUE;
 	private static final Color ENEMY_SUBMARINE_COLOR = Color.RED;
@@ -122,10 +123,10 @@ public class MainPanel extends JPanel {
 		double mapWidth = gameInfo.getGame().getMapConfiguration().getWidth();
 		double mapHeight = gameInfo.getGame().getMapConfiguration().getHeight();
 
-		paintCircle(g, CORNER_COLOR, 0, 0, size, scale);
-		paintCircle(g, CORNER_COLOR, mapWidth * scale, getHeight() - mapHeight * scale, size, scale);
-		paintCircle(g, CORNER_COLOR, mapWidth * scale, mapHeight * scale, size, scale);
-		paintCircle(g, CORNER_COLOR, 0, mapHeight * scale, size, scale);
+		paintCircle(g, CORNER_COLOR, 0, 0, size);
+		paintCircle(g, CORNER_COLOR, mapWidth * scale, getHeight() - mapHeight * scale, size);
+		paintCircle(g, CORNER_COLOR, mapWidth * scale, mapHeight * scale, size);
+		paintCircle(g, CORNER_COLOR, 0, mapHeight * scale, size);
 	}
 
 	private void paintIslands(Graphics g, double scale) {
@@ -134,29 +135,37 @@ public class MainPanel extends JPanel {
 			double y = getHeight() - islandPosition.getY().doubleValue() * scale;
 			double islandSize = gameInfo.getGame().getMapConfiguration().getIslandSize() * scale;
 
-			paintCircle(g, GROUND_COLOR, x, y, islandSize, scale);
-			paintCircle(g, TERRAIN_COLOR, x, y, islandSize * 0.8, scale);
+			paintCircle(g, GROUND_COLOR, x, y, islandSize);
+			paintCircle(g, TERRAIN_COLOR, x, y, islandSize * 0.8);
 		}
 	}
 
 	private void paintSubmarineComponent(Graphics g, double scale) {
+		double sonarRange = gameInfo.getGame().getMapConfiguration().getSonarRange();
+		double extendedSonarRange = gameInfo.getGame().getMapConfiguration().getExtendedSonarRange();
+		double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize() * scale;
+		
 		for (Submarine submarine : submarines) {
 			double x = submarine.getPosition().getX().doubleValue() * scale;
 			double y = getHeight() - submarine.getPosition().getY().doubleValue() * scale;
 
-			boolean hasExtSonar = submarine.getSonarExtended() > 0;
-			double sonarRange = gameInfo.getGame().getMapConfiguration().getSonarRange();
-			double extSonarRange = gameInfo.getGame().getMapConfiguration().getExtendedSonarRange();
-
-			paintCircle(g, SONAR_COLOR, x, y, hasExtSonar ? extSonarRange : sonarRange, scale);
+			if (submarine.getSonarExtended() > 0) {
+				paintCircle(g, EXTENDED_SONAR_COLOR, x, y, extendedSonarRange);
+			}
+		}
+		
+		for (Submarine submarine : submarines) {
+			double x = submarine.getPosition().getX().doubleValue() * scale;
+			double y = getHeight() - submarine.getPosition().getY().doubleValue() * scale;
+			
+			paintCircle(g, SONAR_COLOR, x, y, sonarRange);
 		}
 
 		for (Submarine submarine : submarines) {
 			double x = submarine.getPosition().getX().doubleValue() * scale;
 			double y = getHeight() - submarine.getPosition().getY().doubleValue() * scale;
-			double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize() * scale;
 
-			paintCircle(g, SUBMARINE_COLOR, x, y, submarineSize, scale);
+			paintCircle(g, SUBMARINE_COLOR, x, y, submarineSize);
 			
 			int dirX = (int) (x + MathUtil.xMovement(submarine.getVelocity(), submarine.getAngle()) * scale);
 			int dirY = (int) (y - MathUtil.yMovement(submarine.getVelocity(), submarine.getAngle()) * scale );
@@ -170,9 +179,8 @@ public class MainPanel extends JPanel {
 		for (Submarine submarine : enemySubmarines) {
 			double x = submarine.getPosition().getX().doubleValue() * scale;
 			double y = getHeight() - submarine.getPosition().getY().doubleValue() * scale;
-			double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize() * scale;
 
-			paintCircle(g, ENEMY_SUBMARINE_COLOR, x, y, submarineSize, scale);
+			paintCircle(g, ENEMY_SUBMARINE_COLOR, x, y, submarineSize);
 			g.drawString(String.valueOf(submarine.getId()), (int) (x - submarineSize * 1.5), (int) (y - submarineSize));
 		}
 	}
@@ -182,11 +190,11 @@ public class MainPanel extends JPanel {
 			double x = position.getX().doubleValue() * scale;
 			double y = getHeight() - position.getY().doubleValue() * scale;
 
-			paintCircle(g, TORPEDO_COLOR, x, y, 5, scale);
+			paintCircle(g, TORPEDO_COLOR, x, y, 5);
 		}
 	}
-
-	private void paintCircle(Graphics g, Color color, double x, double y, double size, double scale) {
+  
+	private void paintCircle(Graphics g, Color color, double x, double y, double size) {
 		g.setColor(color);
 		g.fillOval((int) (x - size), (int) (y - size), (int) size * 2, (int) size * 2);
 	}
