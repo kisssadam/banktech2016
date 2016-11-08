@@ -40,6 +40,12 @@ public class MathUtil {
 		return velocity < 0 ? 0 : (velocity > maxSpeed ? maxSpeed : velocity);
 	}
 	
+	private static double angleDistance(double alpha, double beta) {
+        double phi = normalizeAngle(Math.abs(beta - alpha));       // This is either the distance or 360 - distance
+        double distance = phi > 180 ? 360 - phi : phi;
+        return distance;
+    }
+	
 	public static double distanceOfCircles(Position sourcePosition, double sourceR, Position destinationPosition,
 			double destinationR) {
 		BigDecimal xSubtract = sourcePosition.getX().subtract(destinationPosition.getX());
@@ -275,17 +281,35 @@ public class MathUtil {
 		return null;
 	}
 	
-        public static boolean isSubmarineMovingInLineWithOtherSubmarine(Submarine actualSubmarine, Submarine[] allSubmarine, double submarineSize, double maxSpeed) {
-            for (Submarine submarine : allSubmarine) {
-                if(!actualSubmarine.equals(submarine)) {
-                    Position p = movingCircleCollisionDetection(submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, actualSubmarine.getPosition(), maxSpeed + 10, actualSubmarine.getAngle(), submarineSize);
-                    if(p != null) {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
+	public static Submarine getNearestSubmarineInOurWay(Submarine actualSubmarine, List<Submarine> allSubmarine, double submarineSize, double maxSpeed) {
+		Submarine nearestSubmarine = null;
+		for (Submarine submarine : allSubmarine) {
+			if(!actualSubmarine.equals(submarine)) {
+				Position p = movingCircleCollisionDetection(submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, actualSubmarine.getPosition(), maxSpeed + 10, actualSubmarine.getAngle(), submarineSize);
+				if(p != null) {
+					if(nearestSubmarine == null) {
+						nearestSubmarine = submarine;
+					} else {
+						if(distanceOfCircles(actualSubmarine.getPosition(), submarineSize, submarine.getPosition(), submarineSize) < distanceOfCircles(actualSubmarine.getPosition(), submarineSize, nearestSubmarine.getPosition(), submarineSize)) {
+							nearestSubmarine = submarine;
+						}
+					}
+				}
+			}
+		}
+		return nearestSubmarine;
+	}
+		
+	public static double getSteeringHeadingToSubmarine(Submarine actualSubmarine, Submarine otherSubmarine, double maxSteering) {
+		double plusAngle = normalizeAngle(actualSubmarine.getAngle() + maxSteering);
+		double minusAngle = normalizeAngle(actualSubmarine.getAngle() - maxSteering);
+		if(angleDistance(plusAngle, otherSubmarine.getAngle()) > angleDistance(minusAngle, otherSubmarine.getAngle())) {
+			return maxSteering;
+		} else {
+			return -maxSteering;
+		}
+	}
+		
         
 	public static boolean isSubmarineHeadingToTorpedoExplosion(List<Entity> torpedos, Position submarinePosition, double submarineVelocity, double submarineAngle,
 			double submarineSize, List<Submarine> enemySubmarines, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
@@ -424,6 +448,7 @@ public class MathUtil {
 			if(!islandTorpedoCollisionPositions.isEmpty()) {
 				for (Position islandTorpedoCollisionPosition : islandTorpedoCollisionPositions) {
 					if(distanceOfCircles(islandTorpedoCollisionPosition, 0, torpedoPosition, 0) < distanceOfCircles(aimedTargetCollisionPosition, 0, torpedoPosition, 0)) {
+						System.out.println("utban van a sziget");
 						return false;
 					}
 				}

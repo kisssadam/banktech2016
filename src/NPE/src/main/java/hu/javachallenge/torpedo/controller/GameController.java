@@ -32,6 +32,7 @@ import hu.javachallenge.torpedo.util.DangerType;
 import hu.javachallenge.torpedo.util.MathConstants;
 import hu.javachallenge.torpedo.util.MathUtil;
 import static hu.javachallenge.torpedo.util.MathUtil.shouldWeShoot;
+import java.util.LinkedList;
 
 public class GameController implements Runnable {
 
@@ -185,7 +186,7 @@ public class GameController implements Runnable {
 						callHandler.extendSonar(gameId, submarine.getId());
 					}
 					SonarResponse sonar = callHandler.sonar(gameId, submarine.getId());
-
+					
 					for (Entity entity : sonar.getEntities()) {
 						switch (entity.getType()) {
 						case "Submarine":
@@ -198,11 +199,11 @@ public class GameController implements Runnable {
 							break;
 						}
 					}
-				}
+					}
 				
 				enemySubmarines.addAll(enemySubmarinesSet);
 				torpedos.addAll(torpedosSet);
-
+				
 				for (Submarine submarine : submarinesInGame.getSubmarines()) {
 					mainPanel.updateSubmarine(submarine);
 				}
@@ -302,8 +303,17 @@ public class GameController implements Runnable {
 							moved = true;
 						} else {
 							double newNormalizedVelocity = normalizeVelocity(submarine.getVelocity() + maxAccelerationPerRound, maxSpeed);
-							if (MathUtil.isSubmarineMovingInLineWithOtherSubmarine(submarine, submarinesInGame.getSubmarines(), submarineSize, maxSpeed)) {
-								callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), maxSteeringPerRound);
+							if(!enemySubmarines.isEmpty()) {
+								if(submarine.getVelocity() > maxSpeed * 0.5) {
+									newNormalizedVelocity = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed);
+								}
+							}
+							List<Submarine> everySubmarines = new LinkedList<>();
+							everySubmarines.addAll(enemySubmarines);
+							everySubmarines.addAll(Arrays.asList(submarinesInGame.getSubmarines()));
+							Submarine submarineInOurWay = MathUtil.getNearestSubmarineInOurWay(submarine, everySubmarines, submarineSize, maxSpeed);
+							if (submarineInOurWay != null) {
+								callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), MathUtil.getSteeringHeadingToSubmarine(submarine, submarineInOurWay, maxSteeringPerRound));
 							} else {
 								callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), 0);
 							}
