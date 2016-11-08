@@ -1,7 +1,6 @@
 package hu.javachallenge.torpedo.controller;
 
 import static hu.javachallenge.torpedo.util.MathUtil.aimAtMovingTarget;
-import static hu.javachallenge.torpedo.util.MathUtil.isDangerousToShoot;
 import static hu.javachallenge.torpedo.util.MathUtil.normalizeAngle;
 import static hu.javachallenge.torpedo.util.MathUtil.normalizeVelocity;
 
@@ -34,6 +33,7 @@ import hu.javachallenge.torpedo.response.SubmarinesResponse;
 import hu.javachallenge.torpedo.util.DangerType;
 import hu.javachallenge.torpedo.util.MathConstants;
 import hu.javachallenge.torpedo.util.MathUtil;
+import static hu.javachallenge.torpedo.util.MathUtil.shouldWeShoot;
 
 public class GameController implements Runnable {
 
@@ -200,7 +200,7 @@ public class GameController implements Runnable {
 				for (Submarine submarine : submarinesInGame.getSubmarines()) {
 					for (Submarine enemySubmarine : enemySubmarines) {
 						double theta = aimAtMovingTarget(submarine.getPosition(), enemySubmarine.getPosition(), enemySubmarine.getAngle(), enemySubmarine.getVelocity(), torpedoSpeed);
-						if (!isDangerousToShoot(submarine.getPosition(), Arrays.asList(submarinesInGame.getSubmarines()), submarineSize, enemySubmarine.getPosition(), enemySubmarine.getVelocity(), enemySubmarine.getAngle(), torpedoSpeed, theta, torpedoExplosionRadius, islandPositions, islandSize)) {
+						if (shouldWeShoot(submarine.getPosition(), Arrays.asList(submarinesInGame.getSubmarines()), submarineSize, enemySubmarine, torpedoRange, torpedoSpeed, theta, torpedoExplosionRadius, islandPositions, islandSize)) {
 							if (submarine.getTorpedoCooldown() == 0.0) {
 								callHandler.shoot(gameId, submarine.getId(), normalizeAngle(theta));
 								break;
