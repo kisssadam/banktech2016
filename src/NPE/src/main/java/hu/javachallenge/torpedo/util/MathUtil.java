@@ -681,7 +681,56 @@ public class MathUtil {
 	 * Megmondja, hogy a paraméterül kapott két körnek mekkora területi átfedése van.
 	 */
 	public static double intersectionOfCircles(Position pa, Position pb, double ra, double rb) {
-		// TODO(ZsocaCoder): implementaljuk.
-		return 0.0;
+		double d = distanceOfCircles(pa, 0.0, pb, 0.0);
+		double R = ra > rb ? ra : rb;
+		double r = ra < rb ? ra : rb;
+		if (d >= (R + r)) {
+			return 0.0;
+		}
+		double a = (1.0 / d) * Math.sqrt(4 * d * d * R * R - Math.pow(d * d - r * r + R * R, 2.0));
+		
+		double alpha = Math.toDegrees(Math.asin(a / (2.0 * R)) * 2.0);
+		double beta = Math.toDegrees(Math.asin(a / (2.0 * r)) * 2.0);
+		
+		double TC = (alpha / 360.0) * R * R * Math.PI;
+		double tC = (beta / 360.0) * r * r * Math.PI;
+		
+		double x = Math.sqrt(R * R - Math.pow(a / 2.0, 2.0));
+		double y = d - x;
+		
+		double TH = x * a;
+		double tH = y * a;
+		
+		double TL = TC - TH;
+		double tL = tC - tH;
+		
+		return TL + tL;
+	}
+	
+	/**
+	 * Megmondja, hogy ha adott két körgyűrű, akkor mekkora az általuk közösen fedett terület.
+	 */
+	public static double intersectionOfRings(Position pa, Position pb, double ra, double rb) {
+		double d = distanceOfCircles(pa, 0.0, pb, 0.0);
+		double R = ra > rb ? ra : rb;
+		double r = ra < rb ? ra : rb;
+		
+		// A gyűrűk nem fedik egymást:
+		if (d >= 2 * R) {
+			return 0.0;
+		}
+		
+		if (d >= R + r) {
+			return intersectionOfCirclesWithSameRadius(pa, pb, R);
+		} else if (d >= 2 * r) {
+			double intOfDiffCircles = intersectionOfCircles(pa, pb, R, r);
+			return intersectionOfCirclesWithSameRadius(pa, pb, R) - 2 * intOfDiffCircles; 
+		} else if (d >= r) {
+			double intOfLittles = intersectionOfCirclesWithSameRadius(pa, pb, r);
+			double intOfDiffCircles = intersectionOfCircles(pa, pb, R, r);
+			return intersectionOfCirclesWithSameRadius(pa, pb, R) - 2 * intOfDiffCircles - intOfLittles;
+		} else {
+			return 2 * r * r * Math.PI - intersectionOfCirclesWithSameRadius(pa, pb, r);
+		}
 	}
 }
