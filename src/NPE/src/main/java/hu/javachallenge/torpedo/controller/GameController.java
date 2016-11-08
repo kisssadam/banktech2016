@@ -65,12 +65,14 @@ public class GameController implements Runnable {
 	private List<Entity> torpedos;
 
 	private SubmarinesResponse submarinesInGame;
+	private Set<Submarine> submarinesToSlow;
 
 	public GameController(CallHandler callHandler, String teamName) {
 		this.callHandler = callHandler;
 		this.teamName = teamName;
 		this.enemySubmarines = new ArrayList<>();
 		this.torpedos = new ArrayList<>();
+		this.submarinesToSlow = new HashSet<>();
 	}
 
 	@Override
@@ -154,6 +156,7 @@ public class GameController implements Runnable {
 				previousRound = actualRound;
 				enemySubmarines.clear();
 				torpedos.clear();
+				submarinesToSlow.clear();
 
 				submarinesInGame = callHandler.submarinesInGame(gameId);
 
@@ -194,6 +197,7 @@ public class GameController implements Runnable {
 						case "Submarine":
 							if (!entity.getOwner().getName().equals(teamName)) {
 								enemySubmarinesSet.add(new Submarine("Submarine", entity.getId(), entity.getPosition(), entity.getOwner(), entity.getVelocity(), entity.getAngle(), 0, 0, 0, 0));
+								submarinesToSlow.add(submarine);
 							}
 							break;
 						case "Torpedo":
@@ -201,7 +205,7 @@ public class GameController implements Runnable {
 							break;
 						}
 					}
-					}
+				}
 				
 				enemySubmarines.addAll(enemySubmarinesSet);
 				torpedos.addAll(torpedosSet);
@@ -305,7 +309,7 @@ public class GameController implements Runnable {
 							moved = true;
 						} else {
 							double newNormalizedVelocity = normalizeVelocity(submarine.getVelocity() + maxAccelerationPerRound, maxSpeed);
-							if(!enemySubmarines.isEmpty()) {
+							if(submarinesToSlow.contains(submarine)) {
 								if(submarine.getVelocity() > maxSpeed * 0.5) {
 									newNormalizedVelocity = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed);
 								}
