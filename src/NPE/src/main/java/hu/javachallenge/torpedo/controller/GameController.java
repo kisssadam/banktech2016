@@ -202,23 +202,24 @@ public class GameController implements Runnable {
 					}
 					
 					SonarResponse sonar = callHandler.sonar(gameId, submarine.getId());
-					
-					for (Entity entity : sonar.getEntities()) {
-						switch (entity.getType()) {
-						case "Submarine":
-							if (!entity.getOwner().getName().equals(teamName)) {
-								Submarine enemySubmarine = new Submarine("Submarine", entity.getId(), entity.getPosition(), entity.getOwner(), entity.getVelocity(), entity.getAngle(), 0, 0, 0, 0);
-								if(gameInfo.getGame().getRound() < 2) {
-									enemySubmarine.setVelocity(enemySubmarine.getVelocity() +  maxSpeed);
+					if (sonar != null) {
+						for (Entity entity : sonar.getEntities()) {
+							switch (entity.getType()) {
+							case "Submarine":
+								if (!entity.getOwner().getName().equals(teamName)) {
+									Submarine enemySubmarine = new Submarine("Submarine", entity.getId(), entity.getPosition(), entity.getOwner(), entity.getVelocity(), entity.getAngle(), 0, 0, 0, 0);
+									if(gameInfo.getGame().getRound() < 2) {
+										enemySubmarine.setVelocity(enemySubmarine.getVelocity() +  maxSpeed);
+									}
+									System.out.println(enemySubmarine);
+									enemySubmarinesSet.add(enemySubmarine);
+									submarinesToSlow.add(submarine);
 								}
-								System.out.println(enemySubmarine);
-								enemySubmarinesSet.add(enemySubmarine);
-								submarinesToSlow.add(submarine);
+								break;
+							case "Torpedo":
+								torpedosSet.add(entity);
+								break;
 							}
-							break;
-						case "Torpedo":
-							torpedosSet.add(entity);
-							break;
 						}
 					}
 				}
