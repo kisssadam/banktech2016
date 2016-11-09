@@ -18,6 +18,7 @@ import hu.javachallenge.torpedo.model.Entity;
 import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.model.Submarine;
 import hu.javachallenge.torpedo.response.GameInfoResponse;
+import java.util.Arrays;
 import java.util.LinkedList;
 
 public class MathUtil {
@@ -127,7 +128,7 @@ public class MathUtil {
 	}
 
 	// https://www.kirupa.com/forum/showthread.php?347334-Aiming-and-hitting-a-moving-target
-	public static double aimAtMovingTarget(Position sourcePosition, Position targetPosition, double targetMovementAngle,
+	public static Double aimAtMovingTarget(Position sourcePosition, Position targetPosition, double targetMovementAngle,
 			double targetVelocity, double bulletVelocity) {
 		double dX = targetPosition.getX().subtract(sourcePosition.getX()).doubleValue();
 		double dY = targetPosition.getY().subtract(sourcePosition.getY()).doubleValue();
@@ -138,12 +139,16 @@ public class MathUtil {
 		double a = Math.pow(xMovementResult, 2) + Math.pow(yMovementResult, 2) - Math.pow(bulletVelocity, 2);
 		double b = 2 * (xMovementResult * dX + yMovementResult * dY);
 		double c = Math.pow(dX, 2) + Math.pow(dY, 2);
-
+		
+		if(Math.abs(a) < MathConstants.EPSILON) {
+			return null;
+		}
+		
 		// Check we're not breaking into complex numbers
 		double q = Math.pow(b, 2) - 4 * a * c;
-		if (q < 0.0) {
+		if (q < MathConstants.EPSILON) {
 			log.error("Math.pow({}) cannot be interpreted on negative numbers.", q);
-			return 0.0;
+			return null;
 		}
 
 		// The time that we will hit the target
@@ -188,6 +193,27 @@ public class MathUtil {
 		}
 
 		return possibleSubmarineTargets;
+	}
+	
+	public static Position getNearestIsland(GameInfoResponse gameInfoResponse, Position sourcePosition) {
+		List<Island> islands = new ArrayList<>();
+		Position[] islandPositions = gameInfoResponse.getGame().getMapConfiguration().getIslandPositions();
+		double islandSize = gameInfoResponse.getGame().getMapConfiguration().getIslandSize();
+		double submarineSize = gameInfoResponse.getGame().getMapConfiguration().getSubmarineSize();
+		double sonarRange = gameInfoResponse.getGame().getMapConfiguration().getSonarRange();
+
+		for (Position islandPosition : islandPositions) {
+			double distance = distanceOfCircles(sourcePosition, sonarRange, islandPosition, islandSize);
+			if(distance < 0) {
+				islands.add(new Island(islandPosition, distance));
+			}
+		}
+		Collections.sort(islands, (island1, island2) -> island1.distance <= island2.distance ? -1 : 1);
+		if(!islands.isEmpty()) {
+			return islands.get(0).position;
+		} else {
+			return null;
+		}
 	}
 	
 	public static Position getNearestIslandInDirection(List<Position> islandsInDirection) {
@@ -303,7 +329,59 @@ public class MathUtil {
 		}
 		return nearestSubmarine;
 	}
+	
+	public static Submarine getBiggestSonarIntersectionSubmarine(Submarine submarine, Submarine[] submarines, double sonarRange, double extendedSonarRange) {
+		double intersection = 0.0;
+		Submarine biggestSonarIntersectionSubmarine = null;
+		for (Submarine s : submarines) {
+			if(!s.equals(submarine)) {
+				double temp = intersectionOfCircles(s.getPosition(), submarine.getPosition(), s.getSonarExtended() > 0 ? extendedSonarRange : sonarRange, submarine.getSonarExtended() > 0 ? extendedSonarRange : sonarRange);
+				if(temp > intersection) {
+					intersection = temp;
+					biggestSonarIntersectionSubmarine = s;
+				}
+			}
+			
+		}
+		return biggestSonarIntersectionSubmarine;
+	}
+	
+	public static double getSteeringBasedOnSonars(Submarine submarine1, Submarine[] submarines, double sonarRange, double extendedSonarRange, double maxSteering) {
+		Submarine submarine2 = getBiggestSonarIntersectionSubmarine(submarine1, submarines, sonarRange, extendedSonarRange);
 		
+		if(submarine2 == null) {
+			return 0.0;
+		}
+		
+		if(intersectionOfCircles(submarine1.getPosition(), submarine2.getPosition(), submarine1.getSonarExtended() > 0 ? extendedSonarRange : sonarRange, submarine2.getSonarExtended() > 0 ? extendedSonarRange : sonarRange) > 0){
+			double xValue = submarine1.getPosition().getX().doubleValue() + xMovement(10, submarine1.getAngle());
+			double yValue = submarine1.getPosition().getY().doubleValue() + yMovement(10, submarine1.getAngle());
+			Position newPosition = new Position(xValue , yValue);
+				if(isPositionLeftToUs(submarine1.getPosition(), newPosition, submarine2.getPosition())) {
+				return -maxSteering;
+			} else {
+				return maxSteering;
+			}
+		} else {
+			return 0.0;
+		}
+	}
+	
+	public static double getSteeringHeadingToIsland(Submarine submarine, Position islandPosition, double maxSteering, double submarineSize, double islandSize) {
+		Position collisionPosition = movingCircleCollisionDetection(submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, islandPosition, 0, 0, islandSize);
+		if(collisionPosition == null) {
+			return 0.0;
+		}
+		double xValue = submarine.getPosition().getX().doubleValue() + xMovement(10, submarine.getAngle());
+		double yValue = submarine.getPosition().getY().doubleValue() + yMovement(10, submarine.getAngle());
+		Position newPosition = new Position(xValue , yValue);
+		if(isPositionLeftToUs(submarine.getPosition(), newPosition, collisionPosition)) {
+			return -maxSteering;
+		} else {
+			return maxSteering;
+		}
+	}
+	
 	public static double getSteeringHeadingToSubmarine(Submarine actualSubmarine, Submarine otherSubmarine, double maxSteering, double submarineSize) {
 		Position collisionPosition = movingCircleCollisionDetection(actualSubmarine.getPosition(), actualSubmarine.getVelocity(), actualSubmarine.getAngle(), submarineSize, otherSubmarine.getPosition(), otherSubmarine.getVelocity(), otherSubmarine.getAngle(), submarineSize);
 		if(collisionPosition == null) {
@@ -466,7 +544,7 @@ public class MathUtil {
 			return false;
 		}
 		
-		double mennyikoronbelultudmegallni = mennyikoronbelultudmegallni(maxAccelerationPerRound, submarineVelocity);
+		double mennyikoronbelultudmegallni = Math.ceil(mennyikoronbelultudmegallni(maxAccelerationPerRound, submarineVelocity)) + 1;
 		
 		Position newSubmarinePosition = new Position(
 				submarinePosition.getX().doubleValue() + xMovement(submarineVelocity, submarineAngle),
@@ -485,7 +563,7 @@ public class MathUtil {
 	
 	public static boolean isSubmarineLeavingSpace(Position submarinePosition, double submarineSize, double submarineVelocity, double submarineAngle,
 			double width, double height, double maxAccelerationPerRound) {
-		double mennyikoronbelultudmegallni = Math.ceil(mennyikoronbelultudmegallni(maxAccelerationPerRound, submarineVelocity));
+		double mennyikoronbelultudmegallni = Math.ceil(mennyikoronbelultudmegallni(maxAccelerationPerRound, submarineVelocity)) + 1;
 		
 		Position newSubmarinePosition = new Position(
 				submarinePosition.getX().doubleValue() + xMovement(submarineVelocity, submarineAngle),
@@ -590,6 +668,10 @@ public class MathUtil {
 		double b = 2 * (Vab.getX().multiply(Pab.getX()).add(Vab.getY().multiply(Pab.getY()))).doubleValue();
 		double c = Pab.getX().pow(2).add(Pab.getY().pow(2)).doubleValue() - Math.pow(targetSize + sourceSize, 2);
 		
+		if(Math.abs(a) < MathConstants.EPSILON) {
+			return null;
+		}
+		
 		double q = Math.pow(b, 2) - 4 * a * c;
 		if (q < 0.0) {
 			log.warn("collisionPoisition q={}", q);
@@ -597,11 +679,7 @@ public class MathUtil {
 			}
 		
 		double disc = Math.sqrt(q);
-		if (disc < 0) {
-			return null;
-		}
-		
-		if (a == 0) {
+		if (disc < MathConstants.EPSILON) {
 			return null;
 		}
 		
