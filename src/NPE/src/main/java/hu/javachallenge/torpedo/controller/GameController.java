@@ -352,9 +352,15 @@ public class GameController implements Runnable {
 										steering = MathUtil.getSteeringBasedOnSonars(submarine, submarinesInGame.getSubmarines(), sonarRange, extendedSonarRange, maxSteeringPerRound);
 									}
 								} else {
-									if(submarine.getVelocity() > maxSpeed * 0.5) {
+									if(submarine.getVelocity() > maxSpeed * 0.25) {
 										newNormalizedVelocity = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed);
 									}
+								}
+								
+								if(steering == 0.0) {
+									Submarine[] enemies = new Submarine[enemySubmarines.size()];
+									enemies = everySubmarines.toArray(enemies);
+									steering = MathUtil.getSteeringBasedOnEnemyPosition(submarine, enemies, sonarRange, maxSteeringPerRound);
 								}
 								callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), steering);
 							}

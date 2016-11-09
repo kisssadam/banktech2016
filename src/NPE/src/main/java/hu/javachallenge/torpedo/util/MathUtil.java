@@ -346,6 +346,27 @@ public class MathUtil {
 		return biggestSonarIntersectionSubmarine;
 	}
 	
+	public static double getSteeringBasedOnEnemyPosition(Submarine submarine1, Submarine[] enemySubmarines, double sonarRange, double maxSteering) {
+		Submarine submarine2 = getBiggestSonarIntersectionSubmarine(submarine1, enemySubmarines, sonarRange, sonarRange);
+		
+		if(submarine2 == null) {
+			return 0.0;
+		}
+		
+		if(intersectionOfCirclesWithSameRadius(submarine1.getPosition(), submarine2.getPosition(), sonarRange) > 0){
+			double xValue = submarine1.getPosition().getX().doubleValue() + xMovement(10, submarine1.getAngle());
+			double yValue = submarine1.getPosition().getY().doubleValue() + yMovement(10, submarine1.getAngle());
+			Position newPosition = new Position(xValue , yValue);
+				if(isPositionLeftToUs(submarine1.getPosition(), newPosition, submarine2.getPosition())) {
+				return maxSteering;
+			} else {
+				return -maxSteering;
+			}
+		} else {
+			return 0.0;
+		}
+	}
+	
 	public static double getSteeringBasedOnSonars(Submarine submarine1, Submarine[] submarines, double sonarRange, double extendedSonarRange, double maxSteering) {
 		Submarine submarine2 = getBiggestSonarIntersectionSubmarine(submarine1, submarines, sonarRange, extendedSonarRange);
 		
