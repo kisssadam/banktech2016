@@ -174,12 +174,18 @@ public class GameController implements Runnable {
 							if (s.equals(submarine)) {
 								continue;
 							}
-							if (s.getSonarExtended() > 0 || shipsWithActivatedSonar.contains(s.getId())) {
-								// TODO(ZsocaCoder): ez nem tul pontos igy. Improve-oljuk majd. 
-								double commonCoveredAreaByExtSonar =
-									MathUtil.intersectionOfCirclesWithSameRadius(submarine.getPosition(), s.getPosition(), extendedSonarRange);
-								double coverRate = commonCoveredAreaByExtSonar / (Math.pow(extendedSonarRange, 2.0) * Math.PI);
-								if (coverRate > MathConstants.EXT_SONAR_INTERSEPT_THRESHOLD) {
+							if (s.getSonarExtended() > 0 || shipsWithActivatedSonar.contains(s.getId())) { 
+//								double commonCoveredAreaByExtSonar =
+//									MathUtil.intersectionOfCirclesWithSameRadius(submarine.getPosition(), s.getPosition(), extendedSonarRange);
+//								double commonAreaOfRings =
+//									MathUtil.intersectionOfRings(submarine.getPosition(), s.getPosition(), sonarRange, extendedSonarRange);
+//								double coverRate =
+//									commonAreaOfRings / (Math.pow(extendedSonarRange, 2.0) * Math.PI - Math.pow(sonarRange, 2.0) * Math.PI);
+//								if (coverRate > MathConstants.EXT_SONAR_INTERSEPT_THRESHOLD) {
+//									useExtendedSonar = false;
+//									break;
+//								}
+								if (MathUtil.distanceOfCircles(submarine.getPosition(), 0.0, s.getPosition(), 0.0) < sonarRange) {
 									useExtendedSonar = false;
 									break;
 								}

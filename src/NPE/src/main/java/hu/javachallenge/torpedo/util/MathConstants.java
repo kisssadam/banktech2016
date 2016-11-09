@@ -10,6 +10,6 @@ public class MathConstants {
 	 * szonárt. Másképpen: minél nagyobb, annál kevésbé függ egy hajó kiterjesztett szonárjának
 	 * aktiválása a többi hajóétól.
 	 */
-	public static final double EXT_SONAR_INTERSEPT_THRESHOLD = 0.3;
+	public static final double EXT_SONAR_INTERSEPT_THRESHOLD = 0.5;
 	
 }
