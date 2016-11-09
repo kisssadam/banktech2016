@@ -40,6 +40,10 @@ public class MathUtil {
 		return velocity < 0 ? 0 : (velocity > maxSpeed ? maxSpeed : velocity);
 	}
 	
+	public static boolean isPositionLeftToUs(Position s, Position e, Position p){
+		return ((e.getX().doubleValue() - s.getX().doubleValue())*(p.getY().doubleValue() - s.getY().doubleValue()) - (e.getY().doubleValue() - s.getY().doubleValue())*(p.getX().doubleValue() - s.getX().doubleValue())) > 0;
+   }
+	
 	private static double angleDifference(double alpha, double beta) {
         double phi = normalizeAngle(Math.abs(beta - alpha));       // This is either the distance or 360 - distance
         double distance = phi > 180 ? 360 - phi : phi;
@@ -285,7 +289,7 @@ public class MathUtil {
 		Submarine nearestSubmarine = null;
 		for (Submarine submarine : allSubmarine) {
 			if(!actualSubmarine.equals(submarine)) {
-				Position p = movingCircleCollisionDetection(submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, actualSubmarine.getPosition(), maxSpeed + 10, actualSubmarine.getAngle(), submarineSize);
+				Position p = movingCircleCollisionDetection(submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, actualSubmarine.getPosition(), maxSpeed, actualSubmarine.getAngle(), submarineSize);
 				if(p != null) {
 					if(nearestSubmarine == null) {
 						nearestSubmarine = submarine;
@@ -300,13 +304,18 @@ public class MathUtil {
 		return nearestSubmarine;
 	}
 		
-	public static double getSteeringHeadingToSubmarine(Submarine actualSubmarine, Submarine otherSubmarine, double maxSteering) {
-		double plusAngle = normalizeAngle(actualSubmarine.getAngle() + maxSteering);
-		double minusAngle = normalizeAngle(actualSubmarine.getAngle() - maxSteering);
-		if(angleDifference(plusAngle, otherSubmarine.getAngle()) > angleDifference(minusAngle, otherSubmarine.getAngle())) {
-			return maxSteering;
-		} else {
+	public static double getSteeringHeadingToSubmarine(Submarine actualSubmarine, Submarine otherSubmarine, double maxSteering, double submarineSize) {
+		Position collisionPosition = movingCircleCollisionDetection(actualSubmarine.getPosition(), actualSubmarine.getVelocity(), actualSubmarine.getAngle(), submarineSize, otherSubmarine.getPosition(), otherSubmarine.getVelocity(), otherSubmarine.getAngle(), submarineSize);
+		if(collisionPosition == null) {
+			return 0.0;
+		}
+		double xValue = actualSubmarine.getPosition().getX().doubleValue() + xMovement(10, actualSubmarine.getAngle());
+		double yValue = actualSubmarine.getPosition().getY().doubleValue() + yMovement(10, actualSubmarine.getAngle());
+		Position newPosition = new Position(xValue , yValue);
+		if(isPositionLeftToUs(actualSubmarine.getPosition(), newPosition, collisionPosition)) {
 			return -maxSteering;
+		} else {
+			return maxSteering;
 		}
 	}
 	

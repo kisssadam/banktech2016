@@ -280,6 +280,23 @@ public class GameController implements Runnable {
 								moveParameters.add(new MoveParameter(minusVelocity - submarine.getVelocity(), -maxSteeringPerRound));
 							}
 						}
+						
+						if (!moved && dangerTypes.contains(DangerType.LEAVING_SPACE)) {
+							if (submarine.getVelocity() < MathConstants.EPSILON) {
+								callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), MathUtil.getSteeringHeadingToEdge(submarine.getPosition(), submarineSize, width, height, submarine.getAngle(), sonarRange, maxSteeringPerRound));
+							} else {
+								callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), 0);
+							}
+							moved = true;
+						}
+						if(!moved && (dangerTypes.contains(DangerType.HEADING_TO_ISLAND))) {
+							if (submarine.getVelocity() < MathConstants.EPSILON) {
+								callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), maxSteeringPerRound);
+							} else {
+								callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), 0);
+							}
+							moved = true;
+						}
 
 						newSubmarinePosition = new Position(submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(minusVelocity, plusAngle), submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(minusVelocity, plusAngle));
 
@@ -293,14 +310,7 @@ public class GameController implements Runnable {
 							}
 						}
 
-						if (!moved && (dangerTypes.contains(DangerType.HEADING_TO_ISLAND) || dangerTypes.contains(DangerType.LEAVING_SPACE))) {
-							if (submarine.getVelocity() < MathConstants.EPSILON) {
-								callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), maxSteeringPerRound);
-							} else {
-								callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), 0);
-							}
-							moved = true;
-						}
+						
 					}
 
 					if (!moved) {
@@ -321,7 +331,7 @@ public class GameController implements Runnable {
 							everySubmarines.addAll(Arrays.asList(submarinesInGame.getSubmarines()));
 							Submarine submarineInOurWay = MathUtil.getNearestSubmarineInOurWay(submarine, everySubmarines, submarineSize, maxSpeed);
 							if (submarineInOurWay != null) {
-								callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), MathUtil.getSteeringHeadingToSubmarine(submarine, submarineInOurWay, maxSteeringPerRound));
+								callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), MathUtil.getSteeringHeadingToSubmarine(submarine, submarineInOurWay, maxSteeringPerRound, submarineSize));
 							} else {
 								double steering = MathUtil.getSteeringHeadingToEdge(submarine.getPosition(), submarineSize, width, height, submarine.getAngle(), sonarRange, maxSteeringPerRound);
 								callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), steering);
