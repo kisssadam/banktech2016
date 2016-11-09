@@ -116,21 +116,9 @@ public class Submarine {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
+		final int prime = 2593;
 		int result = 1;
-		long temp;
-		temp = Double.doubleToLongBits(angle);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + hp;
 		result = prime * result + (int) (id ^ (id >>> 32));
-		result = prime * result + ((owner == null) ? 0 : owner.hashCode());
-		result = prime * result + ((position == null) ? 0 : position.hashCode());
-		result = prime * result + sonarCooldown;
-		result = prime * result + sonarExtended;
-		result = prime * result + torpedoCooldown;
-		result = prime * result + ((type == null) ? 0 : type.hashCode());
-		temp = Double.doubleToLongBits(velocity);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
 		return result;
 	}
 
@@ -146,46 +134,7 @@ public class Submarine {
 			return false;
 		}
 		Submarine other = (Submarine) obj;
-		if (Double.doubleToLongBits(angle) != Double.doubleToLongBits(other.angle)) {
-			return false;
-		}
-		if (hp != other.hp) {
-			return false;
-		}
 		if (id != other.id) {
-			return false;
-		}
-		if (owner == null) {
-			if (other.owner != null) {
-				return false;
-			}
-		} else if (!owner.equals(other.owner)) {
-			return false;
-		}
-		if (position == null) {
-			if (other.position != null) {
-				return false;
-			}
-		} else if (!position.equals(other.position)) {
-			return false;
-		}
-		if (sonarCooldown != other.sonarCooldown) {
-			return false;
-		}
-		if (sonarExtended != other.sonarExtended) {
-			return false;
-		}
-		if (torpedoCooldown != other.torpedoCooldown) {
-			return false;
-		}
-		if (type == null) {
-			if (other.type != null) {
-				return false;
-			}
-		} else if (!type.equals(other.type)) {
-			return false;
-		}
-		if (Double.doubleToLongBits(velocity) != Double.doubleToLongBits(other.velocity)) {
 			return false;
 		}
 		return true;

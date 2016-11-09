@@ -565,7 +565,7 @@ public class MathUtil {
 			return false;
 		}
 		
-		double mennyikoronbelultudmegallni = Math.ceil(mennyikoronbelultudmegallni(maxAccelerationPerRound, submarineVelocity)) + 1;
+		double mennyikoronbelultudmegallni = Math.ceil(countRoundsToStop(maxAccelerationPerRound, submarineVelocity)) + 1;
 		
 		Position newSubmarinePosition = new Position(
 				submarinePosition.getX().doubleValue() + xMovement(submarineVelocity, submarineAngle),
@@ -584,15 +584,15 @@ public class MathUtil {
 	
 	public static boolean isSubmarineLeavingSpace(Position submarinePosition, double submarineSize, double submarineVelocity, double submarineAngle,
 			double width, double height, double maxAccelerationPerRound) {
-		double mennyikoronbelultudmegallni = Math.ceil(mennyikoronbelultudmegallni(maxAccelerationPerRound, submarineVelocity)) + 1;
+		double roundsToStop = Math.ceil(countRoundsToStop(maxAccelerationPerRound, submarineVelocity)) + 1;
 		
 		Position newSubmarinePosition = new Position(
 				submarinePosition.getX().doubleValue() + xMovement(submarineVelocity, submarineAngle),
 				submarinePosition.getY().doubleValue() + yMovement(submarineVelocity, submarineAngle));
 		
 		Position position = new Position(
-				newSubmarinePosition.getX().doubleValue() + mennyikoronbelultudmegallni * xMovement(submarineVelocity / 2, submarineAngle),
-				newSubmarinePosition.getY().doubleValue() + mennyikoronbelultudmegallni * yMovement(submarineVelocity / 2, submarineAngle));
+				newSubmarinePosition.getX().doubleValue() + roundsToStop * xMovement(submarineVelocity / 2, submarineAngle),
+				newSubmarinePosition.getY().doubleValue() + roundsToStop * yMovement(submarineVelocity / 2, submarineAngle));
 		
 		return minDistanceFromEdgeInWay(position, submarineSize, width, height, submarineAngle) < 2 * submarineSize;
 	}
@@ -622,7 +622,7 @@ public class MathUtil {
 		}
 	}
 	
-	public static double mennyikoronbelultudmegallni(double maxAccelerationPerRound, double velocity) {
+	public static double countRoundsToStop(double maxAccelerationPerRound, double velocity) {
 		return velocity / maxAccelerationPerRound;
 	}
 	
@@ -752,19 +752,24 @@ public class MathUtil {
 			List<Entity> torpedos, List<Submarine> enemySubmarines, double torpedoExplosionRadius) {
 		Set<DangerType> dangerTypes = new HashSet<>();
 		
-		List<Position> islandsInDirection = islandsInDirection(gameInfo, submarinePosition, submarineAngle);
-		Position nearestIslandInDirection = getNearestIslandInDirection(islandsInDirection);
-		
-		if (isSubmarineHeadingToIsland(nearestIslandInDirection, islandSize, submarinePosition, submarineSize, submarineVelocity, submarineAngle, maxAccelerationPerRound)) {
-			dangerTypes.add(DangerType.HEADING_TO_ISLAND);
-		}
-		
-		if (isSubmarineLeavingSpace(submarinePosition, submarineSize, submarineVelocity, submarineAngle, width, height, maxAccelerationPerRound)) {
-			dangerTypes.add(DangerType.LEAVING_SPACE);
-		}
-		
-		if (isSubmarineHeadingToTorpedoExplosion(torpedos, submarinePosition, submarineVelocity, submarineAngle, submarineSize, enemySubmarines, torpedoExplosionRadius, islandPositions, islandSize)) {
-			dangerTypes.add(DangerType.HEADING_TO_TORPEDO_EXPLOSION);
+		try {
+			List<Position> islandsInDirection = islandsInDirection(gameInfo, submarinePosition, submarineAngle);
+			Position nearestIslandInDirection = getNearestIslandInDirection(islandsInDirection);
+			
+			if (isSubmarineHeadingToIsland(nearestIslandInDirection, islandSize, submarinePosition, submarineSize, submarineVelocity, submarineAngle, maxAccelerationPerRound)) {
+				dangerTypes.add(DangerType.HEADING_TO_ISLAND);
+			}
+			
+			if (isSubmarineLeavingSpace(submarinePosition, submarineSize, submarineVelocity, submarineAngle, width, height, maxAccelerationPerRound)) {
+				dangerTypes.add(DangerType.LEAVING_SPACE);
+			}
+			
+			if (isSubmarineHeadingToTorpedoExplosion(torpedos, submarinePosition, submarineVelocity, submarineAngle, submarineSize, enemySubmarines, torpedoExplosionRadius, islandPositions, islandSize)) {
+				dangerTypes.add(DangerType.HEADING_TO_TORPEDO_EXPLOSION);
+			}
+		} catch (Exception e) {
+			log.error(e.toString());
+			e.printStackTrace();
 		}
 
 		return dangerTypes;

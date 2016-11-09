@@ -87,15 +87,9 @@ public class Game {
 
 	@Override
 	public int hashCode() {
-		final int prime = 11321;
+		final int prime = 2593;
 		int result = 1;
-		result = prime * result + ((connectionStatus == null) ? 0 : connectionStatus.hashCode());
-		result = prime * result + ((createdTime == null) ? 0 : createdTime.hashCode());
 		result = prime * result + (int) (id ^ (id >>> 32));
-		result = prime * result + ((mapConfiguration == null) ? 0 : mapConfiguration.hashCode());
-		result = prime * result + (int) (round ^ (round >>> 32));
-		result = prime * result + ((scores == null) ? 0 : scores.hashCode());
-		result = prime * result + ((status == null) ? 0 : status.hashCode());
 		return result;
 	}
 
@@ -111,41 +105,7 @@ public class Game {
 			return false;
 		}
 		Game other = (Game) obj;
-		if (connectionStatus == null) {
-			if (other.connectionStatus != null) {
-				return false;
-			}
-		} else if (!connectionStatus.equals(other.connectionStatus)) {
-			return false;
-		}
-		if (createdTime == null) {
-			if (other.createdTime != null) {
-				return false;
-			}
-		} else if (!createdTime.equals(other.createdTime)) {
-			return false;
-		}
 		if (id != other.id) {
-			return false;
-		}
-		if (mapConfiguration == null) {
-			if (other.mapConfiguration != null) {
-				return false;
-			}
-		} else if (!mapConfiguration.equals(other.mapConfiguration)) {
-			return false;
-		}
-		if (round != other.round) {
-			return false;
-		}
-		if (scores == null) {
-			if (other.scores != null) {
-				return false;
-			}
-		} else if (!scores.equals(other.scores)) {
-			return false;
-		}
-		if (status != other.status) {
 			return false;
 		}
 		return true;
