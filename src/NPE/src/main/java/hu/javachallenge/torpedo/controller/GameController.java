@@ -5,8 +5,6 @@ import static hu.javachallenge.torpedo.util.MathUtil.normalizeAngle;
 import static hu.javachallenge.torpedo.util.MathUtil.normalizeVelocity;
 import static hu.javachallenge.torpedo.util.MathUtil.shouldWeShoot;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -15,12 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.swing.JFrame;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import hu.javachallenge.torpedo.gui.MainPanel;
 import hu.javachallenge.torpedo.model.Entity;
 import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.model.Status;
@@ -39,7 +34,6 @@ public class GameController implements Runnable {
 
 	private CallHandler callHandler;
 	private String teamName;
-	private MainPanel mainPanel;
 
 	private GameInfoResponse gameInfo;
 	private long gameId;
@@ -127,21 +121,6 @@ public class GameController implements Runnable {
 		this.submarinesInGame = callHandler.submarinesInGame(gameId);
 		this.sonarRange = gameInfo.getGame().getMapConfiguration().getSonarRange();
 		this.extendedSonarRange = gameInfo.getGame().getMapConfiguration().getExtendedSonarRange();
-
-		mainPanel = new MainPanel(gameInfo);
-		mainPanel.setLayout(new BorderLayout());
-		mainPanel.setPreferredSize(new Dimension(1275, 600));
-		mainPanel.addSubmarines(Arrays.asList(submarinesInGame.getSubmarines()));
-
-		JFrame mainFrame = new JFrame("NPE - BankTech Java Challenge 2016");
-		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		mainFrame.add(mainPanel);
-		mainFrame.setResizable(false);
-		mainFrame.setVisible(true);
-		mainFrame.pack();
-
-		mainPanel.repaint();
-		mainPanel.revalidate();
 	}
 
 	private static class MoveParameter {
@@ -218,15 +197,6 @@ public class GameController implements Runnable {
 					
 					enemySubmarines.addAll(enemySubmarineSet);
 					torpedos.addAll(torpedoSet);
-					
-					for (Submarine submarine : submarinesInGame.getSubmarines()) {
-						mainPanel.updateSubmarine(submarine);
-					}
-					mainPanel.addEnemySubmarines(enemySubmarines);
-					mainPanel.addTorpedos(torpedos);
-					
-					mainPanel.repaint();
-					mainPanel.revalidate();
 	
 					log.trace("Detected enemy submarines: {}", enemySubmarines);
 					log.trace("Detected torpedos: {}", torpedos);
