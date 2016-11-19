@@ -6,7 +6,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
 
 import javax.swing.JPanel;
 
@@ -94,19 +93,16 @@ public class MainPanel extends JPanel {
 		}
 	}
 
-	public void updateSubmarine(Submarine submarine) {
-		try {
-			for (ListIterator<Submarine> iterator = submarines.listIterator(); iterator.hasNext();) {
-				Submarine s = iterator.next();
-				if (s.getId() == submarine.getId()) {
-					iterator.set(submarine);
-					return;
-				}
-			}
-		} catch (Exception e) {
+	public void updateSubmarines(Submarine[] submarines) {
+		this.submarines.clear();
+		if (submarines == null) {
+			return;
+		}
+		for (Submarine submarine : submarines) {
+			this.submarines.add(submarine);
 		}
 	}
-
+	
 	@Override
 	protected void paintComponent(Graphics g) {
 		super.paintComponent(g);
@@ -174,6 +170,15 @@ public class MainPanel extends JPanel {
 			Graphics2D g2 = (Graphics2D) g;
 			g2.setStroke(new BasicStroke(3.0f));
 			g2.drawLine((int) x, (int) y, dirX, dirY);
+		}
+		
+		for (Submarine submarine : submarines) {
+			double x = submarine.getPosition().getX().doubleValue() * scale;
+			double y = getHeight() - submarine.getPosition().getY().doubleValue() * scale;
+			String title = String.valueOf(submarine.getHp());
+			
+			g.setColor(Color.GREEN);
+			g.drawString(title, (int) x, (int) y);
 		}
 
 		for (Submarine submarine : enemySubmarines) {

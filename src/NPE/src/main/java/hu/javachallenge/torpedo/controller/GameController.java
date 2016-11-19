@@ -215,9 +215,8 @@ public class GameController implements Runnable {
 					enemySubmarines.addAll(enemySubmarineSet);
 					torpedos.addAll(torpedoSet);
 					
-					for (Submarine submarine : submarinesInGame.getSubmarines()) {
-						mainPanel.updateSubmarine(submarine);
-					}
+					mainPanel.updateSubmarines(submarinesInGame.getSubmarines());
+					
 					mainPanel.addEnemySubmarines(enemySubmarines);
 					mainPanel.addTorpedos(torpedos);
 					
