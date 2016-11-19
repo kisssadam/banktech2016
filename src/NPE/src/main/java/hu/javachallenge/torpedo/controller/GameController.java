@@ -202,6 +202,59 @@ public class GameController implements Runnable {
 		}
 	}
 
+	private void extendSonarIfNeccessary(Submarine submarine) {
+		if (submarine.getSonarCooldown() == 0) {
+			boolean useExtendedSonar = true;
+			
+			for (Submarine s : submarinesInGame.getSubmarines()) {
+				if (!s.equals(submarine)) {
+					if (s.getSonarExtended() > 0 || shipsWithActivatedSonar.contains(s.getId())) { 
+						if (MathUtil.distanceOfCircles(submarine.getPosition(), 0.0, s.getPosition(), 0.0) < sonarRange) {
+							useExtendedSonar = false;
+							break;
+						}
+					}
+				}
+			}
+			
+			if (useExtendedSonar) {
+				callHandler.extendSonar(gameId, submarine.getId());
+				shipsWithActivatedSonar.add(submarine.getId());
+			}
+		}
+	}
+	
+	private void processSonarResponse(Submarine submarine, SonarResponse sonar) {
+		if (sonar == null) {
+			return;
+		}
+		for (Entity entity : sonar.getEntities()) {
+			switch (entity.getType()) {
+			case "Submarine":
+				if (!entity.getOwner().getName().equals(teamName)) {
+					Submarine enemySubmarine = new Submarine("Submarine", entity.getId(), entity.getPosition(), entity.getOwner(), entity.getVelocity(), entity.getAngle(), 0, 0, 0, 0);
+					if (gameInfo.getGame().getRound() < 2) {
+						enemySubmarine.setVelocity(enemySubmarine.getVelocity() + maxSpeed);
+					}
+					log.debug("Enemy submarine: {}.", enemySubmarine);
+					enemySubmarineSet.add(enemySubmarine);
+					submarinesToSlow.add(submarine);
+				}/*
+				// TODO czuczi
+				// Ezt nezd meg, hogy mi a velemenyed! Szerintem rossz,
+				// de most a hajok allandoan egyutt mennek sonar tavolsagon belul,
+				// ezert probaltuk belerakni, de keves sikerrel jartunk el!
+				else if (submarinesToSlow.isEmpty()) {
+					submarinesToSlow.add(submarine);
+				}*/
+				break;
+			case "Torpedo":
+				torpedoSet.add(entity);
+				break;
+			}
+		}
+	}
+	
 	private void controlSubmarine(Submarine submarine) {
 		shoot(submarine);
 
@@ -343,59 +396,6 @@ public class GameController implements Runnable {
 		
 		mainPanel.repaint();
 		mainPanel.revalidate();
-	}
-
-	private void processSonarResponse(Submarine submarine, SonarResponse sonar) {
-		if (sonar == null) {
-			return;
-		}
-		for (Entity entity : sonar.getEntities()) {
-			switch (entity.getType()) {
-			case "Submarine":
-				if (!entity.getOwner().getName().equals(teamName)) {
-					Submarine enemySubmarine = new Submarine("Submarine", entity.getId(), entity.getPosition(), entity.getOwner(), entity.getVelocity(), entity.getAngle(), 0, 0, 0, 0);
-					if (gameInfo.getGame().getRound() < 2) {
-						enemySubmarine.setVelocity(enemySubmarine.getVelocity() + maxSpeed);
-					}
-					log.debug("Enemy submarine: {}.", enemySubmarine);
-					enemySubmarineSet.add(enemySubmarine);
-					submarinesToSlow.add(submarine);
-				}/*
-				// TODO czuczi
-				// Ezt nezd meg, hogy mi a velemenyed! Szerintem rossz,
-				// de most a hajok allandoan egyutt mennek sonar tavolsagon belul,
-				// ezert probaltuk belerakni, de keves sikerrel jartunk el!
-				else if (submarinesToSlow.isEmpty()) {
-					submarinesToSlow.add(submarine);
-				}*/
-				break;
-			case "Torpedo":
-				torpedoSet.add(entity);
-				break;
-			}
-		}
-	}
-
-	private void extendSonarIfNeccessary(Submarine submarine) {
-		if (submarine.getSonarCooldown() == 0) {
-			boolean useExtendedSonar = true;
-			
-			for (Submarine s : submarinesInGame.getSubmarines()) {
-				if (!s.equals(submarine)) {
-					if (s.getSonarExtended() > 0 || shipsWithActivatedSonar.contains(s.getId())) { 
-						if (MathUtil.distanceOfCircles(submarine.getPosition(), 0.0, s.getPosition(), 0.0) < sonarRange) {
-							useExtendedSonar = false;
-							break;
-						}
-					}
-				}
-			}
-			
-			if (useExtendedSonar) {
-				callHandler.extendSonar(gameId, submarine.getId());
-				shipsWithActivatedSonar.add(submarine.getId());
-			}
-		}
 	}
 
 	private void updateGameInfo() {
