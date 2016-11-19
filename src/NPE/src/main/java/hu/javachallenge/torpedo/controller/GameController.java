@@ -25,7 +25,6 @@ import hu.javachallenge.torpedo.model.Entity;
 import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.model.Status;
 import hu.javachallenge.torpedo.model.Submarine;
-import hu.javachallenge.torpedo.response.CreateGameResponse;
 import hu.javachallenge.torpedo.response.GameInfoResponse;
 import hu.javachallenge.torpedo.response.GameListResponse;
 import hu.javachallenge.torpedo.response.SonarResponse;
@@ -89,15 +88,12 @@ public class GameController implements Runnable {
 	}
 
 	private void startGame() {
+		callHandler.createGame();
+
 		GameListResponse gameList = callHandler.gameList();
 		long[] games = gameList.getGames();
 
-		if (games == null || games.length == 0) {
-			CreateGameResponse createGameResponse = callHandler.createGame();
-			gameId = createGameResponse.getId();
-		} else {
-			gameId = games[0];
-		}
+		gameId = games[0];
 
 		updateGameInfo();
 
