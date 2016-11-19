@@ -159,208 +159,242 @@ public class GameController implements Runnable {
 				previousRound = actualRound;
 				
 				try {
-					enemySubmarines.clear();
-					torpedos.clear();
-					submarinesToSlow.clear();
-					enemySubmarineSet.clear();
-					torpedoSet.clear();
-					shipsWithActivatedSonar.clear();
-					
-					submarinesInGame = callHandler.submarinesInGame(gameId);
-					
-					for (Submarine submarine : submarinesInGame.getSubmarines()) {
-						if (submarine.getSonarCooldown() == 0) {
-							boolean useExtendedSonar = true;
-							
-							for (Submarine s : submarinesInGame.getSubmarines()) {
-								if (!s.equals(submarine)) {
-									if (s.getSonarExtended() > 0 || shipsWithActivatedSonar.contains(s.getId())) { 
-										if (MathUtil.distanceOfCircles(submarine.getPosition(), 0.0, s.getPosition(), 0.0) < sonarRange) {
-											useExtendedSonar = false;
-											break;
-										}
-									}
-								}
-							}
-							
-							if (useExtendedSonar) {
-								callHandler.extendSonar(gameId, submarine.getId());
-								shipsWithActivatedSonar.add(submarine.getId());
-							}
-						}
-						
-						SonarResponse sonar = callHandler.sonar(gameId, submarine.getId());
-						if (sonar != null) {
-							for (Entity entity : sonar.getEntities()) {
-								switch (entity.getType()) {
-								case "Submarine":
-									if (!entity.getOwner().getName().equals(teamName)) {
-										Submarine enemySubmarine = new Submarine("Submarine", entity.getId(), entity.getPosition(), entity.getOwner(), entity.getVelocity(), entity.getAngle(), 0, 0, 0, 0);
-										if (gameInfo.getGame().getRound() < 2) {
-											enemySubmarine.setVelocity(enemySubmarine.getVelocity() + maxSpeed);
-										}
-										log.debug("Enemy submarine: {}.", enemySubmarine);
-										enemySubmarineSet.add(enemySubmarine);
-										submarinesToSlow.add(submarine);
-									}
-									break;
-								case "Torpedo":
-									torpedoSet.add(entity);
-									break;
-								}
-							}
-						}
-					}
-					
-					enemySubmarines.addAll(enemySubmarineSet);
-					torpedos.addAll(torpedoSet);
-					
-					mainPanel.updateSubmarines(submarinesInGame.getSubmarines());
-					
-					mainPanel.addEnemySubmarines(enemySubmarines);
-					mainPanel.addTorpedos(torpedos);
-					
-					mainPanel.repaint();
-					mainPanel.revalidate();
-	
-					log.trace("Detected enemy submarines: {}", enemySubmarines);
-					log.trace("Detected torpedos: {}", torpedos);
-	
-					for (Submarine submarine : submarinesInGame.getSubmarines()) {
-						for (Submarine enemySubmarine : enemySubmarines) {
-							Double theta = aimAtMovingTarget(submarine.getPosition(), enemySubmarine.getPosition(), enemySubmarine.getAngle(), enemySubmarine.getVelocity(), torpedoSpeed);
-							if (theta != null && shouldWeShoot(submarine.getPosition(), Arrays.asList(submarinesInGame.getSubmarines()), submarineSize, enemySubmarine, torpedoRange, torpedoSpeed, theta, torpedoExplosionRadius, islandPositions, islandSize)) {
-								if (submarine.getTorpedoCooldown() == 0.0) {
-									callHandler.shoot(gameId, submarine.getId(), normalizeAngle(theta));
-									break;
-								}
-							}
-						}
-	
-						moveParameters.clear();
-	
-						boolean moved = false;
-	
-						Set<DangerType> dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, submarine.getPosition(), submarineSize, submarine.getVelocity(), submarine.getAngle(), maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
-						if (!dangerTypes.isEmpty()) {
-							double plusAngle = normalizeAngle(submarine.getAngle() + maxSteeringPerRound);
-							double minusAngle = normalizeAngle(submarine.getAngle() - maxSteeringPerRound);
-							double minusVelocity = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed);
-							
-							Set<DangerType> newDangerTypes;
-							
-							Position newSubmarinePosition = new Position(submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(submarine.getVelocity(), plusAngle), submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(submarine.getVelocity(), plusAngle));
-							
-							if (!moved) {
-								newDangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, submarine.getVelocity(), plusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
-								if (newDangerTypes.isEmpty()) {
-									callHandler.move(gameId, submarine.getId(), 0, maxSteeringPerRound);
-									moved = true;
-								} else if (newDangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
-									moveParameters.add(new MoveParameter(0, maxSteeringPerRound));
-								}
-							}
-	
-							newSubmarinePosition = new Position(submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(submarine.getVelocity(), minusAngle), submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(submarine.getVelocity(), minusAngle));
-	
-							if (!moved) {
-								newDangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, submarine.getVelocity(), minusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
-								if (newDangerTypes.isEmpty()) {
-									callHandler.move(gameId, submarine.getId(), 0, -maxSteeringPerRound);
-									moved = true;
-								} else if (newDangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
-									moveParameters.add(new MoveParameter(0, -maxSteeringPerRound));
-								}
-							}
-	
-							newSubmarinePosition = new Position(submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(minusVelocity, minusAngle), submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(minusVelocity, minusAngle));
-	
-							if (!moved) {
-								newDangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, minusVelocity, minusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
-								if (newDangerTypes.isEmpty()) {
-									callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), -maxSteeringPerRound);
-									moved = true;
-								} else if (newDangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
-									moveParameters.add(new MoveParameter(minusVelocity - submarine.getVelocity(), -maxSteeringPerRound));
-								}
-							}
-	
-							newSubmarinePosition = new Position(submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(minusVelocity, plusAngle), submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(minusVelocity, plusAngle));
-	
-							if (!moved) {
-								newDangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, minusVelocity, plusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
-								if (newDangerTypes.isEmpty()) {
-									callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), maxSteeringPerRound);
-									moved = true;
-								} else if (newDangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
-									moveParameters.add(new MoveParameter(minusVelocity - submarine.getVelocity(), maxSteeringPerRound));
-								}
-							}
-							
-							if (!moved && dangerTypes.contains(DangerType.LEAVING_SPACE)) {
-								callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), MathUtil.getSteeringHeadingToEdge(submarine.getPosition(), submarineSize, width, height, submarine.getAngle(), sonarRange, maxSteeringPerRound));
-								moved = true;
-							}
-							
-							if (!moved && (dangerTypes.contains(DangerType.HEADING_TO_ISLAND))) {
-								Position islandPosition = MathUtil.getNearestIslandInDirection(islandPositions);
-								double steering = MathUtil.getSteeringHeadingToIsland(submarine, islandPosition, maxSteeringPerRound, submarineSize, islandSize);
-								callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), steering);
-								moved = true;
-							}
-						}
-	
-						if (!moved) {
-							if (!moveParameters.isEmpty()) {
-								log.warn("Submarine {} is heading to torpedo.", submarine);
-								MoveParameter moveParameter = moveParameters.get(0);
-								callHandler.move(gameId, submarine.getId(), moveParameter.speed, moveParameter.angle);
-								moved = true;
-							} else {
-								double newNormalizedVelocity = normalizeVelocity(submarine.getVelocity() + maxAccelerationPerRound, maxSpeed);
-								if (submarinesToSlow.contains(submarine)) {
-									if(submarine.getVelocity() > maxSpeed * 0.5) {
-										newNormalizedVelocity = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed);
-									}
-								}
-								List<Submarine> allSubmarines = new LinkedList<>();
-								allSubmarines.addAll(enemySubmarines);
-								allSubmarines.addAll(Arrays.asList(submarinesInGame.getSubmarines()));
-								Submarine submarineInOurWay = MathUtil.getNearestSubmarineInOurWay(submarine, allSubmarines, submarineSize, maxSpeed);
-								if (submarineInOurWay != null) {
-									callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), MathUtil.getSteeringHeadingToSubmarine(submarine, submarineInOurWay, maxSteeringPerRound, submarineSize));
-								} else {
-									double steering = MathUtil.getSteeringHeadingToEdge(submarine.getPosition(), submarineSize, width, height, submarine.getAngle(), sonarRange, maxSteeringPerRound);
-									if (steering == 0.0) {
-										Position nearestIslandPosition = MathUtil.getNearestIsland(gameInfo, submarine.getPosition());
-										if (nearestIslandPosition != null) {
-											steering = MathUtil.getSteeringHeadingToIsland(submarine, nearestIslandPosition, maxSteeringPerRound, submarineSize, islandSize);
-										} else {
-											steering = MathUtil.getSteeringBasedOnSonars(submarine, submarinesInGame.getSubmarines(), sonarRange, extendedSonarRange, maxSteeringPerRound);
-										}
-									} else {
-										if(submarine.getVelocity() > maxSpeed * 0.25) {
-											newNormalizedVelocity = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed);
-										}
-									}
-									
-									if (steering == 0.0) {
-										Submarine[] enemies = new Submarine[enemySubmarines.size()];
-										enemies = allSubmarines.toArray(enemies);
-										steering = MathUtil.getSteeringBasedOnEnemyPosition(submarine, enemies, sonarRange, maxSteeringPerRound);
-									}
-									callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), steering);
-								}
-								moved = true;
-							}
-						}
-					}
+					clearFields();
+					playRound();
 				} catch (Throwable t) {
 					log.error(t.toString());
 					t.printStackTrace();
 				}
 			}
 			updateGameInfo();
+		}
+	}
+
+	private void clearFields() {
+		enemySubmarines.clear();
+		torpedos.clear();
+		submarinesToSlow.clear();
+		enemySubmarineSet.clear();
+		torpedoSet.clear();
+		shipsWithActivatedSonar.clear();
+	}
+	
+	private void playRound() {
+		submarinesInGame = callHandler.submarinesInGame(gameId);
+		
+		for (Submarine submarine : submarinesInGame.getSubmarines()) {
+			extendSonarIfNeccessary(submarine);
+			
+			SonarResponse sonar = callHandler.sonar(gameId, submarine.getId());
+			processSonarResponse(submarine, sonar);
+		}
+		
+		enemySubmarines.addAll(enemySubmarineSet);
+		torpedos.addAll(torpedoSet);
+		
+		updateMainPanel();
+
+		log.trace("Detected enemy submarines: {}", enemySubmarines);
+		log.trace("Detected torpedos: {}", torpedos);
+
+		for (Submarine submarine : submarinesInGame.getSubmarines()) {
+			controlSubmarine(submarine);
+		}
+	}
+
+	private void controlSubmarine(Submarine submarine) {
+		shoot(submarine);
+
+		moveParameters.clear();
+		boolean moved = false;
+
+		Set<DangerType> dangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, submarine.getPosition(), submarineSize, submarine.getVelocity(), submarine.getAngle(), maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
+		if (!dangerTypes.isEmpty()) {
+			double plusAngle = normalizeAngle(submarine.getAngle() + maxSteeringPerRound);
+			double minusAngle = normalizeAngle(submarine.getAngle() - maxSteeringPerRound);
+			double minusVelocity = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed);
+			
+			Set<DangerType> newDangerTypes;
+			
+			Position newSubmarinePosition = new Position(submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(submarine.getVelocity(), plusAngle), submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(submarine.getVelocity(), plusAngle));
+			
+			if (!moved) {
+				newDangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, submarine.getVelocity(), plusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
+				if (newDangerTypes.isEmpty()) {
+					callHandler.move(gameId, submarine.getId(), 0, maxSteeringPerRound);
+					moved = true;
+				} else if (newDangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
+					moveParameters.add(new MoveParameter(0, maxSteeringPerRound));
+				}
+			}
+
+			newSubmarinePosition = new Position(submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(submarine.getVelocity(), minusAngle), submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(submarine.getVelocity(), minusAngle));
+
+			if (!moved) {
+				newDangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, submarine.getVelocity(), minusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
+				if (newDangerTypes.isEmpty()) {
+					callHandler.move(gameId, submarine.getId(), 0, -maxSteeringPerRound);
+					moved = true;
+				} else if (newDangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
+					moveParameters.add(new MoveParameter(0, -maxSteeringPerRound));
+				}
+			}
+
+			newSubmarinePosition = new Position(submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(minusVelocity, minusAngle), submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(minusVelocity, minusAngle));
+
+			if (!moved) {
+				newDangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, minusVelocity, minusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
+				if (newDangerTypes.isEmpty()) {
+					callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), -maxSteeringPerRound);
+					moved = true;
+				} else if (newDangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
+					moveParameters.add(new MoveParameter(minusVelocity - submarine.getVelocity(), -maxSteeringPerRound));
+				}
+			}
+
+			newSubmarinePosition = new Position(submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(minusVelocity, plusAngle), submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(minusVelocity, plusAngle));
+
+			if (!moved) {
+				newDangerTypes = MathUtil.getDangerTypes(gameInfo, islandPositions, islandSize, newSubmarinePosition, submarineSize, minusVelocity, plusAngle, maxAccelerationPerRound, width, height, torpedos, enemySubmarines, torpedoExplosionRadius);
+				if (newDangerTypes.isEmpty()) {
+					callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), maxSteeringPerRound);
+					moved = true;
+				} else if (newDangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
+					moveParameters.add(new MoveParameter(minusVelocity - submarine.getVelocity(), maxSteeringPerRound));
+				}
+			}
+			
+			if (!moved && dangerTypes.contains(DangerType.LEAVING_SPACE)) {
+				callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), MathUtil.getSteeringHeadingToEdge(submarine.getPosition(), submarineSize, width, height, submarine.getAngle(), sonarRange, maxSteeringPerRound));
+				moved = true;
+			}
+			
+			if (!moved && (dangerTypes.contains(DangerType.HEADING_TO_ISLAND))) {
+				Position islandPosition = MathUtil.getNearestIslandInDirection(islandPositions);
+				double steering = MathUtil.getSteeringHeadingToIsland(submarine, islandPosition, maxSteeringPerRound, submarineSize, islandSize);
+				callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), steering);
+				moved = true;
+			}
+		}
+
+		if (!moved) {
+			if (!moveParameters.isEmpty()) {
+				log.warn("Submarine {} is heading to torpedo.", submarine);
+				MoveParameter moveParameter = moveParameters.get(0);
+				callHandler.move(gameId, submarine.getId(), moveParameter.speed, moveParameter.angle);
+				moved = true;
+			} else {
+				double newNormalizedVelocity = normalizeVelocity(submarine.getVelocity() + maxAccelerationPerRound, maxSpeed);
+				if (submarinesToSlow.contains(submarine)) {
+					if(submarine.getVelocity() > maxSpeed * 0.5) {
+						newNormalizedVelocity = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed);
+					}
+				}
+				List<Submarine> allSubmarines = new LinkedList<>();
+				allSubmarines.addAll(enemySubmarines);
+				allSubmarines.addAll(Arrays.asList(submarinesInGame.getSubmarines()));
+				Submarine submarineInOurWay = MathUtil.getNearestSubmarineInOurWay(submarine, allSubmarines, submarineSize, maxSpeed);
+				if (submarineInOurWay != null) {
+					callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), MathUtil.getSteeringHeadingToSubmarine(submarine, submarineInOurWay, maxSteeringPerRound, submarineSize));
+				} else {
+					double steering = MathUtil.getSteeringHeadingToEdge(submarine.getPosition(), submarineSize, width, height, submarine.getAngle(), sonarRange, maxSteeringPerRound);
+					if (steering == 0.0) {
+						Position nearestIslandPosition = MathUtil.getNearestIsland(gameInfo, submarine.getPosition());
+						if (nearestIslandPosition != null) {
+							steering = MathUtil.getSteeringHeadingToIsland(submarine, nearestIslandPosition, maxSteeringPerRound, submarineSize, islandSize);
+						} else {
+							steering = MathUtil.getSteeringBasedOnSonars(submarine, submarinesInGame.getSubmarines(), sonarRange, extendedSonarRange, maxSteeringPerRound);
+						}
+					} else {
+						if(submarine.getVelocity() > maxSpeed * 0.25) {
+							newNormalizedVelocity = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed);
+						}
+					}
+					
+					if (steering == 0.0) {
+						Submarine[] enemies = new Submarine[enemySubmarines.size()];
+						enemies = allSubmarines.toArray(enemies);
+						steering = MathUtil.getSteeringBasedOnEnemyPosition(submarine, enemies, sonarRange, maxSteeringPerRound);
+					}
+					callHandler.move(gameId, submarine.getId(), newNormalizedVelocity - submarine.getVelocity(), steering);
+				}
+				moved = true;
+			}
+		}
+	}
+
+	private void shoot(Submarine submarine) {
+		for (Submarine enemySubmarine : enemySubmarines) {
+			Double theta = aimAtMovingTarget(submarine.getPosition(), enemySubmarine.getPosition(), enemySubmarine.getAngle(), enemySubmarine.getVelocity(), torpedoSpeed);
+			if (theta != null && shouldWeShoot(submarine.getPosition(), Arrays.asList(submarinesInGame.getSubmarines()), submarineSize, enemySubmarine, torpedoRange, torpedoSpeed, theta, torpedoExplosionRadius, islandPositions, islandSize)) {
+				if (submarine.getTorpedoCooldown() == 0.0) {
+					callHandler.shoot(gameId, submarine.getId(), normalizeAngle(theta));
+					break;
+				}
+			}
+		}
+	}
+
+	private void updateMainPanel() {
+		mainPanel.updateSubmarines(submarinesInGame.getSubmarines());
+		
+		mainPanel.addEnemySubmarines(enemySubmarines);
+		mainPanel.addTorpedos(torpedos);
+		
+		mainPanel.repaint();
+		mainPanel.revalidate();
+	}
+
+	private void processSonarResponse(Submarine submarine, SonarResponse sonar) {
+		if (sonar == null) {
+			return;
+		}
+		for (Entity entity : sonar.getEntities()) {
+			switch (entity.getType()) {
+			case "Submarine":
+				if (!entity.getOwner().getName().equals(teamName)) {
+					Submarine enemySubmarine = new Submarine("Submarine", entity.getId(), entity.getPosition(), entity.getOwner(), entity.getVelocity(), entity.getAngle(), 0, 0, 0, 0);
+					if (gameInfo.getGame().getRound() < 2) {
+						enemySubmarine.setVelocity(enemySubmarine.getVelocity() + maxSpeed);
+					}
+					log.debug("Enemy submarine: {}.", enemySubmarine);
+					enemySubmarineSet.add(enemySubmarine);
+					submarinesToSlow.add(submarine);
+				}/*
+				// TODO czuczi
+				// Ezt nezd meg, hogy mi a velemenyed! Szerintem rossz,
+				// de most a hajok allandoan egyutt mennek sonar tavolsagon belul,
+				// ezert probaltuk belerakni, de keves sikerrel jartunk el!
+				else if (submarinesToSlow.isEmpty()) {
+					submarinesToSlow.add(submarine);
+				}*/
+				break;
+			case "Torpedo":
+				torpedoSet.add(entity);
+				break;
+			}
+		}
+	}
+
+	private void extendSonarIfNeccessary(Submarine submarine) {
+		if (submarine.getSonarCooldown() == 0) {
+			boolean useExtendedSonar = true;
+			
+			for (Submarine s : submarinesInGame.getSubmarines()) {
+				if (!s.equals(submarine)) {
+					if (s.getSonarExtended() > 0 || shipsWithActivatedSonar.contains(s.getId())) { 
+						if (MathUtil.distanceOfCircles(submarine.getPosition(), 0.0, s.getPosition(), 0.0) < sonarRange) {
+							useExtendedSonar = false;
+							break;
+						}
+					}
+				}
+			}
+			
+			if (useExtendedSonar) {
+				callHandler.extendSonar(gameId, submarine.getId());
+				shipsWithActivatedSonar.add(submarine.getId());
+			}
 		}
 	}
 
