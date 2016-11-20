@@ -1,6 +1,5 @@
 package hu.javachallenge.torpedo.util;
 
-import hu.javachallenge.torpedo.controller.MoveParameter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,6 +12,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import hu.javachallenge.torpedo.controller.MoveParameter;
 import hu.javachallenge.torpedo.model.Entity;
 import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.model.Submarine;
@@ -529,6 +529,7 @@ public class MathUtil {
 				}
 			}
 		}
+		System.out.println("submarine: " + submarine1 + " steering: " + steering);
 		return new MoveParameter(acc, steering);
 	}
 
@@ -600,8 +601,6 @@ public class MathUtil {
 	}
 	
 	public static MoveParameter getMoveParameterHeadingToEdge(Submarine submarine, double submarineSize, double width, double height, double sonarRange, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
-		System.out.println("Hello submarine: " + submarine);
-		
 		double fromRight = width - submarine.getPosition().getX().doubleValue() - submarineSize;
 		double fromTop = height - submarine.getPosition().getY().doubleValue() - submarineSize;
 		double fromLeft = submarine.getPosition().getX().doubleValue() - submarineSize;
@@ -679,7 +678,9 @@ public class MathUtil {
 				} else if (fromBottom <= sonarRange) {
 					if (submarineAngle <= 225 && submarineAngle >= 180) {
 						steering = -maxSteeringPerRound;
-					} else if (submarineAngle >= 225 && submarineAngle <= 315) {
+					} else if (submarineAngle >= 225 && submarineAngle <= 360) {
+						steering = maxSteeringPerRound;
+					} else if (submarineAngle == 0.0) {
 						steering = maxSteeringPerRound;
 					}
 				}
@@ -863,7 +864,7 @@ public class MathUtil {
 		Position position = new Position(
 			newSubmarinePosition.getX().doubleValue() + roundsToStop * xMovement(submarineVelocity / 2, submarineAngle),
 			newSubmarinePosition.getY().doubleValue() + roundsToStop * yMovement(submarineVelocity / 2, submarineAngle));
-		System.out.println("min dist from edge: " + minDistanceFromEdgeInWay(position, submarineSize, width, height, submarineAngle));
+
 		return minDistanceFromEdgeInWay(position, submarineSize, width, height, submarineAngle) < 2 * submarineSize;
 	}
 

@@ -9,6 +9,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -306,7 +308,7 @@ public class GameController implements Runnable {
 			}
 
 			if (!moved && dangerTypes.contains(DangerType.LEAVING_SPACE)) {
-				callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), MathUtil.getMoveParameterHeadingToEdge(submarine, submarineSize, width, height, sonarRange, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed).getSteering());
+				callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), MathUtil.getMoveParameterHeadingToEdge(submarine, submarineSize, width, height, extendedSonarRange, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed).getSteering());
 				moved = true;
 			}
 
@@ -362,8 +364,8 @@ public class GameController implements Runnable {
 		MoveParameter moveParameter;
 
 		//Szonárnyi távolságon belül tartunk-e ki a pályáról?
-		moveParameter = MathUtil.getMoveParameterHeadingToEdge(submarine, submarineSize, width, height, sonarRange, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed);
-
+		moveParameter = MathUtil.getMoveParameterHeadingToEdge(submarine, submarineSize, width, height, extendedSonarRange, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed);
+		
 		if (moveParameter.getSteering() == 0.0) {
 			//Szonárnyi távolságon belül van-e sziget?
 			Position nearestIslandPosition = MathUtil.getNearestIsland(gameInfo, submarine.getPosition());
@@ -396,9 +398,21 @@ public class GameController implements Runnable {
 	}
 
 	private void shoot(Submarine submarine) {
+		Collections.sort(enemySubmarines, new Comparator<Submarine>() {
+
+			@Override
+			public int compare(Submarine lhs, Submarine rhs) {
+				double lhsDistance = MathUtil.distanceOfCircles(submarine.getPosition(), submarineSize, lhs.getPosition(), submarineSize);
+				double rhsDistance = MathUtil.distanceOfCircles(submarine.getPosition(), submarineSize, rhs.getPosition(), submarineSize);
+				return Double.compare(lhsDistance, rhsDistance);
+			}
+		});
+		
 		for (Submarine enemySubmarine : enemySubmarines) {
 			Double theta = aimAtMovingTarget(submarine.getPosition(), enemySubmarine.getPosition(), enemySubmarine.getAngle(), enemySubmarine.getVelocity(), torpedoSpeed);
-			if (theta != null && shouldWeShoot(submarine.getPosition(), Arrays.asList(submarinesInGame.getSubmarines()), submarineSize, enemySubmarine, torpedoRange, torpedoSpeed, theta, torpedoExplosionRadius, islandPositions, islandSize)) {
+			boolean areWeInDanger = MathUtil.isSubmarineHeadingToTorpedoExplosion(torpedos, submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, enemySubmarines, torpedoExplosionRadius, islandPositions, islandSize);
+			boolean shouldWeShoot = shouldWeShoot(submarine.getPosition(), Arrays.asList(submarinesInGame.getSubmarines()), submarineSize, enemySubmarine, torpedoRange, torpedoSpeed, theta, torpedoExplosionRadius, islandPositions, islandSize);
+			if (theta != null && (areWeInDanger || shouldWeShoot)) {
 				if (submarine.getTorpedoCooldown() == 0.0) {
 					callHandler.shoot(gameId, submarine.getId(), normalizeAngle(theta));
 					break;
