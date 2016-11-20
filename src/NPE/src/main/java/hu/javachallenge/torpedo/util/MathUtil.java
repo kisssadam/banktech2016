@@ -409,7 +409,7 @@ public class MathUtil {
 				} else {
 					steering = maxSteeringPerRound;
 				}
-			} else {
+			}/* else {
 				if (isPositionInFrontOfUs(submarine1, submarine2.getPosition())) {
 					acc = plusAcceleration;
 				} else if (submarine1.getVelocity() > maxSpeed * 0.5) {
@@ -423,7 +423,7 @@ public class MathUtil {
 				} else {
 					steering = -maxSteeringPerRound;
 				}
-			}
+			}*/
 
 		}
 		return new MoveParameter(acc, steering);
@@ -443,7 +443,9 @@ public class MathUtil {
 
 		if (dangerousTorpedoHitPosition != null) {
 			if (isPositionInFrontOfUs(targetSubmarine, dangerousTorpedoHitPosition)) {
-				acc = minusAcceleration;
+				 if (targetSubmarine.getVelocity() > maxSpeed * 0.2) {
+					 acc = minusAcceleration;
+				 }
 			} else {
 				acc = plusAcceleration;
 			}
@@ -844,6 +846,9 @@ public class MathUtil {
 
 		Position collisionPosition = collisionPosition(islandSize, islandPosition, 0, 0, newSubmarinePosition, submarineVelocity, submarineAngle);
 		if (collisionPosition == null) {
+			return false;
+		}
+		if (submarineVelocity < MathConstants.EPSILON) {
 			return false;
 		}
 		double time = Math.abs(distanceOfCircles(newSubmarinePosition, submarineSize, collisionPosition, 0)) / (submarineVelocity / 2);

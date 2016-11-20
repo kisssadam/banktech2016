@@ -410,9 +410,9 @@ public class GameController implements Runnable {
 		
 		for (Submarine enemySubmarine : enemySubmarines) {
 			Double theta = aimAtMovingTarget(submarine.getPosition(), enemySubmarine.getPosition(), enemySubmarine.getAngle(), enemySubmarine.getVelocity(), torpedoSpeed);
-			boolean areWeInDanger = MathUtil.isSubmarineHeadingToTorpedoExplosion(torpedos, submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, enemySubmarines, torpedoExplosionRadius, islandPositions, islandSize);
+			//boolean areWeInDanger = MathUtil.isSubmarineHeadingToTorpedoExplosion(torpedos, submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, enemySubmarines, torpedoExplosionRadius, islandPositions, islandSize);
 			boolean shouldWeShoot = shouldWeShoot(submarine.getPosition(), Arrays.asList(submarinesInGame.getSubmarines()), submarineSize, enemySubmarine, torpedoRange, torpedoSpeed, theta, torpedoExplosionRadius, islandPositions, islandSize);
-			if (theta != null && (areWeInDanger || shouldWeShoot)) {
+			if (theta != null && (/*areWeInDanger || */shouldWeShoot)) {
 				if (submarine.getTorpedoCooldown() == 0.0) {
 					callHandler.shoot(gameId, submarine.getId(), normalizeAngle(theta));
 					break;
