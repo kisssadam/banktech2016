@@ -1,5 +1,6 @@
 package hu.javachallenge.torpedo.util;
 
+import hu.javachallenge.torpedo.controller.MoveParameter;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,43 +23,65 @@ public class MathUtil {
 	private static final Logger log = LoggerFactory.getLogger(MathUtil.class);
 
 	private static class Island {
+
 		private Position position;
 		private double distance;
-		
+
 		public Island(Position position, double distance) {
 			this.position = position;
 			this.distance = distance;
 		}
 	}
-	
+
 	public static double normalizeAngle(double angle) {
 		while (angle >= 360) {
 			angle -= 360;
 		}
-		
+
 		while (angle < 0) {
 			angle += 360;
 		}
-		
+
 		return angle;
 	}
-	
+
 	public static double normalizeVelocity(double velocity, double maxSpeed) {
 		return velocity < 0 ? 0 : (velocity > maxSpeed ? maxSpeed : velocity);
 	}
-	
-	public static boolean isPositionLeftToUs(Position s, Position e, Position p){
-		return ((e.getX().doubleValue() - s.getX().doubleValue())*(p.getY().doubleValue() - s.getY().doubleValue()) - (e.getY().doubleValue() - s.getY().doubleValue())*(p.getX().doubleValue() - s.getX().doubleValue())) > 0;
-   }
-	
+
+	private static boolean isPositionLeftOfUs(Position s, Position e, Position p) {
+		return ((e.getX().doubleValue() - s.getX().doubleValue()) * (p.getY().doubleValue() - s.getY().doubleValue()) - (e.getY().doubleValue() - s.getY().doubleValue()) * (p.getX().doubleValue() - s.getX().doubleValue())) > 0;
+	}
+
+	public static boolean isPositionLeftOfUs(Submarine submarine, Position p) {
+		Position s = submarine.getPosition();
+
+		double xValue = submarine.getPosition().getX().doubleValue() + xMovement(10, submarine.getAngle());
+		double yValue = submarine.getPosition().getY().doubleValue() + yMovement(10, submarine.getAngle());
+		Position e = new Position(xValue, yValue);
+
+		return isPositionLeftOfUs(s, e, p);
+	}
+
+	public static boolean isPositionInFrontOfUs(Submarine submarine, Position p) {
+		Position s = submarine.getPosition();
+		double angle = normalizeAngle(submarine.getAngle() - 90);
+
+		double xValue = submarine.getPosition().getX().doubleValue() + xMovement(10, angle);
+		double yValue = submarine.getPosition().getY().doubleValue() + yMovement(10, angle);
+		Position e = new Position(xValue, yValue);
+
+		return isPositionLeftOfUs(s, e, p);
+	}
+
 	private static double angleDifference(double alpha, double beta) {
-        double phi = normalizeAngle(Math.abs(beta - alpha));  // This is either the distance or 360 - distance
-        double distance = phi > 180 ? 360 - phi : phi;
-        return distance;
-    }
-	
+		double phi = normalizeAngle(Math.abs(beta - alpha));  // This is either the distance or 360 - distance
+		double distance = phi > 180 ? 360 - phi : phi;
+		return distance;
+	}
+
 	public static double distanceOfCircles(Position sourcePosition, double sourceR, Position destinationPosition,
-			double destinationR) {
+		double destinationR) {
 		BigDecimal xSubtract = sourcePosition.getX().subtract(destinationPosition.getX());
 		BigDecimal xSquare = xSubtract.multiply(xSubtract);
 
@@ -119,10 +142,8 @@ public class MathUtil {
 
 	/**
 	 *
-	 * @param velocity
-	 *            átfogó
-	 * @param angle
-	 *            szög
+	 * @param velocity átfogó
+	 * @param angle szög
 	 * @return szomszédos befogó
 	 */
 	public static double xMovement(double velocity, double angle) {
@@ -137,7 +158,7 @@ public class MathUtil {
 	 * https://www.kirupa.com/forum/showthread.php?347334-Aiming-and-hitting-a-moving-target
 	 */
 	public static Double aimAtMovingTarget(Position sourcePosition, Position targetPosition, double targetMovementAngle,
-			double targetVelocity, double bulletVelocity) {
+		double targetVelocity, double bulletVelocity) {
 		double dX = targetPosition.getX().subtract(sourcePosition.getX()).doubleValue();
 		double dY = targetPosition.getY().subtract(sourcePosition.getY()).doubleValue();
 
@@ -147,11 +168,11 @@ public class MathUtil {
 		double a = Math.pow(xMovementResult, 2) + Math.pow(yMovementResult, 2) - Math.pow(bulletVelocity, 2);
 		double b = 2 * (xMovementResult * dX + yMovementResult * dY);
 		double c = Math.pow(dX, 2) + Math.pow(dY, 2);
-		
-		if(Math.abs(a) < MathConstants.EPSILON) {
+
+		if (Math.abs(a) < MathConstants.EPSILON) {
 			return null;
 		}
-		
+
 		// Check whether we're breaking into complex numbers:
 		double q = Math.pow(b, 2) - 4 * a * c;
 		if (q < MathConstants.EPSILON) {
@@ -181,7 +202,7 @@ public class MathUtil {
 	 * Visszaadja a lehetséges (nem esik útba sziget) célpontokat.
 	 */
 	public static List<Submarine> getPossibleTargets(GameInfoResponse gameInfoResponse, Position[] islandPositions,
-			Position sourcePosition, Submarine[] submarines, double bulletVelocity) {
+		Position sourcePosition, Submarine[] submarines, double bulletVelocity) {
 		List<Submarine> possibleTargets = new ArrayList<>();
 
 		for (Submarine submarine : submarines) {
@@ -206,7 +227,7 @@ public class MathUtil {
 
 		return possibleTargets;
 	}
-	
+
 	public static Position getNearestIsland(GameInfoResponse gameInfoResponse, Position sourcePosition) {
 		List<Island> islands = new ArrayList<>();
 		Position[] islandPositions = gameInfoResponse.getGame().getMapConfiguration().getIslandPositions();
@@ -227,13 +248,13 @@ public class MathUtil {
 			return null;
 		}
 	}
-	
+
 	public static Position getNearestIslandInDirection(List<Position> islandsInDirection) {
 		return islandsInDirection.isEmpty() ? null : islandsInDirection.get(0);
 	}
-	
+
 	public static List<Position> islandsInDirection(GameInfoResponse gameInfoResponse, Position sourcePosition,
-			double angle) {
+		double angle) {
 		List<Island> islandsInDirection = new ArrayList<>();
 
 		Position[] islandPositions = gameInfoResponse.getGame().getMapConfiguration().getIslandPositions();
@@ -263,12 +284,12 @@ public class MathUtil {
 		}
 
 		Collections.sort(islandsInDirection, (island1, island2) -> island1.distance <= island2.distance ? -1 : 1);
-		
+
 		return islandsInDirection.stream().map(island -> island.position).collect(Collectors.toList());
 	}
-	
+
 	public static List<Position> whereCouldTorpedoHitIslands(List<Position> islandPositions, double islandSize, Position torpedoPosition, double torpedoRange,
-			double torpedoVelocity, double torpedoAngle, double torpedoRoundsMoved) {
+		double torpedoVelocity, double torpedoAngle, double torpedoRoundsMoved) {
 		List<Position> collisionPositions = new LinkedList<>();
 		for (Position islandPosition : islandPositions) {
 			Position collisionPosition = collisionPosition(islandSize, islandPosition, 0, 0, torpedoPosition, torpedoVelocity, torpedoAngle);
@@ -279,12 +300,12 @@ public class MathUtil {
 				}
 			}
 		}
-		
+
 		return collisionPositions;
 	}
-	
-	public static List<Position> whereCouldTorpedoHitUs(List<Submarine> submarines, double submarineSize, Position torpedoPosition, double torpedoRange,
-			double torpedoVelocity, double torpedoAngle, double torpedoRoundsMoved) {
+
+	public static List<Position> whereCouldTorpedoHitSubmarines(List<Submarine> submarines, double submarineSize, Position torpedoPosition, double torpedoRange,
+		double torpedoVelocity, double torpedoAngle, double torpedoRoundsMoved) {
 		List<Position> collisionPositions = new LinkedList<>();
 		for (Submarine submarine : submarines) {
 			if (!submarine.getPosition().equals(torpedoPosition)) {
@@ -297,12 +318,12 @@ public class MathUtil {
 				}
 			}
 		}
-		
+
 		return collisionPositions;
 	}
-	
+
 	public static Position whereCouldTorpedoHitAimedTarget(Submarine submarine, double submarineSize, Position torpedoPosition, double torpedoRange,
-			double torpedoVelocity, double torpedoAngle, double torpedoRoundsMoved) {
+		double torpedoVelocity, double torpedoAngle, double torpedoRoundsMoved) {
 		Position collisionPosition = collisionPosition(submarineSize, submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), torpedoPosition, torpedoVelocity, torpedoAngle);
 		if (collisionPosition != null) {
 			double time = Math.abs(torpedoDistance(torpedoPosition, collisionPosition, 0)) / torpedoVelocity;
@@ -312,7 +333,7 @@ public class MathUtil {
 		}
 		return null;
 	}
-	
+
 	public static Submarine getNearestSubmarineInOurWay(Submarine actualSubmarine, List<Submarine> allSubmarine, double submarineSize, double maxSpeed) {
 		Submarine nearestSubmarine = null;
 		for (Submarine submarine : allSubmarine) {
@@ -321,18 +342,16 @@ public class MathUtil {
 				if (p != null) {
 					if (nearestSubmarine == null) {
 						nearestSubmarine = submarine;
-					} else {
-						if (distanceOfCircles(actualSubmarine.getPosition(), submarineSize, submarine.getPosition(), submarineSize) < distanceOfCircles(actualSubmarine.getPosition(), submarineSize, nearestSubmarine.getPosition(), submarineSize)) {
-							nearestSubmarine = submarine;
-						}
+					} else if (distanceOfCircles(actualSubmarine.getPosition(), submarineSize, submarine.getPosition(), submarineSize) < distanceOfCircles(actualSubmarine.getPosition(), submarineSize, nearestSubmarine.getPosition(), submarineSize)) {
+						nearestSubmarine = submarine;
 					}
 				}
 			}
 		}
 		return nearestSubmarine;
 	}
-	
-	public static Submarine getBiggestSonarIntersectionSubmarine(Submarine submarine, Submarine[] submarines, double sonarRange, double extendedSonarRange) {
+
+	public static Submarine getBiggestSonarIntersectionSubmarine(Submarine submarine, List<Submarine> submarines, double sonarRange, double extendedSonarRange) {
 		double intersection = 0.0;
 		Submarine biggestSonarIntersectionSubmarine = null;
 		for (Submarine s : submarines) {
@@ -343,184 +362,341 @@ public class MathUtil {
 					biggestSonarIntersectionSubmarine = s;
 				}
 			}
-			
+
 		}
 		return biggestSonarIntersectionSubmarine;
 	}
-	
-	public static double getSteeringBasedOnEnemyPosition(Submarine submarine1, Submarine[] enemySubmarines, double sonarRange, double maxSteering) {
+
+	public static MoveParameter getMoveParameterBasedOnEnemyPosition(Submarine submarine1, List<Submarine> enemySubmarines, double sonarRange, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed,
+		List<Submarine> allSubmarine, double submarineSize, double torpedoRange, double torpedoSpeed, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
 		Submarine submarine2 = getBiggestSonarIntersectionSubmarine(submarine1, enemySubmarines, sonarRange, sonarRange);
-		
-		if (submarine2 == null) {
-			return 0.0;
-		}
-		
-		if (intersectionOfCirclesWithSameRadius(submarine1.getPosition(), submarine2.getPosition(), sonarRange) > 0){
-			double xValue = submarine1.getPosition().getX().doubleValue() + xMovement(10, submarine1.getAngle());
-			double yValue = submarine1.getPosition().getY().doubleValue() + yMovement(10, submarine1.getAngle());
-			Position newPosition = new Position(xValue , yValue);
-				if (isPositionLeftToUs(submarine1.getPosition(), newPosition, submarine2.getPosition())) {
-				return maxSteering;
+		double minusAcceleration = normalizeVelocity(submarine1.getVelocity() - maxAccelerationPerRound, maxSpeed) - submarine1.getVelocity();
+		double plusAcceleration = normalizeVelocity(submarine1.getVelocity() + maxAccelerationPerRound, maxSpeed) - submarine1.getVelocity();
+
+		double acc = plusAcceleration;
+		double steering = 0;
+
+		if (submarine2 != null) {
+			Double theta = aimAtMovingTarget(submarine1.getPosition(), submarine2.getPosition(), submarine2.getAngle(), submarine2.getVelocity(), torpedoSpeed);
+			boolean isEnemyTooCloseToShoot = !shouldWeShoot(submarine1.getPosition(), allSubmarine, submarineSize, submarine2, torpedoRange, torpedoSpeed, theta, torpedoExplosionRadius, islandPositions, islandSize);
+			if (isEnemyTooCloseToShoot) {
+				if (isPositionInFrontOfUs(submarine1, submarine2.getPosition())) {
+					if (submarine1.getVelocity() > maxSpeed * 0.5) {
+						acc = minusAcceleration;
+					} else {
+						acc = plusAcceleration;
+					}
+				} else {
+					acc = plusAcceleration;
+				}
+
+				if (isPositionLeftOfUs(submarine1, submarine2.getPosition())) {
+					steering = -maxSteeringPerRound;
+				} else {
+					steering = maxSteeringPerRound;
+				}
 			} else {
-				return -maxSteering;
+				if (isPositionInFrontOfUs(submarine1, submarine2.getPosition())) {
+					acc = plusAcceleration;
+				} else if (submarine1.getVelocity() > maxSpeed * 0.5) {
+					acc = minusAcceleration;
+				} else {
+					acc = plusAcceleration;
+				}
+
+				if (isPositionLeftOfUs(submarine1, submarine2.getPosition())) {
+					steering = maxSteeringPerRound;
+				} else {
+					steering = -maxSteeringPerRound;
+				}
 			}
-		} else {
-			return 0.0;
+
 		}
+		return new MoveParameter(acc, steering);
 	}
-	
-	public static double getSteeringBasedOnSonars(Submarine submarine1, Submarine[] submarines, double sonarRange, double extendedSonarRange, double maxSteering) {
+
+	public static MoveParameter getMoveParameterBasedOnTorpedos(List<Entity> torpedos, List<Submarine> submarines, double submarineSize,
+		Submarine targetSubmarine, double torpedoRange, double torpedoVelocity, double torpedoExplosionRadius, List<Position> islandPositions,
+		double islandSize, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
+
+		double minusAcceleration = normalizeVelocity(targetSubmarine.getVelocity() - maxAccelerationPerRound, maxSpeed) - targetSubmarine.getVelocity();
+		double plusAcceleration = normalizeVelocity(targetSubmarine.getVelocity() + maxAccelerationPerRound, maxSpeed) - targetSubmarine.getVelocity();
+
+		double acc = plusAcceleration;
+		double steering = 0;
+
+		Position dangerousTorpedoHitPosition = getDangerousTorpedoHitPosition(torpedos, submarines, submarineSize, targetSubmarine, torpedoRange, torpedoVelocity, torpedoExplosionRadius, islandPositions, islandSize);
+
+		if (dangerousTorpedoHitPosition != null) {
+			if (isPositionInFrontOfUs(targetSubmarine, dangerousTorpedoHitPosition)) {
+				if (targetSubmarine.getVelocity() > maxSpeed * 0.25) {
+					acc = minusAcceleration;
+				} else {
+					acc = plusAcceleration;
+				}
+			} else {
+				acc = plusAcceleration;
+			}
+
+			if (isPositionLeftOfUs(targetSubmarine, dangerousTorpedoHitPosition)) {
+				steering = -maxSteeringPerRound;
+			} else {
+				steering = maxSteeringPerRound;
+			}
+		}
+
+		return new MoveParameter(acc, steering);
+	}
+
+	public static Position getDangerousTorpedoHitPosition(List<Entity> torpedos, List<Submarine> submarines, double submarineSize,
+		Submarine targetSubmarine, double torpedoRange, double torpedoVelocity, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
+
+		for (Entity torpedo : torpedos) {
+			Position torpedoPosition = torpedo.getPosition();
+			double torpedoAngle = torpedo.getAngle();
+			double torpedoRoundsMoved = torpedo.getRoundsMoved();
+			Position aimedTargetCollisionPosition = whereCouldTorpedoHitAimedTarget(targetSubmarine, submarineSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, torpedoRoundsMoved);
+			List<Position> islandTorpedoCollisionPositions = whereCouldTorpedoHitIslands(islandPositions, islandSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, torpedoRoundsMoved);
+			List<Position> submarineTorpedoCollisionPositions = whereCouldTorpedoHitSubmarines(submarines, submarineSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, torpedoRoundsMoved);
+
+			if (!islandTorpedoCollisionPositions.isEmpty()) {
+				for (Position islandTorpedoCollisionPosition : islandTorpedoCollisionPositions) {
+					Position collisionPosition = movingCircleCollisionDetection(targetSubmarine.getPosition(), targetSubmarine.getVelocity(), targetSubmarine.getAngle(), submarineSize, islandTorpedoCollisionPosition, 0, 0, torpedoRange);
+					if (collisionPosition != null) {
+						return collisionPosition;
+					}
+				}
+			}
+
+			if (!submarineTorpedoCollisionPositions.isEmpty()) {
+				for (Position submarineTorpedoCollisionPosition : submarineTorpedoCollisionPositions) {
+					Position collisionPosition = movingCircleCollisionDetection(targetSubmarine.getPosition(), targetSubmarine.getVelocity(), targetSubmarine.getAngle(), submarineSize, submarineTorpedoCollisionPosition, 0, 0, torpedoRange);
+					if (collisionPosition != null) {
+						return collisionPosition;
+					}
+				}
+			}
+
+			if (aimedTargetCollisionPosition != null) {
+				if (!islandTorpedoCollisionPositions.isEmpty()) {
+					for (Position islandTorpedoCollisionPosition : islandTorpedoCollisionPositions) {
+						if (distanceOfCircles(islandTorpedoCollisionPosition, 0, torpedoPosition, 0) < distanceOfCircles(aimedTargetCollisionPosition, 0, torpedoPosition, 0)) {
+							return null;
+						}
+					}
+				}
+				return aimedTargetCollisionPosition;
+			}
+		}
+		return null;
+	}
+
+	public static MoveParameter getMoveParameterBasedOnSonars(Submarine submarine1, List<Submarine> submarines, double sonarRange, double extendedSonarRange, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
 		Submarine submarine2 = getBiggestSonarIntersectionSubmarine(submarine1, submarines, sonarRange, extendedSonarRange);
-		
-		if (submarine2 == null) {
-			return 0.0;
-		}
-		
-		if (intersectionOfCircles(submarine1.getPosition(), submarine2.getPosition(), submarine1.getSonarExtended() > 0 ? extendedSonarRange : sonarRange, submarine2.getSonarExtended() > 0 ? extendedSonarRange : sonarRange) > 0){
-			double xValue = submarine1.getPosition().getX().doubleValue() + xMovement(10, submarine1.getAngle());
-			double yValue = submarine1.getPosition().getY().doubleValue() + yMovement(10, submarine1.getAngle());
-			Position newPosition = new Position(xValue , yValue);
-			if (isPositionLeftToUs(submarine1.getPosition(), newPosition, submarine2.getPosition())) {
-				return -maxSteering;
-			} else {
-				return maxSteering;
+
+		double minusAcceleration = normalizeVelocity(submarine1.getVelocity() - maxAccelerationPerRound, maxSpeed) - submarine1.getVelocity();
+		double plusAcceleration = normalizeVelocity(submarine1.getVelocity() + maxAccelerationPerRound, maxSpeed) - submarine1.getVelocity();
+
+		double acc = plusAcceleration;
+		double steering = 0;
+
+		if (submarine2 != null) {
+
+			if (intersectionOfCircles(submarine1.getPosition(), submarine2.getPosition(), submarine1.getSonarExtended() > 0 ? extendedSonarRange : sonarRange, submarine2.getSonarExtended() > 0 ? extendedSonarRange : sonarRange) > 0) {
+				if (isPositionInFrontOfUs(submarine1, submarine2.getPosition())) {
+					if (submarine1.getVelocity() > maxSpeed * 0.5) {
+						acc = minusAcceleration;
+					} else {
+						acc = plusAcceleration;
+					}
+				} else {
+					acc = plusAcceleration;
+				}
+				if (isPositionLeftOfUs(submarine1, submarine2.getPosition())) {
+					steering = -maxSteeringPerRound;
+				} else {
+					steering = maxSteeringPerRound;
+				}
 			}
-		} else {
-			return 0.0;
 		}
+		return new MoveParameter(acc, steering);
 	}
-	
+
+	public static MoveParameter getMoveParameterHeadingToIslandBasedOnSonar(Submarine submarine, Position islandPosition, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
+		double minusAcceleration = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed) - submarine.getVelocity();
+		double plusAcceleration = normalizeVelocity(submarine.getVelocity() + maxAccelerationPerRound, maxSpeed) - submarine.getVelocity();
+
+		double acc = plusAcceleration;
+		double steering = 0;
+		if (isPositionInFrontOfUs(submarine, islandPosition)) {
+			if (submarine.getVelocity() > maxSpeed * 0.5) {
+				acc = minusAcceleration;
+			} else {
+				acc = plusAcceleration;
+			}
+			if (isPositionLeftOfUs(submarine, islandPosition)) {
+				steering = -maxSteeringPerRound;
+			} else {
+				steering = maxSteeringPerRound;
+			}
+		}
+
+		return new MoveParameter(acc, steering);
+	}
+
 	public static double getSteeringHeadingToIsland(Submarine submarine, Position islandPosition, double maxSteering, double submarineSize, double islandSize) {
 		Position collisionPosition = movingCircleCollisionDetection(submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, islandPosition, 0, 0, islandSize);
 		if (collisionPosition == null) {
 			return 0.0;
 		}
-		double xValue = submarine.getPosition().getX().doubleValue() + xMovement(10, submarine.getAngle());
-		double yValue = submarine.getPosition().getY().doubleValue() + yMovement(10, submarine.getAngle());
-		Position newPosition = new Position(xValue , yValue);
-		if (isPositionLeftToUs(submarine.getPosition(), newPosition, collisionPosition)) {
+		if (isPositionLeftOfUs(submarine, collisionPosition)) {
 			return -maxSteering;
 		} else {
 			return maxSteering;
 		}
 	}
-	
-	public static double getSteeringHeadingToSubmarine(Submarine actualSubmarine, Submarine otherSubmarine, double maxSteering, double submarineSize) {
+
+	public static MoveParameter getMoveParameterHeadingToSubmarine(Submarine actualSubmarine, Submarine otherSubmarine, double submarineSize, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
+		double minusAcceleration = normalizeVelocity(actualSubmarine.getVelocity() - maxAccelerationPerRound, maxSpeed) - actualSubmarine.getVelocity();
+		double plusAcceleration = normalizeVelocity(actualSubmarine.getVelocity() + maxAccelerationPerRound, maxSpeed) - actualSubmarine.getVelocity();
+
+		double acc = plusAcceleration;
+		double steering = 0;
+
 		Position collisionPosition = movingCircleCollisionDetection(actualSubmarine.getPosition(), actualSubmarine.getVelocity(), actualSubmarine.getAngle(), submarineSize, otherSubmarine.getPosition(), otherSubmarine.getVelocity(), otherSubmarine.getAngle(), submarineSize);
-		if (collisionPosition == null) {
-			return 0.0;
+		if (collisionPosition != null) {
+
+			if (isPositionInFrontOfUs(actualSubmarine, collisionPosition)) {
+				if (actualSubmarine.getVelocity() > maxSpeed * 0.5) {
+					acc = minusAcceleration;
+				} else {
+					acc = plusAcceleration;
+				}
+			} else {
+				acc = plusAcceleration;
+			}
+			if (isPositionLeftOfUs(actualSubmarine, collisionPosition)) {
+				steering = -maxSteeringPerRound;
+			} else {
+				steering = maxSteeringPerRound;
+			}
 		}
-		double xValue = actualSubmarine.getPosition().getX().doubleValue() + xMovement(10, actualSubmarine.getAngle());
-		double yValue = actualSubmarine.getPosition().getY().doubleValue() + yMovement(10, actualSubmarine.getAngle());
-		Position newPosition = new Position(xValue , yValue);
-		if (isPositionLeftToUs(actualSubmarine.getPosition(), newPosition, collisionPosition)) {
-			return -maxSteering;
-		} else {
-			return maxSteering;
-		}
+
+		return new MoveParameter(acc, steering);
 	}
-	
-	public static double getSteeringHeadingToEdge(Position submarinePosition, double submarineSize, double width, double height, double submarineAngle, double sonarRange, double maxSteering) {
-		double fromRight = width - submarinePosition.getX().doubleValue() - submarineSize;
-		double fromTop = height - submarinePosition.getY().doubleValue() - submarineSize;
-		double fromLeft = submarinePosition.getX().doubleValue() - submarineSize;
-		double fromBottom = submarinePosition.getY().doubleValue() - submarineSize;
-		
+
+	public static MoveParameter getMoveParameterHeadingToEdge(Submarine submarine, double submarineSize, double width, double height, double sonarRange, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
+		double fromRight = width - submarine.getPosition().getX().doubleValue() - submarineSize;
+		double fromTop = height - submarine.getPosition().getY().doubleValue() - submarineSize;
+		double fromLeft = submarine.getPosition().getX().doubleValue() - submarineSize;
+		double fromBottom = submarine.getPosition().getY().doubleValue() - submarineSize;
+		double submarineAngle = submarine.getAngle();
+
+		double minusAcceleration = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed) - submarine.getVelocity();
+		double plusAcceleration = normalizeVelocity(submarine.getVelocity() + maxAccelerationPerRound, maxSpeed) - submarine.getVelocity();
+
+		double acc = plusAcceleration;
+		double steering = 0;
+
 		if (submarineAngle == 0.0) {
 			if (fromRight < sonarRange) {
 				if (fromTop < fromBottom) {
-					return -maxSteering;
+					steering = -maxSteeringPerRound;
 				} else {
-					return maxSteering;
+					steering = maxSteeringPerRound;
 				}
 			}
 		} else if (submarineAngle == 90.0) {
 			if (fromTop < sonarRange) {
 				if (fromLeft < fromRight) {
-					return -maxSteering;
+					steering = -maxSteeringPerRound;
 				} else {
-					return maxSteering;
+					steering = maxSteeringPerRound;
 				}
 			}
 		} else if (submarineAngle == 180.0) {
 			if (fromLeft < sonarRange) {
 				if (fromBottom < fromTop) {
-					return -maxSteering;
-				} else{
-					return maxSteering;
+					steering = -maxSteeringPerRound;
+				} else {
+					steering = maxSteeringPerRound;
 				}
 			}
 		} else if (submarineAngle == 270.0) {
 			if (fromBottom < sonarRange) {
 				if (fromRight < fromLeft) {
-					return -maxSteering;
+					steering = -maxSteeringPerRound;
 				} else {
-					return maxSteering;
+					steering = maxSteeringPerRound;
 				}
 			}
 		} else if (submarineAngle > 0.0 && submarineAngle < 90.0) {
 			if (fromTop < sonarRange && fromRight < sonarRange) {
-				if (distanceOfCircles(submarinePosition, submarineSize, new Position(width, height), 0) < sonarRange) {
+				if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(width, height), 0) < sonarRange) {
 					if (fromTop < fromRight) {
-						return -maxSteering;
+						steering = -maxSteeringPerRound;
 					} else {
-						return maxSteering;
+						steering = maxSteeringPerRound;
 					}
 				}
 			} else if (fromTop < sonarRange) {
-				return -maxSteering;
+				steering = -maxSteeringPerRound;
 			} else if (fromRight < sonarRange) {
-				return  maxSteering;
+				steering = maxSteeringPerRound;
 			}
 		} else if (submarineAngle > 90.0 && submarineAngle < 180.0) {
 			if (fromLeft < sonarRange && fromTop < sonarRange) {
-				if (distanceOfCircles(submarinePosition, submarineSize, new Position(0, height), 0) < sonarRange) {
+				if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(0, height), 0) < sonarRange) {
 					if (fromLeft < fromTop) {
-						return -maxSteering;
+						steering = -maxSteeringPerRound;
 					} else {
-						return maxSteering;
+						steering = maxSteeringPerRound;
 					}
 				}
 			} else if (fromLeft < sonarRange) {
-				return -maxSteering;
+				steering = -maxSteeringPerRound;
 			} else if (fromTop < sonarRange) {
-				return  maxSteering;
+				steering = maxSteeringPerRound;
 			}
 		} else if (submarineAngle > 180.0 && submarineAngle < 270.0) {
 			if (fromBottom < sonarRange && fromLeft < sonarRange) {
-				if (distanceOfCircles(submarinePosition, submarineSize, new Position(0, 0), 0) < sonarRange) {
+				if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(0, 0), 0) < sonarRange) {
 					if (fromBottom < fromLeft) {
-						return -maxSteering;
+						steering = -maxSteeringPerRound;
 					} else {
-						return maxSteering;
+						steering = maxSteeringPerRound;
 					}
 				}
 			} else if (fromBottom < sonarRange) {
-				return -maxSteering;
+				steering = -maxSteeringPerRound;
 			} else if (fromLeft < sonarRange) {
-				return  maxSteering;
+				steering = maxSteeringPerRound;
 			}
-		} else {
-			if (fromRight < sonarRange && fromBottom < sonarRange) {
-				if(distanceOfCircles(submarinePosition, submarineSize, new Position(0, width), 0) < sonarRange) {
-					if(fromRight < fromBottom) {
-						return -maxSteering;
-					} else {
-						return maxSteering;
-					}
+		} else if (fromRight < sonarRange && fromBottom < sonarRange) {
+			if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(0, width), 0) < sonarRange) {
+				if (fromRight < fromBottom) {
+					steering = -maxSteeringPerRound;
+				} else {
+					steering = maxSteeringPerRound;
 				}
-			} else if (fromRight < sonarRange) {
-				return -maxSteering;
-			} else if (fromBottom < sonarRange) {
-				return  maxSteering;
+			}
+		} else if (fromRight < sonarRange) {
+			steering = -maxSteeringPerRound;
+		} else if (fromBottom < sonarRange) {
+			steering = maxSteeringPerRound;
+		}
+
+		if (steering != 0.0) {
+			if (submarine.getVelocity() > maxSpeed * 0.5) {
+				acc = minusAcceleration;
 			}
 		}
-		
-		return 0.0;
+
+		return new MoveParameter(acc, steering);
 	}
-        
+
 	public static boolean isSubmarineHeadingToTorpedoExplosion(List<Entity> torpedos, Position submarinePosition, double submarineVelocity, double submarineAngle,
-			double submarineSize, List<Submarine> enemySubmarines, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
+		double submarineSize, List<Submarine> enemySubmarines, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
 		for (Entity torpedo : torpedos) {
 			if (isSubmarineHeadingToTorpedoExplosion(torpedo.getPosition(), submarinePosition, submarineVelocity, submarineAngle, submarineSize, enemySubmarines, torpedo.getVelocity(), torpedo.getAngle(), torpedoExplosionRadius, islandPositions, islandSize)) {
 				return true;
@@ -528,10 +704,10 @@ public class MathUtil {
 		}
 		return false;
 	}
-	
+
 	public static boolean isSubmarineHeadingToTorpedoExplosion(Position torpedoPosition, Position submarinePosition,
-			double submarineVelocity, double submarineAngle, double submarineSize, List<Submarine> enemySubmarines, double torpedoVelocity, double torpedoAngle,
-			double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
+		double submarineVelocity, double submarineAngle, double submarineSize, List<Submarine> enemySubmarines, double torpedoVelocity, double torpedoAngle,
+		double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
 		Position newSubmarinePosition = new Position(
 			submarinePosition.getX().doubleValue() + xMovement(submarineVelocity, submarineAngle),
 			submarinePosition.getY().doubleValue() + yMovement(submarineVelocity, submarineAngle));
@@ -560,20 +736,20 @@ public class MathUtil {
 
 		return false;
 	}
-	
-	public static boolean isSubmarineHeadingToIsland(Position islandPosition, double islandSize, Position submarinePosition, double submarineSize, 
-			double submarineVelocity, double submarineAngle, double maxAccelerationPerRound) {
+
+	public static boolean isSubmarineHeadingToIsland(Position islandPosition, double islandSize, Position submarinePosition, double submarineSize,
+		double submarineVelocity, double submarineAngle, double maxAccelerationPerRound) {
 		if (islandPosition == null) {
 			return false;
 		}
-		
+
 		double roundsToStop = Math.ceil(countRoundsToStop(maxAccelerationPerRound, submarineVelocity)) + 1;
-		
+
 		Position newSubmarinePosition = new Position(
 			submarinePosition.getX().doubleValue() + xMovement(submarineVelocity, submarineAngle),
 			submarinePosition.getY().doubleValue() + yMovement(submarineVelocity, submarineAngle));
-		
-		Position collisionPosition = collisionPosition(islandSize, islandPosition, 0, 0, newSubmarinePosition, submarineVelocity , submarineAngle);
+
+		Position collisionPosition = collisionPosition(islandSize, islandPosition, 0, 0, newSubmarinePosition, submarineVelocity, submarineAngle);
 		if (collisionPosition == null) {
 			return false;
 		}
@@ -583,28 +759,28 @@ public class MathUtil {
 		}
 		return false;
 	}
-	
+
 	public static boolean isSubmarineLeavingSpace(Position submarinePosition, double submarineSize, double submarineVelocity, double submarineAngle,
-			double width, double height, double maxAccelerationPerRound) {
+		double width, double height, double maxAccelerationPerRound) {
 		double roundsToStop = Math.ceil(countRoundsToStop(maxAccelerationPerRound, submarineVelocity)) + 1;
-		
+
 		Position newSubmarinePosition = new Position(
 			submarinePosition.getX().doubleValue() + xMovement(submarineVelocity, submarineAngle),
 			submarinePosition.getY().doubleValue() + yMovement(submarineVelocity, submarineAngle));
-		
+
 		Position position = new Position(
 			newSubmarinePosition.getX().doubleValue() + roundsToStop * xMovement(submarineVelocity / 2, submarineAngle),
 			newSubmarinePosition.getY().doubleValue() + roundsToStop * yMovement(submarineVelocity / 2, submarineAngle));
-		
+
 		return minDistanceFromEdgeInWay(position, submarineSize, width, height, submarineAngle) < 2 * submarineSize;
 	}
-	
+
 	public static double minDistanceFromEdgeInWay(Position submarinePosition, double submarineSize, double width, double height, double submarineAngle) {
 		double fromRight = width - submarinePosition.getX().doubleValue() - submarineSize;
 		double fromTop = height - submarinePosition.getY().doubleValue() - submarineSize;
 		double fromLeft = submarinePosition.getX().doubleValue() - submarineSize;
 		double fromBottom = submarinePosition.getY().doubleValue() - submarineSize;
-		
+
 		if (submarineAngle == 0.0) {
 			return fromRight;
 		} else if (submarineAngle == 90.0) {
@@ -623,35 +799,35 @@ public class MathUtil {
 			return Math.min(fromRight, fromBottom);
 		}
 	}
-	
+
 	public static double countRoundsToStop(double maxAccelerationPerRound, double velocity) {
 		return velocity / maxAccelerationPerRound;
 	}
-	
+
 	public static Position collisionPosition(double targetSize, Position targetPosition, double targetVelocity, double targetAngle,
-				Position torpedoPosition, double torpedoVelocity, double torpedoAngle) {
+		Position torpedoPosition, double torpedoVelocity, double torpedoAngle) {
 		return movingCircleCollisionDetection(torpedoPosition, torpedoVelocity, torpedoAngle, 0, targetPosition, targetVelocity, targetAngle, targetSize);
 	}
 
 	public static List<Position> islandsInSubmarineDirection(Position submarinePosition, double submarineVelocity, double submarineAngle,
-			double submarineSize, Position[] islandPositions, double islandSize) {
+		double submarineSize, Position[] islandPositions, double islandSize) {
 		List<Position> islandsInSubmarineDirections = new ArrayList<>();
-		
+
 		for (Position islandPosition : islandPositions) {
 			Position position = movingCircleCollisionDetection(submarinePosition, submarineVelocity, submarineAngle, submarineSize, islandPosition, 0, 0, islandSize);
 			islandsInSubmarineDirections.add(position);
 		}
-		
+
 		return islandsInSubmarineDirections;
 	}
-	
+
 	public static boolean shouldWeShoot(Position torpedoPosition, List<Submarine> submarines, double submarineSize,
-			Submarine targetSubmarine, double torpedoRange, double torpedoVelocity, double torpedoAngle, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
+		Submarine targetSubmarine, double torpedoRange, double torpedoVelocity, double torpedoAngle, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
 		Position aimedTargetCollisionPosition = whereCouldTorpedoHitAimedTarget(targetSubmarine, submarineSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, 0);
 		List<Position> islandTorpedoCollisionPositions = whereCouldTorpedoHitIslands(islandPositions, islandSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, 0);
-		List<Position> submarineTorpedoCollisionPositions = whereCouldTorpedoHitUs(submarines, submarineSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, 0);
-		
-		if (aimedTargetCollisionPosition != null)  {
+		List<Position> submarineTorpedoCollisionPositions = whereCouldTorpedoHitSubmarines(submarines, submarineSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, 0);
+
+		if (aimedTargetCollisionPosition != null) {
 			if (!islandTorpedoCollisionPositions.isEmpty()) {
 				for (Position islandTorpedoCollisionPosition : islandTorpedoCollisionPositions) {
 					if (distanceOfCircles(islandTorpedoCollisionPosition, 0, torpedoPosition, 0) < distanceOfCircles(aimedTargetCollisionPosition, 0, torpedoPosition, 0)) {
@@ -677,33 +853,33 @@ public class MathUtil {
 			return false;
 		}
 	}
-	
+
 	private static Position movingCircleCollisionDetection(Position sourcePosition, double sourceVelocity, double sourceAngle, double sourceSize,
-			Position targetPosition, double targetVelocity, double targetAngle, double targetSize) {
+		Position targetPosition, double targetVelocity, double targetAngle, double targetSize) {
 		Position Pab = subtract(sourcePosition, targetPosition);
 		Position sourceVelocityVector = new Position(xMovement(sourceVelocity, sourceAngle), yMovement(sourceVelocity, sourceAngle));
 		Position targetVelocityVector = new Position(xMovement(targetVelocity, targetAngle), yMovement(targetVelocity, targetAngle));
-		
+
 		Position Vab = subtract(sourceVelocityVector, targetVelocityVector);
 		double a = Vab.getX().pow(2).add(Vab.getY().pow(2)).doubleValue();
 		double b = 2 * (Vab.getX().multiply(Pab.getX()).add(Vab.getY().multiply(Pab.getY()))).doubleValue();
 		double c = Pab.getX().pow(2).add(Pab.getY().pow(2)).doubleValue() - Math.pow(targetSize + sourceSize, 2);
-		
+
 		if (Math.abs(a) < MathConstants.EPSILON) {
 			return null;
 		}
-		
+
 		double q = Math.pow(b, 2) - 4 * a * c;
 		if (q < 0.0) {
 			log.warn("collisionPoisition q={}", q);
-				return null;
-			}
-		
+			return null;
+		}
+
 		double disc = Math.sqrt(q);
 		if (disc < MathConstants.EPSILON) {
 			return null;
 		}
-		
+
 		double root_1 = (-b + disc) / (2 * a);
 		double root_2 = (-b - disc) / (2 * a);
 		if (root_1 < 0.0 && root_2 < 0.0) {
@@ -717,53 +893,53 @@ public class MathUtil {
 				min = root_2;
 			}
 		}
-		
+
 		Position newSourcePosition = new Position(
 			sourcePosition.getX().add(sourceVelocityVector.getX().multiply(BigDecimal.valueOf(min))).doubleValue(),
 			sourcePosition.getY().add(sourceVelocityVector.getY().multiply(BigDecimal.valueOf(min))).doubleValue());
-		
+
 		Position newTargetPosition = new Position(
 			targetPosition.getX().add(targetVelocityVector.getX().multiply(BigDecimal.valueOf(min))).doubleValue(),
 			targetPosition.getY().add(targetVelocityVector.getY().multiply(BigDecimal.valueOf(min))).doubleValue());
-		
+
 		if (targetSize == 0.0) {
 			return newTargetPosition;
 		}
-		
+
 		if (sourceSize == 0.0) {
 			return newSourcePosition;
 		}
 
 		Position position = subtract(newSourcePosition, newTargetPosition);
-		
+
 		double pX = position.getX().doubleValue() * (sourceSize / targetSize);
 		double pY = position.getY().doubleValue() * (sourceSize / targetSize);
 		Position p = new Position(pX, pY);
-		
+
 		return subtract(newSourcePosition, p);
 	}
-	
+
 	public static Position subtract(Position lhs, Position rhs) {
 		return new Position(lhs.getX().subtract(rhs.getX()), lhs.getY().subtract(rhs.getY()));
 	}
-	
+
 	public static Set<DangerType> getDangerTypes(GameInfoResponse gameInfo, List<Position> islandPositions, double islandSize, Position submarinePosition,
-			double submarineSize, double submarineVelocity, double submarineAngle, double maxAccelerationPerRound, double width, double height,
-			List<Entity> torpedos, List<Submarine> enemySubmarines, double torpedoExplosionRadius) {
+		double submarineSize, double submarineVelocity, double submarineAngle, double maxAccelerationPerRound, double width, double height,
+		List<Entity> torpedos, List<Submarine> enemySubmarines, double torpedoExplosionRadius) {
 		Set<DangerType> dangerTypes = new HashSet<>();
-		
+
 		try {
 			List<Position> islandsInDirection = islandsInDirection(gameInfo, submarinePosition, submarineAngle);
 			Position nearestIslandInDirection = getNearestIslandInDirection(islandsInDirection);
-			
+
 			if (isSubmarineHeadingToIsland(nearestIslandInDirection, islandSize, submarinePosition, submarineSize, submarineVelocity, submarineAngle, maxAccelerationPerRound)) {
 				dangerTypes.add(DangerType.HEADING_TO_ISLAND);
 			}
-			
+
 			if (isSubmarineLeavingSpace(submarinePosition, submarineSize, submarineVelocity, submarineAngle, width, height, maxAccelerationPerRound)) {
 				dangerTypes.add(DangerType.LEAVING_SPACE);
 			}
-			
+
 			if (isSubmarineHeadingToTorpedoExplosion(torpedos, submarinePosition, submarineVelocity, submarineAngle, submarineSize, enemySubmarines, torpedoExplosionRadius, islandPositions, islandSize)) {
 				dangerTypes.add(DangerType.HEADING_TO_TORPEDO_EXPLOSION);
 			}
@@ -776,22 +952,25 @@ public class MathUtil {
 	}
 
 	/**
-	 * Source: http://jwilson.coe.uga.edu/EMAT6680Su12/Carreras/EMAT6690/Essay2/essay2.html
-	 * Megmondja, hogy a paraméterül kapott két körnek mekkora területi átfedése van.
+	 * Source:
+	 * http://jwilson.coe.uga.edu/EMAT6680Su12/Carreras/EMAT6690/Essay2/essay2.html
+	 * Megmondja, hogy a paraméterül kapott két körnek mekkora területi átfedése
+	 * van.
 	 */
 	public static double intersectionOfCirclesWithSameRadius(Position a, Position b, double r) {
 		double distanceOfPoints = distanceOfCircles(a, 0.0, b, 0.0);
 		if (distanceOfPoints >= 2.0 * r) {
 			return 0.0;
 		}
-		
+
 		double theta = 2.0 * Math.acos(distanceOfPoints / (2.0 * r));
-		
+
 		return r * r * (theta - Math.sin(theta));
 	}
-	
+
 	/**
-	 * Megmondja, hogy a paraméterül kapott két körnek mekkora területi átfedése van.
+	 * Megmondja, hogy a paraméterül kapott két körnek mekkora területi átfedése
+	 * van.
 	 */
 	public static double intersectionOfCircles(Position pa, Position pb, double ra, double rb) {
 		double d = distanceOfCircles(pa, 0.0, pb, 0.0);
@@ -801,43 +980,44 @@ public class MathUtil {
 			return 0.0;
 		}
 		double a = (1.0 / d) * Math.sqrt(4 * d * d * R * R - Math.pow(d * d - r * r + R * R, 2.0));
-		
+
 		double alpha = Math.toDegrees(Math.asin(a / (2.0 * R)) * 2.0);
 		double beta = Math.toDegrees(Math.asin(a / (2.0 * r)) * 2.0);
-		
+
 		double TC = (alpha / 360.0) * R * R * Math.PI;
 		double tC = (beta / 360.0) * r * r * Math.PI;
-		
+
 		double x = Math.sqrt(R * R - Math.pow(a / 2.0, 2.0));
 		double y = d - x;
-		
+
 		double TH = x * a;
 		double tH = y * a;
-		
+
 		double TL = TC - TH;
 		double tL = tC - tH;
-		
+
 		return TL + tL;
 	}
-	
+
 	/**
-	 * Megmondja, hogy ha adott két körgyűrű, akkor mekkora az általuk közösen fedett terület.
+	 * Megmondja, hogy ha adott két körgyűrű, akkor mekkora az általuk közösen
+	 * fedett terület.
 	 */
 	public static double intersectionOfRings(Position pa, Position pb, double ra, double rb) {
 		double d = distanceOfCircles(pa, 0.0, pb, 0.0);
 		double R = ra > rb ? ra : rb;
 		double r = ra < rb ? ra : rb;
-		
+
 		// A gyűrűk nem fedik egymást:
 		if (d >= 2 * R) {
 			return 0.0;
 		}
-		
+
 		if (d >= R + r) {
 			return intersectionOfCirclesWithSameRadius(pa, pb, R);
 		} else if (d >= 2 * r) {
 			double intOfDiffCircles = intersectionOfCircles(pa, pb, R, r);
-			return intersectionOfCirclesWithSameRadius(pa, pb, R) - 2 * intOfDiffCircles; 
+			return intersectionOfCirclesWithSameRadius(pa, pb, R) - 2 * intOfDiffCircles;
 		} else if (d >= r) {
 			double intOfLittles = intersectionOfCirclesWithSameRadius(pa, pb, r);
 			double intOfDiffCircles = intersectionOfCircles(pa, pb, R, r);
