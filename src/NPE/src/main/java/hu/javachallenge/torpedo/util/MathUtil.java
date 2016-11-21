@@ -68,7 +68,7 @@ public class MathUtil {
 		return ((e.getX().doubleValue() - s.getX().doubleValue()) * (p.getY().doubleValue() - s.getY().doubleValue()) - (e.getY().doubleValue() - s.getY().doubleValue()) * (p.getX().doubleValue() - s.getX().doubleValue())) > 0;
 	}
 
-	public static boolean isPositionLeftOfUs(Submarine submarine, Position p) {
+	public static boolean isPositionLeftToUs(Submarine submarine, Position p) {
 		Position s = submarine.getPosition();
 
 		double xValue = submarine.getPosition().getX().doubleValue() + xMovement(10, submarine.getAngle());
@@ -111,7 +111,7 @@ public class MathUtil {
 	}
 
 	/**
-	 * Milyen irányban kell kilőni a torpedót, hogy eltalálja a célt.
+	 * @return Ilyen irányban kell kilőni a torpedót, hogy eltalálja a célt.
 	 */
 	public static double torpedoDestinationAngle(Position sourcePosition, Position destinationPosition) {
 		double srcX = sourcePosition.getX().doubleValue();
@@ -156,7 +156,6 @@ public class MathUtil {
 	}
 
 	/**
-	 *
 	 * @param velocity átfogó
 	 * @param angle szög
 	 * @return szomszédos befogó
@@ -173,7 +172,7 @@ public class MathUtil {
 	 * https://www.kirupa.com/forum/showthread.php?347334-Aiming-and-hitting-a-moving-target
 	 */
 	public static Double aimAtMovingTarget(Position sourcePosition, Position targetPosition, double targetMovementAngle,
-		double targetVelocity, double bulletVelocity) {
+            double targetVelocity, double bulletVelocity) {
 		double dX = targetPosition.getX().subtract(sourcePosition.getX()).doubleValue();
 		double dY = targetPosition.getY().subtract(sourcePosition.getY()).doubleValue();
 
@@ -208,13 +207,14 @@ public class MathUtil {
 
 	/**
 	 * http://stackoverflow.com/questions/1571294/line-equation-with-angle
+     * @return Meredekség.
 	 */
-	public static double meredekség(double angle) {
+	public static double slope(double angle) {
 		return Math.tan(Math.toRadians(angle));
 	}
 
 	/**
-	 * Visszaadja a lehetséges (nem esik útba sziget) célpontokat.
+	 * @return Lehetséges (nem esik útba sziget) célpontok.
 	 */
 	public static List<Submarine> getPossibleTargets(GameInfoResponse gameInfoResponse, Position sourcePosition, Submarine[] submarines) {
 		double bulletVelocity = gameInfoResponse.getGame().getMapConfiguration().getTorpedoSpeed();
@@ -270,7 +270,7 @@ public class MathUtil {
 	}
 
 	public static List<Position> islandsInDirection(GameInfoResponse gameInfoResponse, Position sourcePosition,
-		double angle) {
+            double angle) {
 		List<Island> islandsInDirection = new ArrayList<>();
 
 		Position[] islandPositions = gameInfoResponse.getGame().getMapConfiguration().getIslandPositions();
@@ -278,7 +278,7 @@ public class MathUtil {
 		double submarineSize = gameInfoResponse.getGame().getMapConfiguration().getSubmarineSize();
 
 		for (Position islandPosition : islandPositions) {
-			double meredekség = meredekség(angle);
+			double meredekség = slope(angle);
 			double a = Math.pow(meredekség, 2) + 1;
 
 			double srcX = sourcePosition.getX().doubleValue();
@@ -304,8 +304,10 @@ public class MathUtil {
 		return islandsInDirection.stream().map(island -> island.position).collect(Collectors.toList());
 	}
 
-	public static List<Position> whereCouldTorpedoHitIslands(List<Position> islandPositions, double islandSize, Position torpedoPosition, double torpedoRange,
-		double torpedoVelocity, double torpedoAngle, double torpedoRoundsMoved) {
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static List<Position> whereCouldTorpedoHitIslands(List<Position> islandPositions, double islandSize,
+            Position torpedoPosition, double torpedoRange, double torpedoVelocity, double torpedoAngle,
+            double torpedoRoundsMoved) {
 		List<Position> collisionPositions = new LinkedList<>();
 		for (Position islandPosition : islandPositions) {
 			Position collisionPosition = collisionPosition(islandSize, islandPosition, 0, 0, torpedoPosition, torpedoVelocity, torpedoAngle);
@@ -320,8 +322,10 @@ public class MathUtil {
 		return collisionPositions;
 	}
 
-	public static List<Position> whereCouldTorpedoHitSubmarines(List<Submarine> submarines, double submarineSize, Position torpedoPosition, double torpedoRange,
-		double torpedoVelocity, double torpedoAngle, double torpedoRoundsMoved) {
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static List<Position> whereCouldTorpedoHitSubmarines(List<Submarine> submarines, double submarineSize,
+            Position torpedoPosition, double torpedoRange, double torpedoVelocity, double torpedoAngle,
+            double torpedoRoundsMoved) {
 		List<Position> collisionPositions = new LinkedList<>();
 		for (Submarine submarine : submarines) {
 			if (!submarine.getPosition().equals(torpedoPosition)) {
@@ -338,8 +342,10 @@ public class MathUtil {
 		return collisionPositions;
 	}
 
-	public static Position whereCouldTorpedoHitAimedTarget(Submarine submarine, double submarineSize, Position torpedoPosition, double torpedoRange,
-		double torpedoVelocity, double torpedoAngle, double torpedoRoundsMoved) {
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static Position whereCouldTorpedoHitAimedTarget(Submarine submarine, double submarineSize,
+            Position torpedoPosition, double torpedoRange, double torpedoVelocity, double torpedoAngle,
+            double torpedoRoundsMoved) {
 		Position collisionPosition = collisionPosition(submarineSize, submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), torpedoPosition, torpedoVelocity, torpedoAngle);
 		if (collisionPosition != null) {
 			double time = Math.abs(torpedoDistance(torpedoPosition, collisionPosition, 0)) / torpedoVelocity;
@@ -350,9 +356,10 @@ public class MathUtil {
 		return null;
 	}
 
-	public static Submarine getNearestSubmarineInOurWay(Submarine actualSubmarine, List<Submarine> allSubmarine, double submarineSize, double maxSpeed) {
+	public static Submarine getNearestSubmarineInOurWay(Submarine actualSubmarine, List<Submarine> allSubmarines,
+            double submarineSize, double maxSpeed) {
 		Submarine nearestSubmarine = null;
-		for (Submarine submarine : allSubmarine) {
+		for (Submarine submarine : allSubmarines) {
 			if (!actualSubmarine.equals(submarine)) {
 				Position p = movingCircleCollisionDetection(submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, actualSubmarine.getPosition(), maxSpeed, actualSubmarine.getAngle(), submarineSize);
 				if (p != null) {
@@ -367,7 +374,8 @@ public class MathUtil {
 		return nearestSubmarine;
 	}
 
-	public static Submarine getBiggestSonarIntersectionSubmarine(Submarine submarine, List<Submarine> submarines, double sonarRange, double extendedSonarRange) {
+	public static Submarine getBiggestSonarIntersectionSubmarine(Submarine submarine, List<Submarine> submarines,
+            double sonarRange, double extendedSonarRange) {
 		double intersection = 0.0;
 		Submarine biggestSonarIntersectionSubmarine = null;
 		for (Submarine s : submarines) {
@@ -394,8 +402,12 @@ public class MathUtil {
 		return distanceOfCircles(s1.getPosition(), 0, s2.getPosition(), 0) > distanceOfCircles(newS1Position, 0, newS2Position, 0);
 	}
 	
-	public static MoveParameter getMoveParameterBasedOnEnemyPosition(Submarine submarine1, List<Submarine> enemySubmarines, double sonarRange, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed,
-		List<Submarine> allSubmarine, double submarineSize, double torpedoRange, double torpedoSpeed, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static MoveParameter getMoveParameterBasedOnEnemyPosition(Submarine submarine1,
+            List<Submarine> enemySubmarines, double sonarRange, double maxSteeringPerRound,
+            double maxAccelerationPerRound, double maxSpeed, List<Submarine> allSubmarine, double submarineSize,
+            double torpedoRange, double torpedoSpeed, double torpedoExplosionRadius, List<Position> islandPositions,
+            double islandSize) {
 		Submarine submarine2 = getBiggestSonarIntersectionSubmarine(submarine1, enemySubmarines, sonarRange, sonarRange);
 		double minusAcceleration = normalizeVelocity(submarine1.getVelocity() - maxAccelerationPerRound, maxSpeed) - submarine1.getVelocity();
 		double plusAcceleration = normalizeVelocity(submarine1.getVelocity() + maxAccelerationPerRound, maxSpeed) - submarine1.getVelocity();
@@ -417,7 +429,7 @@ public class MathUtil {
 					acc = plusAcceleration;
 				}
 
-				if (isPositionLeftOfUs(submarine1, submarine2.getPosition())) {
+				if (isPositionLeftToUs(submarine1, submarine2.getPosition())) {
 					steering = -maxSteeringPerRound;
 				} else {
 					steering = maxSteeringPerRound;
@@ -445,10 +457,11 @@ public class MathUtil {
 		return new MoveParameter(acc, steering);
 	}
 
-	public static MoveParameter getMoveParameterBasedOnTorpedos(List<Entity> torpedos, List<Submarine> submarines, double submarineSize,
-		Submarine targetSubmarine, double torpedoRange, double torpedoVelocity, double torpedoExplosionRadius, List<Position> islandPositions,
-		double islandSize, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
-
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static MoveParameter getMoveParameterBasedOnTorpedos(List<Entity> torpedos, List<Submarine> submarines,
+            double submarineSize, Submarine targetSubmarine, double torpedoRange, double torpedoVelocity,
+            double torpedoExplosionRadius, List<Position> islandPositions, double islandSize,
+            double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
 		double minusAcceleration = normalizeVelocity(targetSubmarine.getVelocity() - maxAccelerationPerRound, maxSpeed) - targetSubmarine.getVelocity();
 		double plusAcceleration = normalizeVelocity(targetSubmarine.getVelocity() + maxAccelerationPerRound, maxSpeed) - targetSubmarine.getVelocity();
 
@@ -466,7 +479,7 @@ public class MathUtil {
 				acc = plusAcceleration;
 			}
 
-			if (isPositionLeftOfUs(targetSubmarine, dangerousTorpedoHitPosition)) {
+			if (isPositionLeftToUs(targetSubmarine, dangerousTorpedoHitPosition)) {
 				steering = -maxSteeringPerRound;
 			} else {
 				steering = maxSteeringPerRound;
@@ -476,9 +489,10 @@ public class MathUtil {
 		return new MoveParameter(acc, steering);
 	}
 
-	public static Position getDangerousTorpedoHitPosition(List<Entity> torpedos, List<Submarine> submarines, double submarineSize,
-		Submarine targetSubmarine, double torpedoRange, double torpedoVelocity, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
-
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static Position getDangerousTorpedoHitPosition(List<Entity> torpedos, List<Submarine> submarines,
+            double submarineSize, Submarine targetSubmarine, double torpedoRange, double torpedoVelocity,
+            double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
 		for (Entity torpedo : torpedos) {
 			Position torpedoPosition = torpedo.getPosition();
 			double torpedoAngle = torpedo.getAngle();
@@ -519,7 +533,10 @@ public class MathUtil {
 		return null;
 	}
 
-	public static MoveParameter getMoveParameterBasedOnSonars(Submarine submarine1, List<Submarine> submarines, double sonarRange, double extendedSonarRange, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static MoveParameter getMoveParameterBasedOnSonars(Submarine submarine1, List<Submarine> submarines,
+            double sonarRange, double extendedSonarRange, double maxSteeringPerRound, double maxAccelerationPerRound,
+            double maxSpeed) {
 		Submarine submarine2 = getBiggestSonarIntersectionSubmarine(submarine1, submarines, sonarRange, extendedSonarRange);
 
 		double minusAcceleration = normalizeVelocity(submarine1.getVelocity() - maxAccelerationPerRound, maxSpeed) - submarine1.getVelocity();
@@ -540,7 +557,7 @@ public class MathUtil {
 				} else {
 					acc = plusAcceleration;
 				}
-				if (isPositionLeftOfUs(submarine1, submarine2.getPosition())) {
+				if (isPositionLeftToUs(submarine1, submarine2.getPosition())) {
 					steering = -maxSteeringPerRound;
 				} else {
 					steering = maxSteeringPerRound;
@@ -551,7 +568,9 @@ public class MathUtil {
 		return new MoveParameter(acc, steering);
 	}
 
-	public static MoveParameter getMoveParameterHeadingToIslandBasedOnSonar(Submarine submarine, Position islandPosition, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static MoveParameter getMoveParameterHeadingToIslandBasedOnSonar(Submarine submarine, Position islandPosition,
+            double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
 		double minusAcceleration = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed) - submarine.getVelocity();
 		double plusAcceleration = normalizeVelocity(submarine.getVelocity() + maxAccelerationPerRound, maxSpeed) - submarine.getVelocity();
 
@@ -560,7 +579,7 @@ public class MathUtil {
 		if (isPositionInFrontOfUs(submarine, islandPosition)) {
 			if (submarine.getVelocity() > maxSpeed * 0.5) {
 				acc = minusAcceleration;
-				if (isPositionLeftOfUs(submarine, islandPosition)) {
+				if (isPositionLeftToUs(submarine, islandPosition)) {
 					steering = -maxSteeringPerRound;
 				} else {
 					steering = maxSteeringPerRound;
@@ -573,19 +592,23 @@ public class MathUtil {
 		return new MoveParameter(acc, steering);
 	}
 
-	public static double getSteeringHeadingToIsland(Submarine submarine, Position islandPosition, double maxSteering, double submarineSize, double islandSize) {
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static double getSteeringHeadingToIsland(Submarine submarine, Position islandPosition, double maxSteering,
+            double submarineSize, double islandSize) {
 		Position collisionPosition = movingCircleCollisionDetection(submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, islandPosition, 0, 0, islandSize);
 		if (collisionPosition == null) {
 			return 0.0;
 		}
-		if (isPositionLeftOfUs(submarine, collisionPosition)) {
+		if (isPositionLeftToUs(submarine, collisionPosition)) {
 			return -maxSteering;
 		} else {
 			return maxSteering;
 		}
 	}
 
-	public static MoveParameter getMoveParameterHeadingToSubmarine(Submarine actualSubmarine, Submarine otherSubmarine, double submarineSize, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static MoveParameter getMoveParameterHeadingToSubmarine(Submarine actualSubmarine, Submarine otherSubmarine,
+            double submarineSize, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
 		double minusAcceleration = normalizeVelocity(actualSubmarine.getVelocity() - maxAccelerationPerRound, maxSpeed) - actualSubmarine.getVelocity();
 		double plusAcceleration = normalizeVelocity(actualSubmarine.getVelocity() + maxAccelerationPerRound, maxSpeed) - actualSubmarine.getVelocity();
 
@@ -604,7 +627,7 @@ public class MathUtil {
 			} else {
 				acc = plusAcceleration;
 			}
-			if (isPositionLeftOfUs(actualSubmarine, collisionPosition)) {
+			if (isPositionLeftToUs(actualSubmarine, collisionPosition)) {
 				steering = -maxSteeringPerRound;
 			} else {
 				steering = maxSteeringPerRound;
@@ -618,7 +641,10 @@ public class MathUtil {
 		BAL_FELSO, JOBB_FELSO, BAL_ALSO, JOBB_ALSO
 	}
 
-	public static MoveParameter getMoveParameterHeadingToEdge(Submarine submarine, double submarineSize, double width, double height, double sonarRange, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static MoveParameter getMoveParameterHeadingToEdge(Submarine submarine, double submarineSize, double width,
+            double height, double sonarRange, double maxSteeringPerRound, double maxAccelerationPerRound,
+            double maxSpeed) {
 		double fromRight = width - submarine.getPosition().getX().doubleValue() - submarineSize;
 		double fromTop = height - submarine.getPosition().getY().doubleValue() - submarineSize;
 		double fromLeft = submarine.getPosition().getX().doubleValue() - submarineSize;
@@ -809,8 +835,10 @@ public class MathUtil {
 		return new MoveParameter(acc, steering);
 	}
 
-	public static boolean isSubmarineHeadingToTorpedoExplosion(List<Entity> torpedos, Position submarinePosition, double submarineVelocity, double submarineAngle,
-		double submarineSize, List<Submarine> enemySubmarines, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static boolean isSubmarineHeadingToTorpedoExplosion(List<Entity> torpedos, Position submarinePosition,
+            double submarineVelocity, double submarineAngle, double submarineSize, List<Submarine> enemySubmarines,
+            double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
 		for (Entity torpedo : torpedos) {
 			if (isSubmarineHeadingToTorpedoExplosion(torpedo.getPosition(), submarinePosition, submarineVelocity, submarineAngle, submarineSize, enemySubmarines, torpedo.getVelocity(), torpedo.getAngle(), torpedoExplosionRadius, islandPositions, islandSize)) {
 				return true;
@@ -819,9 +847,11 @@ public class MathUtil {
 		return false;
 	}
 
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
 	public static boolean isSubmarineHeadingToTorpedoExplosion(Position torpedoPosition, Position submarinePosition,
-		double submarineVelocity, double submarineAngle, double submarineSize, List<Submarine> enemySubmarines, double torpedoVelocity, double torpedoAngle,
-		double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
+            double submarineVelocity, double submarineAngle, double submarineSize, List<Submarine> enemySubmarines,
+            double torpedoVelocity, double torpedoAngle, double torpedoExplosionRadius, List<Position> islandPositions,
+            double islandSize) {
 		Position newSubmarinePosition = new Position(
 			submarinePosition.getX().doubleValue() + xMovement(submarineVelocity, submarineAngle),
 			submarinePosition.getY().doubleValue() + yMovement(submarineVelocity, submarineAngle));
@@ -851,8 +881,10 @@ public class MathUtil {
 		return false;
 	}
 
-	public static boolean isSubmarineHeadingToIsland(Position islandPosition, double islandSize, Position submarinePosition, double submarineSize,
-		double submarineVelocity, double submarineAngle, double maxAccelerationPerRound) {
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static boolean isSubmarineHeadingToIsland(Position islandPosition, double islandSize,
+            Position submarinePosition, double submarineSize, double submarineVelocity, double submarineAngle,
+            double maxAccelerationPerRound) {
 		if (islandPosition == null) {
 			return false;
 		}
