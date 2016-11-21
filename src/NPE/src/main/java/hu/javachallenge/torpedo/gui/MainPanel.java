@@ -164,7 +164,7 @@ public class MainPanel extends JPanel {
 			paintCircle(g, SUBMARINE_COLOR, x, y, submarineSize);
 			
 			int dirX = (int) (x + MathUtil.xMovement(submarine.getVelocity(), submarine.getAngle()) * scale);
-			int dirY = (int) (y - MathUtil.yMovement(submarine.getVelocity(), submarine.getAngle()) * scale );
+			int dirY = (int) (y - MathUtil.yMovement(submarine.getVelocity(), submarine.getAngle()) * scale);
 
 			g.setColor(Color.RED);
 			Graphics2D g2 = (Graphics2D) g;

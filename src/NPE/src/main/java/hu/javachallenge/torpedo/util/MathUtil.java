@@ -2,6 +2,7 @@ package hu.javachallenge.torpedo.util;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -1021,9 +1022,15 @@ public class MathUtil {
 		return new Position(lhs.getX().subtract(rhs.getX()), lhs.getY().subtract(rhs.getY()));
 	}
 
-	public static Set<DangerType> getDangerTypes(GameInfoResponse gameInfo, List<Position> islandPositions, double islandSize, Position submarinePosition,
-		double submarineSize, double submarineVelocity, double submarineAngle, double maxAccelerationPerRound, double width, double height,
-		List<Entity> torpedos, List<Submarine> enemySubmarines, double torpedoExplosionRadius) {
+	public static Set<DangerType> getDangerTypes(GameInfoResponse gameInfo, Position submarinePosition, double submarineVelocity, double submarineAngle, List<Entity> torpedos, List<Submarine> enemySubmarines) {
+		List<Position> islandPositions = Arrays.asList(gameInfo.getGame().getMapConfiguration().getIslandPositions());
+		double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize();
+		double maxAccelerationPerRound = gameInfo.getGame().getMapConfiguration().getMaxAccelerationPerRound();
+		double islandSize  = gameInfo.getGame().getMapConfiguration().getIslandSize();
+		double width = gameInfo.getGame().getMapConfiguration().getWidth();
+		double height = gameInfo.getGame().getMapConfiguration().getHeight();
+		double torpedoExplosionRadius = gameInfo.getGame().getMapConfiguration().getTorpedoExplosionRadius();
+		
 		Set<DangerType> dangerTypes = new HashSet<>();
 
 		try {
