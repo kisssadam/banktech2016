@@ -216,8 +216,9 @@ public class MathUtil {
 	/**
 	 * Visszaadja a lehetséges (nem esik útba sziget) célpontokat.
 	 */
-	public static List<Submarine> getPossibleTargets(GameInfoResponse gameInfoResponse, Position[] islandPositions,
-		Position sourcePosition, Submarine[] submarines, double bulletVelocity) {
+	public static List<Submarine> getPossibleTargets(GameInfoResponse gameInfoResponse, Position sourcePosition, Submarine[] submarines) {
+		double bulletVelocity = gameInfoResponse.getGame().getMapConfiguration().getTorpedoSpeed();
+		
 		List<Submarine> possibleTargets = new ArrayList<>();
 
 		for (Submarine submarine : submarines) {
