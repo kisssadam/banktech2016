@@ -366,7 +366,7 @@ public class GameController implements Runnable {
 
 		//Szonárnyi távolságon belül tartunk-e ki a pályáról?
 		moveParameter = MathUtil.getMoveParameterHeadingToEdge(submarine, submarineSize, width, height, sonarRange, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed);
-		
+
 		if (moveParameter.getSteering() == 0.0) {
 			//Szonárnyi távolságon belül van-e sziget?
 			Position nearestIslandPosition = MathUtil.getNearestIsland(gameInfo, submarine.getPosition());
@@ -394,12 +394,12 @@ public class GameController implements Runnable {
 			//Közel vannak-e a hajóink egymáshoz?
 			moveParameter = MathUtil.getMoveParameterBasedOnSonars(submarine, Arrays.asList(submarinesInGame.getSubmarines()), sonarRange, extendedSonarRange, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed);
 		}
-		
+
 		//Ha hátul van a hajó, de bárrmi más miatt kanyarodik, akkor csak maradjon le a másik hajónktól.
-		if(moveParameter.getAcceleration() != 0.0) {
+		if (moveParameter.getAcceleration() != 0.0) {
 			moveParameter.setAcceleration(MathUtil.getMoveParameterBasedOnSonars(submarine, Arrays.asList(submarinesInGame.getSubmarines()), sonarRange, extendedSonarRange, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed).getAcceleration());
 		}
-		
+
 		return moveParameter;
 	}
 
@@ -413,7 +413,7 @@ public class GameController implements Runnable {
 				return Double.compare(lhsDistance, rhsDistance);
 			}
 		});
-		
+
 		for (Submarine enemySubmarine : enemySubmarines) {
 			Double theta = aimAtMovingTarget(submarine.getPosition(), enemySubmarine.getPosition(), enemySubmarine.getAngle(), enemySubmarine.getVelocity(), torpedoSpeed);
 			//boolean areWeInDanger = MathUtil.isSubmarineHeadingToTorpedoExplosion(torpedos, submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, enemySubmarines, torpedoExplosionRadius, islandPositions, islandSize);

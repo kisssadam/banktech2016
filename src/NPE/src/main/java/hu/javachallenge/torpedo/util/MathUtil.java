@@ -382,7 +382,18 @@ public class MathUtil {
 		}
 		return biggestSonarIntersectionSubmarine;
 	}
-
+	
+	public static boolean areSubmarinesHeadingToEachOther(Submarine s1, Submarine s2) {
+		Position newS1Position = new Position(
+			s1.getPosition().getX().doubleValue() + xMovement(s1.getVelocity(), s1.getAngle()),
+			s1.getPosition().getY().doubleValue() + yMovement(s1.getVelocity(), s1.getAngle()));
+		Position newS2Position = new Position(
+			s2.getPosition().getX().doubleValue() + xMovement(s2.getVelocity(), s2.getAngle()),
+			s2.getPosition().getY().doubleValue() + yMovement(s2.getVelocity(), s2.getAngle()));
+		
+		return distanceOfCircles(s1.getPosition(), 0, s2.getPosition(), 0) > distanceOfCircles(newS1Position, 0, newS2Position, 0);
+	}
+	
 	public static MoveParameter getMoveParameterBasedOnEnemyPosition(Submarine submarine1, List<Submarine> enemySubmarines, double sonarRange, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed,
 		List<Submarine> allSubmarine, double submarineSize, double torpedoRange, double torpedoSpeed, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
 		Submarine submarine2 = getBiggestSonarIntersectionSubmarine(submarine1, enemySubmarines, sonarRange, sonarRange);
@@ -426,7 +437,10 @@ public class MathUtil {
 					steering = -maxSteeringPerRound;
 				}
 			}*/
-
+			if(areSubmarinesHeadingToEachOther(submarine1, submarine2)) {
+				acc *= -1;
+				steering *= -1;
+			}
 		}
 		return new MoveParameter(acc, steering);
 	}
