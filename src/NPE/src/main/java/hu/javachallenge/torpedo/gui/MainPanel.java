@@ -2,6 +2,7 @@ package hu.javachallenge.torpedo.gui;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
@@ -126,10 +127,11 @@ public class MainPanel extends JPanel {
 	}
 
 	private void paintIslands(Graphics g, double scale) {
+		double islandSize = gameInfo.getGame().getMapConfiguration().getIslandSize() * scale;
+		
 		for (Position islandPosition : gameInfo.getGame().getMapConfiguration().getIslandPositions()) {
 			double x = islandPosition.getX().doubleValue() * scale;
 			double y = getHeight() - islandPosition.getY().doubleValue() * scale;
-			double islandSize = gameInfo.getGame().getMapConfiguration().getIslandSize() * scale;
 
 			paintCircle(g, GROUND_COLOR, x, y, islandSize);
 			paintCircle(g, TERRAIN_COLOR, x, y, islandSize * 0.8);
@@ -137,8 +139,8 @@ public class MainPanel extends JPanel {
 	}
 
 	private void paintSubmarineComponent(Graphics g, double scale) {
-		double sonarRange = gameInfo.getGame().getMapConfiguration().getSonarRange();
-		double extendedSonarRange = gameInfo.getGame().getMapConfiguration().getExtendedSonarRange();
+		double sonarRange = gameInfo.getGame().getMapConfiguration().getSonarRange() * scale;
+		double extendedSonarRange = gameInfo.getGame().getMapConfiguration().getExtendedSonarRange() * scale;
 		double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize() * scale;
 		
 		for (Submarine submarine : submarines) {
@@ -178,6 +180,7 @@ public class MainPanel extends JPanel {
 			String title = String.valueOf(submarine.getHp());
 			
 			g.setColor(Color.GREEN);
+			g.setFont(new Font("default", Font.BOLD, 12));
 			g.drawString(title, (int) x, (int) y);
 		}
 

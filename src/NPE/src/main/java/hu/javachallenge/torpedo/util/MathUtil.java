@@ -23,6 +23,21 @@ public class MathUtil {
 
 	private static final Logger log = LoggerFactory.getLogger(MathUtil.class);
 
+	private static class Island {
+
+		private Position position;
+		private double distance;
+
+		public Island(Position position, double distance) {
+			this.position = position;
+			this.distance = distance;
+		}
+	}
+	
+	private static enum Negyed {
+		BAL_FELSO, JOBB_FELSO, BAL_ALSO, JOBB_ALSO
+	}
+	
 	private static Negyed getCurrentNegyed(Submarine submarine, double width, double height) {
 		double submarineX = submarine.getPosition().getX().doubleValue();
 		double submarineY = submarine.getPosition().getY().doubleValue();
@@ -34,17 +49,6 @@ public class MathUtil {
 			return submarineY > centerY ? Negyed.JOBB_FELSO : Negyed.JOBB_ALSO;
 		} else {
 			return submarineY > centerY ? Negyed.BAL_FELSO : Negyed.BAL_ALSO;
-		}
-	}
-
-	private static class Island {
-
-		private Position position;
-		private double distance;
-
-		public Island(Position position, double distance) {
-			this.position = position;
-			this.distance = distance;
 		}
 	}
 
@@ -64,18 +68,18 @@ public class MathUtil {
 		return velocity < 0 ? 0 : (velocity > maxSpeed ? maxSpeed : velocity);
 	}
 
-	private static boolean isPositionLeftOfUs(Position s, Position e, Position p) {
+	private static boolean isPositionOnOurLeft(Position s, Position e, Position p) {
 		return ((e.getX().doubleValue() - s.getX().doubleValue()) * (p.getY().doubleValue() - s.getY().doubleValue()) - (e.getY().doubleValue() - s.getY().doubleValue()) * (p.getX().doubleValue() - s.getX().doubleValue())) > 0;
 	}
 
-	public static boolean isPositionLeftToUs(Submarine submarine, Position p) {
+	public static boolean isPositionOnOurLeft(Submarine submarine, Position p) {
 		Position s = submarine.getPosition();
 
 		double xValue = submarine.getPosition().getX().doubleValue() + xMovement(10, submarine.getAngle());
 		double yValue = submarine.getPosition().getY().doubleValue() + yMovement(10, submarine.getAngle());
 		Position e = new Position(xValue, yValue);
 
-		return isPositionLeftOfUs(s, e, p);
+		return isPositionOnOurLeft(s, e, p);
 	}
 
 	public static boolean isPositionInFrontOfUs(Submarine submarine, Position p) {
@@ -86,17 +90,17 @@ public class MathUtil {
 		double yValue = submarine.getPosition().getY().doubleValue() + yMovement(10, angle);
 		Position e = new Position(xValue, yValue);
 
-		return isPositionLeftOfUs(s, e, p);
+		return isPositionOnOurLeft(s, e, p);
 	}
 
 	private static double angleDifference(double alpha, double beta) {
-		double phi = normalizeAngle(Math.abs(beta - alpha));  // This is either the distance or 360 - distance
-		double distance = phi > 180 ? 360 - phi : phi;
-		return distance;
+		double phi = normalizeAngle(Math.abs(beta - alpha));  // This is either the difference or (360 - difference)
+		double difference = phi > 180 ? 360 - phi : phi;
+		return difference;
 	}
 
 	public static double distanceOfCircles(Position sourcePosition, double sourceR, Position destinationPosition,
-		double destinationR) {
+			double destinationR) {
 		BigDecimal xSubtract = sourcePosition.getX().subtract(destinationPosition.getX());
 		BigDecimal xSquare = xSubtract.multiply(xSubtract);
 
@@ -429,7 +433,7 @@ public class MathUtil {
 					acc = plusAcceleration;
 				}
 
-				if (isPositionLeftToUs(submarine1, submarine2.getPosition())) {
+				if (isPositionOnOurLeft(submarine1, submarine2.getPosition())) {
 					steering = -maxSteeringPerRound;
 				} else {
 					steering = maxSteeringPerRound;
@@ -479,7 +483,7 @@ public class MathUtil {
 				acc = plusAcceleration;
 			}
 
-			if (isPositionLeftToUs(targetSubmarine, dangerousTorpedoHitPosition)) {
+			if (isPositionOnOurLeft(targetSubmarine, dangerousTorpedoHitPosition)) {
 				steering = -maxSteeringPerRound;
 			} else {
 				steering = maxSteeringPerRound;
@@ -557,7 +561,7 @@ public class MathUtil {
 				} else {
 					acc = plusAcceleration;
 				}
-				if (isPositionLeftToUs(submarine1, submarine2.getPosition())) {
+				if (isPositionOnOurLeft(submarine1, submarine2.getPosition())) {
 					steering = -maxSteeringPerRound;
 				} else {
 					steering = maxSteeringPerRound;
@@ -579,7 +583,7 @@ public class MathUtil {
 		if (isPositionInFrontOfUs(submarine, islandPosition)) {
 			if (submarine.getVelocity() > maxSpeed * 0.5) {
 				acc = minusAcceleration;
-				if (isPositionLeftToUs(submarine, islandPosition)) {
+				if (isPositionOnOurLeft(submarine, islandPosition)) {
 					steering = -maxSteeringPerRound;
 				} else {
 					steering = maxSteeringPerRound;
@@ -599,7 +603,7 @@ public class MathUtil {
 		if (collisionPosition == null) {
 			return 0.0;
 		}
-		if (isPositionLeftToUs(submarine, collisionPosition)) {
+		if (isPositionOnOurLeft(submarine, collisionPosition)) {
 			return -maxSteering;
 		} else {
 			return maxSteering;
@@ -627,7 +631,7 @@ public class MathUtil {
 			} else {
 				acc = plusAcceleration;
 			}
-			if (isPositionLeftToUs(actualSubmarine, collisionPosition)) {
+			if (isPositionOnOurLeft(actualSubmarine, collisionPosition)) {
 				steering = -maxSteeringPerRound;
 			} else {
 				steering = maxSteeringPerRound;
@@ -635,10 +639,6 @@ public class MathUtil {
 		}
 
 		return new MoveParameter(acc, steering);
-	}
-
-	private static enum Negyed {
-		BAL_FELSO, JOBB_FELSO, BAL_ALSO, JOBB_ALSO
 	}
 
     // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
@@ -909,8 +909,9 @@ public class MathUtil {
 		return false;
 	}
 
-	public static boolean isSubmarineLeavingSpace(Position submarinePosition, double submarineSize, double submarineVelocity, double submarineAngle,
-		double width, double height, double maxAccelerationPerRound) {
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static boolean isSubmarineLeavingSpace(Position submarinePosition, double submarineSize,
+			double submarineVelocity, double submarineAngle, double width, double height, double maxAccelerationPerRound) {
 		double roundsToStop = Math.ceil(countRoundsToStop(maxAccelerationPerRound, submarineVelocity)) + 1;
 
 		Position newSubmarinePosition = new Position(
@@ -924,7 +925,9 @@ public class MathUtil {
 		return minDistanceFromEdgeInWay(position, submarineSize, width, height, submarineAngle) < 2 * submarineSize;
 	}
 
-	public static double minDistanceFromEdgeInWay(Position submarinePosition, double submarineSize, double width, double height, double submarineAngle) {
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static double minDistanceFromEdgeInWay(Position submarinePosition, double submarineSize, double width,
+			double height, double submarineAngle) {
 		double fromRight = width - submarinePosition.getX().doubleValue() - submarineSize;
 		double fromTop = height - submarinePosition.getY().doubleValue() - submarineSize;
 		double fromLeft = submarinePosition.getX().doubleValue() - submarineSize;
@@ -953,13 +956,14 @@ public class MathUtil {
 		return velocity / maxAccelerationPerRound;
 	}
 
-	public static Position collisionPosition(double targetSize, Position targetPosition, double targetVelocity, double targetAngle,
-		Position torpedoPosition, double torpedoVelocity, double torpedoAngle) {
+	public static Position collisionPosition(double targetSize, Position targetPosition, double targetVelocity,
+			double targetAngle, Position torpedoPosition, double torpedoVelocity, double torpedoAngle) {
 		return movingCircleCollisionDetection(torpedoPosition, torpedoVelocity, torpedoAngle, 0, targetPosition, targetVelocity, targetAngle, targetSize);
 	}
 
-	public static List<Position> islandsInSubmarineDirection(Position submarinePosition, double submarineVelocity, double submarineAngle,
-		double submarineSize, Position[] islandPositions, double islandSize) {
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
+	public static List<Position> islandsInSubmarineDirection(Position submarinePosition, double submarineVelocity,
+			double submarineAngle, double submarineSize, Position[] islandPositions, double islandSize) {
 		List<Position> islandsInSubmarineDirections = new ArrayList<>();
 
 		for (Position islandPosition : islandPositions) {
@@ -970,8 +974,10 @@ public class MathUtil {
 		return islandsInSubmarineDirections;
 	}
 
+    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.  
 	public static boolean shouldWeShoot(Position torpedoPosition, List<Submarine> submarines, double submarineSize,
-		Submarine targetSubmarine, double torpedoRange, double torpedoVelocity, double torpedoAngle, double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
+			Submarine targetSubmarine, double torpedoRange, double torpedoVelocity, double torpedoAngle,
+			double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
 		Position aimedTargetCollisionPosition = whereCouldTorpedoHitAimedTarget(targetSubmarine, submarineSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, 0);
 		List<Position> islandTorpedoCollisionPositions = whereCouldTorpedoHitIslands(islandPositions, islandSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, 0);
 		List<Position> submarineTorpedoCollisionPositions = whereCouldTorpedoHitSubmarines(submarines, submarineSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, 0);
@@ -1003,8 +1009,9 @@ public class MathUtil {
 		}
 	}
 
-	private static Position movingCircleCollisionDetection(Position sourcePosition, double sourceVelocity, double sourceAngle, double sourceSize,
-		Position targetPosition, double targetVelocity, double targetAngle, double targetSize) {
+	private static Position movingCircleCollisionDetection(Position sourcePosition, double sourceVelocity,
+			double sourceAngle, double sourceSize, Position targetPosition, double targetVelocity, double targetAngle,
+			double targetSize) {
 		Position Pab = subtract(sourcePosition, targetPosition);
 		Position sourceVelocityVector = new Position(xMovement(sourceVelocity, sourceAngle), yMovement(sourceVelocity, sourceAngle));
 		Position targetVelocityVector = new Position(xMovement(targetVelocity, targetAngle), yMovement(targetVelocity, targetAngle));
@@ -1072,7 +1079,8 @@ public class MathUtil {
 		return new Position(lhs.getX().subtract(rhs.getX()), lhs.getY().subtract(rhs.getY()));
 	}
 
-	public static Set<DangerType> getDangerTypes(GameInfoResponse gameInfo, Position submarinePosition, double submarineVelocity, double submarineAngle, List<Entity> torpedos, List<Submarine> enemySubmarines) {
+	public static Set<DangerType> getDangerTypes(GameInfoResponse gameInfo, Position submarinePosition,
+			double submarineVelocity, double submarineAngle, List<Entity> torpedos, List<Submarine> enemySubmarines) {
 		List<Position> islandPositions = Arrays.asList(gameInfo.getGame().getMapConfiguration().getIslandPositions());
 		double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize();
 		double maxAccelerationPerRound = gameInfo.getGame().getMapConfiguration().getMaxAccelerationPerRound();
@@ -1109,8 +1117,7 @@ public class MathUtil {
 	/**
 	 * Source:
 	 * http://jwilson.coe.uga.edu/EMAT6680Su12/Carreras/EMAT6690/Essay2/essay2.html
-	 * Megmondja, hogy a paraméterül kapott két körnek mekkora területi átfedése
-	 * van.
+	 * @return A paraméterül kapott két kör területének átfedése.
 	 */
 	public static double intersectionOfCirclesWithSameRadius(Position a, Position b, double r) {
 		double distanceOfPoints = distanceOfCircles(a, 0.0, b, 0.0);
@@ -1124,8 +1131,7 @@ public class MathUtil {
 	}
 
 	/**
-	 * Megmondja, hogy a paraméterül kapott két körnek mekkora területi átfedése
-	 * van.
+	 * @return A paraméterül kapott két kör területének átfedése.
 	 */
 	public static double intersectionOfCircles(Position pa, Position pb, double ra, double rb) {
 		double d = distanceOfCircles(pa, 0.0, pb, 0.0);
@@ -1155,8 +1161,7 @@ public class MathUtil {
 	}
 
 	/**
-	 * Megmondja, hogy ha adott két körgyűrű, akkor mekkora az általuk közösen
-	 * fedett terület.
+	 * @return A paraméterül kapott két körgyűrű területének átfedése.
 	 */
 	public static double intersectionOfRings(Position pa, Position pb, double ra, double rb) {
 		double d = distanceOfCircles(pa, 0.0, pb, 0.0);
