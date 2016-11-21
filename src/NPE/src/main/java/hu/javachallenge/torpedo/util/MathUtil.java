@@ -625,17 +625,17 @@ public class MathUtil {
 					if (fromRight <= sonarRange) {
 						if (submarineAngle >= 0 && submarineAngle <= 45) {
 							steering = -maxSteeringPerRound;
-						} else if (submarineAngle >= 45 && submarineAngle <= 135) {
+						} else if (submarineAngle >= 45 && submarineAngle <= 110) {
 							steering = maxSteeringPerRound;
-						} else if (submarineAngle >= 225) {
+						} else if (submarineAngle >= 250) {
 							steering = -maxSteeringPerRound;
 						}
 					} else if (fromTop <= sonarRange) {
-						if (submarineAngle >= 45 && submarineAngle <= 225) {
+						if (submarineAngle >= 45 && submarineAngle <= 200) {
 							steering = maxSteeringPerRound;
 						} else if (submarineAngle <= 45 && submarineAngle >= 0) {
 							steering = -maxSteeringPerRound;
-						} else if (submarineAngle >= 315) {
+						} else if (submarineAngle >= 340) {
 							steering = -maxSteeringPerRound;
 						}
 					}
@@ -643,17 +643,17 @@ public class MathUtil {
 
 				case JOBB_ALSO:
 					if (fromRight <= sonarRange) {
-						if (submarineAngle >= 315 || submarineAngle <= 135) {
+						if (submarineAngle >= 315 || submarineAngle <= 110) {
 							steering = maxSteeringPerRound;
-						} else if (submarineAngle <= 315 && submarineAngle >= 225) {
+						} else if (submarineAngle <= 315 && submarineAngle >= 250) {
 							steering = -maxSteeringPerRound;
 						}
 					} else if (fromBottom <= sonarRange) {
-						if (submarineAngle >= 135 && submarineAngle <= 315) {
+						if (submarineAngle >= 160 && submarineAngle <= 315) {
 							steering = -maxSteeringPerRound;
 						} else if (submarineAngle >= 315 && submarineAngle <= 360) {
 							steering = maxSteeringPerRound;
-						} else if (submarineAngle <= 45) {
+						} else if (submarineAngle <= 20) {
 							steering = maxSteeringPerRound;
 						}
 					}
@@ -661,17 +661,17 @@ public class MathUtil {
 
 				case BAL_FELSO:
 					if (fromLeft <= sonarRange) {
-						if (submarineAngle >= 135 && submarineAngle <= 315) {
+						if (submarineAngle >= 135 && submarineAngle <= 290) {
 							steering = maxSteeringPerRound;
-						} else if (submarineAngle >= 45 && submarineAngle <= 135) {
+						} else if (submarineAngle >= 70 && submarineAngle <= 135) {
 							steering = -maxSteeringPerRound;
 						}
 					} else if (fromTop <= sonarRange) {
 						if (submarineAngle >= 0 && submarineAngle <= 135) {
 							steering = -maxSteeringPerRound;
-						} else if (submarineAngle >= 135 && submarineAngle <= 225) {
+						} else if (submarineAngle >= 135 && submarineAngle <= 200) {
 							steering = maxSteeringPerRound;
-						} else if (submarineAngle >= 315) {
+						} else if (submarineAngle >= 340) {
 							steering = -maxSteeringPerRound;
 						}
 					}
@@ -679,17 +679,17 @@ public class MathUtil {
 
 				case BAL_ALSO:
 					if (fromLeft <= sonarRange) {
-						if (submarineAngle <= 225 && submarineAngle >= 45) {
+						if (submarineAngle <= 225 && submarineAngle >= 70) {
 							steering = -maxSteeringPerRound;
-						} else if (submarineAngle >= 225 && submarineAngle <= 315) {
+						} else if (submarineAngle >= 225 && submarineAngle <= 290) {
 							steering = maxSteeringPerRound;
 						}
 					} else if (fromBottom <= sonarRange) {
-						if (submarineAngle <= 225 && submarineAngle >= 135) {
+						if (submarineAngle <= 225 && submarineAngle >= 160) {
 							steering = -maxSteeringPerRound;
 						} else if (submarineAngle >= 225 && submarineAngle <= 360) {
 							steering = maxSteeringPerRound;
-						} else if (submarineAngle <= 45) {
+						} else if (submarineAngle <= 20) {
 							steering = maxSteeringPerRound;
 						}
 					}
