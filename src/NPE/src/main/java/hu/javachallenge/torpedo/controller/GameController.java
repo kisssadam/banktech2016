@@ -308,13 +308,13 @@ public class GameController implements Runnable {
 			}
 
 			if (!moved && dangerTypes.contains(DangerType.LEAVING_SPACE)) {
-				callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), MathUtil.getMoveParameterHeadingToEdge(submarine, submarineSize, width, height, extendedSonarRange, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed).getSteering());
+				callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), MathUtil.getMoveParameterHeadingToEdge(gameInfo, submarine, extendedSonarRange).getSteering());
 				moved = true;
 			}
 
 			if (!moved && (dangerTypes.contains(DangerType.HEADING_TO_ISLAND))) {
 				Position islandPosition = MathUtil.getNearestIslandInDirection(islandPositions);
-				double steering = MathUtil.getSteeringHeadingToIsland(submarine, islandPosition, maxSteeringPerRound, submarineSize, islandSize);
+				double steering = MathUtil.getSteeringHeadingToIsland(gameInfo, submarine, islandPosition);
 				callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), steering);
 				moved = true;
 			}
@@ -336,7 +336,7 @@ public class GameController implements Runnable {
 				MoveParameter moveParameter;
 
 				//Van-e ránk veszélyes torpedó?
-				moveParameterBasedOnTorpedos = MathUtil.getMoveParameterBasedOnTorpedos(torpedos, allSubmarines, submarineSize, submarine, torpedoRange, torpedoSpeed, torpedoExplosionRadius, islandPositions, islandSize, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed);
+				moveParameterBasedOnTorpedos = MathUtil.getMoveParameterBasedOnTorpedos(gameInfo, torpedos, allSubmarines, submarine);
 				//Ha nincs veszélyes torpedó
 				if (moveParameterBasedOnTorpedos.getSteering() == 0.0) {
 					moveParameter = getMoveParameterIfNotHeadingToTorpedo(submarine, allSubmarines);
@@ -348,7 +348,7 @@ public class GameController implements Runnable {
 				double velocity = MathUtil.normalizeVelocity(submarine.getVelocity() + moveParameter.getAcceleration(), maxSpeed);
 				Position newSubmarinePosition = new Position(submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(submarine.getVelocity(), angle), submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(submarine.getVelocity(), angle));
 				Submarine newSubmarine = new Submarine(submarine.getType(), submarine.getId(), newSubmarinePosition, submarine.getOwner(), velocity, angle, submarine.getHp(), submarine.getSonarCooldown(), submarine.getTorpedoCooldown(), submarine.getSonarExtended());
-				MoveParameter newMoveParameter = MathUtil.getMoveParameterBasedOnTorpedos(torpedos, allSubmarines, submarineSize, newSubmarine, torpedoRange, torpedoSpeed, torpedoExplosionRadius, islandPositions, islandSize, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed);
+				MoveParameter newMoveParameter = MathUtil.getMoveParameterBasedOnTorpedos(gameInfo, torpedos, allSubmarines, newSubmarine);
 
 				//Ha rá akarnánk fordulni egy torpedóra, az nem jó ötlet...
 				if (newMoveParameter.getSteering() != 0) {
@@ -365,14 +365,14 @@ public class GameController implements Runnable {
 		MoveParameter moveParameter;
 
 		//Szonárnyi távolságon belül tartunk-e ki a pályáról?
-		moveParameter = MathUtil.getMoveParameterHeadingToEdge(submarine, submarineSize, width, height, sonarRange, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed);
+		moveParameter = MathUtil.getMoveParameterHeadingToEdge(gameInfo, submarine, sonarRange);
 
 		if (moveParameter.getSteering() == 0.0) {
 			//Szonárnyi távolságon belül van-e sziget?
 			Position nearestIslandPosition = MathUtil.getNearestIsland(gameInfo, submarine.getPosition());
 			//Ha van sziget szonáron belül
 			if (nearestIslandPosition != null) {
-				moveParameter = MathUtil.getMoveParameterHeadingToIslandBasedOnSonar(submarine, nearestIslandPosition, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed);
+				moveParameter = MathUtil.getMoveParameterHeadingToIslandBasedOnSonar(gameInfo, submarine, nearestIslandPosition);
 			}
 		}
 
@@ -381,23 +381,23 @@ public class GameController implements Runnable {
 			Submarine submarineInOurWay = MathUtil.getNearestSubmarineInOurWay(submarine, allSubmarines, submarineSize, maxSpeed);
 			//Ha van útban tengeralattjáró
 			if (submarineInOurWay != null) {
-				moveParameter = MathUtil.getMoveParameterHeadingToSubmarine(submarine, submarineInOurWay, submarineSize, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed);
+				moveParameter = MathUtil.getMoveParameterHeadingToSubmarine(gameInfo, submarine, submarineInOurWay);
 			}
 		}
 
 		if (moveParameter.getSteering() == 0.0) {
 			//Ellenséges tengeralattjáró túl közel van-e, szonáron belül van-e, stb..
-			moveParameter = MathUtil.getMoveParameterBasedOnEnemyPosition(submarine, enemySubmarines, sonarRange, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed, allSubmarines, submarineSize, torpedoRange, torpedoSpeed, torpedoExplosionRadius, islandPositions, islandSize);
+			moveParameter = MathUtil.getMoveParameterBasedOnEnemyPosition(gameInfo, submarine, enemySubmarines, allSubmarines);
 		}
 
 		if (moveParameter.getSteering() == 0.0) {
 			//Közel vannak-e a hajóink egymáshoz?
-			moveParameter = MathUtil.getMoveParameterBasedOnSonars(submarine, Arrays.asList(submarinesInGame.getSubmarines()), sonarRange, extendedSonarRange, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed);
+			moveParameter = MathUtil.getMoveParameterBasedOnSonars(gameInfo, submarine, Arrays.asList(submarinesInGame.getSubmarines()));
 		}
 
 		//Ha hátul van a hajó, de bárrmi más miatt kanyarodik, akkor csak maradjon le a másik hajónktól.
 		if (moveParameter.getAcceleration() != 0.0) {
-			moveParameter.setAcceleration(MathUtil.getMoveParameterBasedOnSonars(submarine, Arrays.asList(submarinesInGame.getSubmarines()), sonarRange, extendedSonarRange, maxSteeringPerRound, maxAccelerationPerRound, maxSpeed).getAcceleration());
+			moveParameter.setAcceleration(MathUtil.getMoveParameterBasedOnSonars(gameInfo, submarine, Arrays.asList(submarinesInGame.getSubmarines())).getAcceleration());
 		}
 
 		return moveParameter;
@@ -417,7 +417,7 @@ public class GameController implements Runnable {
 		for (Submarine enemySubmarine : enemySubmarines) {
 			Double theta = aimAtMovingTarget(submarine.getPosition(), enemySubmarine.getPosition(), enemySubmarine.getAngle(), enemySubmarine.getVelocity(), torpedoSpeed);
 			//boolean areWeInDanger = MathUtil.isSubmarineHeadingToTorpedoExplosion(torpedos, submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, enemySubmarines, torpedoExplosionRadius, islandPositions, islandSize);
-			boolean shouldWeShoot = shouldWeShoot(submarine.getPosition(), Arrays.asList(submarinesInGame.getSubmarines()), submarineSize, enemySubmarine, torpedoRange, torpedoSpeed, theta, torpedoExplosionRadius, islandPositions, islandSize);
+			boolean shouldWeShoot = shouldWeShoot(gameInfo, submarine.getPosition(), Arrays.asList(submarinesInGame.getSubmarines()), enemySubmarine, theta);
 			if (theta != null && (/*areWeInDanger || */shouldWeShoot)) {
 				if (submarine.getTorpedoCooldown() == 0.0) {
 					callHandler.shoot(gameId, submarine.getId(), normalizeAngle(theta));

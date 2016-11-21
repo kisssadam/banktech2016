@@ -93,11 +93,11 @@ public class MathUtil {
 		return isPositionOnOurLeft(s, e, p);
 	}
 
-	private static double angleDifference(double alpha, double beta) {
-		double phi = normalizeAngle(Math.abs(beta - alpha));  // This is either the difference or (360 - difference)
-		double difference = phi > 180 ? 360 - phi : phi;
-		return difference;
-	}
+//	private static double angleDifference(double alpha, double beta) {
+//		double phi = normalizeAngle(Math.abs(beta - alpha));  // This is either the difference or (360 - difference)
+//		double difference = phi > 180 ? 360 - phi : phi;
+//		return difference;
+//	}
 
 	public static double distanceOfCircles(Position sourcePosition, double sourceR, Position destinationPosition,
 			double destinationR) {
@@ -220,16 +220,16 @@ public class MathUtil {
 	/**
 	 * @return Lehetséges (nem esik útba sziget) célpontok.
 	 */
-	public static List<Submarine> getPossibleTargets(GameInfoResponse gameInfoResponse, Position sourcePosition, Submarine[] submarines) {
-		double bulletVelocity = gameInfoResponse.getGame().getMapConfiguration().getTorpedoSpeed();
+	public static List<Submarine> getPossibleTargets(GameInfoResponse gi, Position sourcePosition, Submarine[] submarines) {
+		double bulletVelocity = gi.getGame().getMapConfiguration().getTorpedoSpeed();
 
 		List<Submarine> possibleTargets = new ArrayList<>();
 
 		for (Submarine submarine : submarines) {
 			double theta = aimAtMovingTarget(sourcePosition, submarine.getPosition(), submarine.getAngle(), submarine.getVelocity(), bulletVelocity);
-			for (Position islandPosition : islandsInDirection(gameInfoResponse, sourcePosition, theta)) {
-				double submarineSize = gameInfoResponse.getGame().getMapConfiguration().getSubmarineSize();
-				double islandSize = gameInfoResponse.getGame().getMapConfiguration().getIslandSize();
+			for (Position islandPosition : islandsInDirection(gi, sourcePosition, theta)) {
+				double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
+				double islandSize = gi.getGame().getMapConfiguration().getIslandSize();
 
 				double islandDistance = distanceOfCircles(sourcePosition, submarineSize, islandPosition, islandSize);
 
@@ -248,12 +248,12 @@ public class MathUtil {
 		return possibleTargets;
 	}
 
-	public static Position getNearestIsland(GameInfoResponse gameInfoResponse, Position sourcePosition) {
+	public static Position getNearestIsland(GameInfoResponse gi, Position sourcePosition) {
 		List<Island> islands = new ArrayList<>();
-		Position[] islandPositions = gameInfoResponse.getGame().getMapConfiguration().getIslandPositions();
-		double islandSize = gameInfoResponse.getGame().getMapConfiguration().getIslandSize();
-//		double submarineSize = gameInfoResponse.getGame().getMapConfiguration().getSubmarineSize();
-		double sonarRange = gameInfoResponse.getGame().getMapConfiguration().getSonarRange();
+		Position[] islandPositions = gi.getGame().getMapConfiguration().getIslandPositions();
+		double islandSize = gi.getGame().getMapConfiguration().getIslandSize();
+//		double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
+		double sonarRange = gi.getGame().getMapConfiguration().getSonarRange();
 
 		for (Position islandPosition : islandPositions) {
 			double distance = distanceOfCircles(sourcePosition, sonarRange, islandPosition, islandSize);
@@ -273,13 +273,12 @@ public class MathUtil {
 		return islandsInDirection.isEmpty() ? null : islandsInDirection.get(0);
 	}
 
-	public static List<Position> islandsInDirection(GameInfoResponse gameInfoResponse, Position sourcePosition,
-            double angle) {
+	public static List<Position> islandsInDirection(GameInfoResponse gi, Position sourcePosition, double angle) {
 		List<Island> islandsInDirection = new ArrayList<>();
 
-		Position[] islandPositions = gameInfoResponse.getGame().getMapConfiguration().getIslandPositions();
-		double islandSize = gameInfoResponse.getGame().getMapConfiguration().getIslandSize();
-		double submarineSize = gameInfoResponse.getGame().getMapConfiguration().getSubmarineSize();
+		Position[] islandPositions = gi.getGame().getMapConfiguration().getIslandPositions();
+		double islandSize = gi.getGame().getMapConfiguration().getIslandSize();
+		double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
 
 		for (Position islandPosition : islandPositions) {
 			double meredekség = slope(angle);
@@ -308,10 +307,13 @@ public class MathUtil {
 		return islandsInDirection.stream().map(island -> island.position).collect(Collectors.toList());
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static List<Position> whereCouldTorpedoHitIslands(List<Position> islandPositions, double islandSize,
-            Position torpedoPosition, double torpedoRange, double torpedoVelocity, double torpedoAngle,
-            double torpedoRoundsMoved) {
+	public static List<Position> whereCouldTorpedoHitIslands(GameInfoResponse gi, Position torpedoPosition,
+			double torpedoAngle, double torpedoRoundsMoved) {
+		List<Position> islandPositions = Arrays.asList(gi.getGame().getMapConfiguration().getIslandPositions());
+		double islandSize = gi.getGame().getMapConfiguration().getIslandSize();
+		double torpedoRange = gi.getGame().getMapConfiguration().getTorpedoRange();
+		double torpedoVelocity = gi.getGame().getMapConfiguration().getTorpedoSpeed();
+		
 		List<Position> collisionPositions = new LinkedList<>();
 		for (Position islandPosition : islandPositions) {
 			Position collisionPosition = collisionPosition(islandSize, islandPosition, 0, 0, torpedoPosition, torpedoVelocity, torpedoAngle);
@@ -326,10 +328,12 @@ public class MathUtil {
 		return collisionPositions;
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static List<Position> whereCouldTorpedoHitSubmarines(List<Submarine> submarines, double submarineSize,
-            Position torpedoPosition, double torpedoRange, double torpedoVelocity, double torpedoAngle,
-            double torpedoRoundsMoved) {
+	public static List<Position> whereCouldTorpedoHitSubmarines(GameInfoResponse gi, List<Submarine> submarines,
+			Position torpedoPosition, double torpedoAngle, double torpedoRoundsMoved) {
+		double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
+		double torpedoRange = gi.getGame().getMapConfiguration().getTorpedoRange();
+		double torpedoVelocity = gi.getGame().getMapConfiguration().getTorpedoSpeed();
+		
 		List<Position> collisionPositions = new LinkedList<>();
 		for (Submarine submarine : submarines) {
 			if (!submarine.getPosition().equals(torpedoPosition)) {
@@ -346,10 +350,12 @@ public class MathUtil {
 		return collisionPositions;
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static Position whereCouldTorpedoHitAimedTarget(Submarine submarine, double submarineSize,
-            Position torpedoPosition, double torpedoRange, double torpedoVelocity, double torpedoAngle,
-            double torpedoRoundsMoved) {
+	public static Position whereCouldTorpedoHitAimedTarget(GameInfoResponse gi, Submarine submarine,
+			Position torpedoPosition, double torpedoAngle, double torpedoRoundsMoved) {
+		double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
+		double torpedoRange = gi.getGame().getMapConfiguration().getTorpedoRange();
+		double torpedoVelocity = gi.getGame().getMapConfiguration().getTorpedoSpeed();
+		
 		Position collisionPosition = collisionPosition(submarineSize, submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), torpedoPosition, torpedoVelocity, torpedoAngle);
 		if (collisionPosition != null) {
 			double time = Math.abs(torpedoDistance(torpedoPosition, collisionPosition, 0)) / torpedoVelocity;
@@ -405,26 +411,28 @@ public class MathUtil {
 		
 		return distanceOfCircles(s1.getPosition(), 0, s2.getPosition(), 0) > distanceOfCircles(newS1Position, 0, newS2Position, 0);
 	}
-	
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static MoveParameter getMoveParameterBasedOnEnemyPosition(Submarine submarine1,
-            List<Submarine> enemySubmarines, double sonarRange, double maxSteeringPerRound,
-            double maxAccelerationPerRound, double maxSpeed, List<Submarine> allSubmarine, double submarineSize,
-            double torpedoRange, double torpedoSpeed, double torpedoExplosionRadius, List<Position> islandPositions,
-            double islandSize) {
-		Submarine submarine2 = getBiggestSonarIntersectionSubmarine(submarine1, enemySubmarines, sonarRange, sonarRange);
-		double minusAcceleration = normalizeVelocity(submarine1.getVelocity() - maxAccelerationPerRound, maxSpeed) - submarine1.getVelocity();
-		double plusAcceleration = normalizeVelocity(submarine1.getVelocity() + maxAccelerationPerRound, maxSpeed) - submarine1.getVelocity();
+
+	public static MoveParameter getMoveParameterBasedOnEnemyPosition(GameInfoResponse gi, Submarine submarine,
+            List<Submarine> enemySubmarines, List<Submarine> allSubmarines) {
+		double sonarRange = gi.getGame().getMapConfiguration().getSonarRange();
+		double maxSteeringPerRound = gi.getGame().getMapConfiguration().getMaxSteeringPerRound();
+		double maxAccelerationPerRound = gi.getGame().getMapConfiguration().getMaxAccelerationPerRound();
+		double maxSpeed = gi.getGame().getMapConfiguration().getMaxSpeed();
+		double torpedoSpeed = gi.getGame().getMapConfiguration().getTorpedoSpeed();
+		
+		Submarine submarine2 = getBiggestSonarIntersectionSubmarine(submarine, enemySubmarines, sonarRange, sonarRange);
+		double minusAcceleration = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed) - submarine.getVelocity();
+		double plusAcceleration = normalizeVelocity(submarine.getVelocity() + maxAccelerationPerRound, maxSpeed) - submarine.getVelocity();
 
 		double acc = plusAcceleration;
 		double steering = 0;
 
 		if (submarine2 != null) {
-			Double theta = aimAtMovingTarget(submarine1.getPosition(), submarine2.getPosition(), submarine2.getAngle(), submarine2.getVelocity(), torpedoSpeed);
-			boolean isEnemyTooCloseToShoot = !shouldWeShoot(submarine1.getPosition(), allSubmarine, submarineSize, submarine2, torpedoRange, torpedoSpeed, theta, torpedoExplosionRadius, islandPositions, islandSize);
+			Double theta = aimAtMovingTarget(submarine.getPosition(), submarine2.getPosition(), submarine2.getAngle(), submarine2.getVelocity(), torpedoSpeed);
+			boolean isEnemyTooCloseToShoot = !shouldWeShoot(gi, submarine.getPosition(), allSubmarines, submarine2, theta);
 			if (isEnemyTooCloseToShoot) {
-				if (isPositionInFrontOfUs(submarine1, submarine2.getPosition())) {
-					if (submarine1.getVelocity() > maxSpeed * 0.25) {
+				if (isPositionInFrontOfUs(submarine, submarine2.getPosition())) {
+					if (submarine.getVelocity() > maxSpeed * 0.25) {
 						acc = minusAcceleration;
 					} else {
 						acc = plusAcceleration;
@@ -433,7 +441,7 @@ public class MathUtil {
 					acc = plusAcceleration;
 				}
 
-				if (isPositionOnOurLeft(submarine1, submarine2.getPosition())) {
+				if (isPositionOnOurLeft(submarine, submarine2.getPosition())) {
 					steering = -maxSteeringPerRound;
 				} else {
 					steering = maxSteeringPerRound;
@@ -453,7 +461,7 @@ public class MathUtil {
 					steering = -maxSteeringPerRound;
 				}
 			}*/
-			if(areSubmarinesHeadingToEachOther(submarine1, submarine2)) {
+			if(areSubmarinesHeadingToEachOther(submarine, submarine2)) {
 				acc *= -1;
 				steering *= -1;
 			}
@@ -461,18 +469,19 @@ public class MathUtil {
 		return new MoveParameter(acc, steering);
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static MoveParameter getMoveParameterBasedOnTorpedos(List<Entity> torpedos, List<Submarine> submarines,
-            double submarineSize, Submarine targetSubmarine, double torpedoRange, double torpedoVelocity,
-            double torpedoExplosionRadius, List<Position> islandPositions, double islandSize,
-            double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
+	public static MoveParameter getMoveParameterBasedOnTorpedos(GameInfoResponse gi, List<Entity> torpedos,
+			List<Submarine> submarines, Submarine targetSubmarine) {
+		double maxSteeringPerRound = gi.getGame().getMapConfiguration().getMaxSteeringPerRound();
+		double maxAccelerationPerRound = gi.getGame().getMapConfiguration().getMaxAccelerationPerRound();
+		double maxSpeed = gi.getGame().getMapConfiguration().getMaxSpeed();
+		
 		double minusAcceleration = normalizeVelocity(targetSubmarine.getVelocity() - maxAccelerationPerRound, maxSpeed) - targetSubmarine.getVelocity();
 		double plusAcceleration = normalizeVelocity(targetSubmarine.getVelocity() + maxAccelerationPerRound, maxSpeed) - targetSubmarine.getVelocity();
 
 		double acc = plusAcceleration;
 		double steering = 0;
 
-		Position dangerousTorpedoHitPosition = getDangerousTorpedoHitPosition(torpedos, submarines, submarineSize, targetSubmarine, torpedoRange, torpedoVelocity, torpedoExplosionRadius, islandPositions, islandSize);
+		Position dangerousTorpedoHitPosition = getDangerousTorpedoHitPosition(gi, torpedos, submarines, targetSubmarine);
 
 		if (dangerousTorpedoHitPosition != null) {
 			if (isPositionInFrontOfUs(targetSubmarine, dangerousTorpedoHitPosition)) {
@@ -493,17 +502,18 @@ public class MathUtil {
 		return new MoveParameter(acc, steering);
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static Position getDangerousTorpedoHitPosition(List<Entity> torpedos, List<Submarine> submarines,
-            double submarineSize, Submarine targetSubmarine, double torpedoRange, double torpedoVelocity,
-            double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
+	public static Position getDangerousTorpedoHitPosition(GameInfoResponse gi, List<Entity> torpedos,
+			List<Submarine> submarines, Submarine targetSubmarine) {
+		double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
+		double torpedoRange = gi.getGame().getMapConfiguration().getTorpedoRange();
+		
 		for (Entity torpedo : torpedos) {
 			Position torpedoPosition = torpedo.getPosition();
 			double torpedoAngle = torpedo.getAngle();
 			double torpedoRoundsMoved = torpedo.getRoundsMoved();
-			Position aimedTargetCollisionPosition = whereCouldTorpedoHitAimedTarget(targetSubmarine, submarineSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, torpedoRoundsMoved);
-			List<Position> islandTorpedoCollisionPositions = whereCouldTorpedoHitIslands(islandPositions, islandSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, torpedoRoundsMoved);
-			List<Position> submarineTorpedoCollisionPositions = whereCouldTorpedoHitSubmarines(submarines, submarineSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, torpedoRoundsMoved);
+			Position aimedTargetCollisionPosition = whereCouldTorpedoHitAimedTarget(gi, targetSubmarine, torpedoPosition, torpedoAngle, torpedoRoundsMoved);
+			List<Position> islandTorpedoCollisionPositions = whereCouldTorpedoHitIslands(gi, torpedoPosition, torpedoAngle, torpedoRoundsMoved);
+			List<Position> submarineTorpedoCollisionPositions = whereCouldTorpedoHitSubmarines(gi, submarines, torpedoPosition, torpedoAngle, torpedoRoundsMoved);
 
 			if (!islandTorpedoCollisionPositions.isEmpty()) {
 				for (Position islandTorpedoCollisionPosition : islandTorpedoCollisionPositions) {
@@ -537,10 +547,14 @@ public class MathUtil {
 		return null;
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static MoveParameter getMoveParameterBasedOnSonars(Submarine submarine1, List<Submarine> submarines,
-            double sonarRange, double extendedSonarRange, double maxSteeringPerRound, double maxAccelerationPerRound,
-            double maxSpeed) {
+	public static MoveParameter getMoveParameterBasedOnSonars(GameInfoResponse gi, Submarine submarine1,
+			List<Submarine> submarines) {
+		double sonarRange = gi.getGame().getMapConfiguration().getSonarRange();
+		double extendedSonarRange = gi.getGame().getMapConfiguration().getExtendedSonarRange();
+		double maxSteeringPerRound = gi.getGame().getMapConfiguration().getMaxSteeringPerRound();
+		double maxAccelerationPerRound = gi.getGame().getMapConfiguration().getMaxAccelerationPerRound();
+        double maxSpeed = gi.getGame().getMapConfiguration().getMaxSpeed();
+		
 		Submarine submarine2 = getBiggestSonarIntersectionSubmarine(submarine1, submarines, sonarRange, extendedSonarRange);
 
 		double minusAcceleration = normalizeVelocity(submarine1.getVelocity() - maxAccelerationPerRound, maxSpeed) - submarine1.getVelocity();
@@ -572,9 +586,12 @@ public class MathUtil {
 		return new MoveParameter(acc, steering);
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static MoveParameter getMoveParameterHeadingToIslandBasedOnSonar(Submarine submarine, Position islandPosition,
-            double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
+	public static MoveParameter getMoveParameterHeadingToIslandBasedOnSonar(GameInfoResponse gi, Submarine submarine,
+			Position islandPosition) {
+		double maxSteeringPerRound = gi.getGame().getMapConfiguration().getMaxSteeringPerRound();
+		double maxAccelerationPerRound = gi.getGame().getMapConfiguration().getMaxAccelerationPerRound();
+		double maxSpeed = gi.getGame().getMapConfiguration().getMaxSpeed();
+		
 		double minusAcceleration = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed) - submarine.getVelocity();
 		double plusAcceleration = normalizeVelocity(submarine.getVelocity() + maxAccelerationPerRound, maxSpeed) - submarine.getVelocity();
 
@@ -596,23 +613,29 @@ public class MathUtil {
 		return new MoveParameter(acc, steering);
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static double getSteeringHeadingToIsland(Submarine submarine, Position islandPosition, double maxSteering,
-            double submarineSize, double islandSize) {
+	public static double getSteeringHeadingToIsland(GameInfoResponse gi, Submarine submarine, Position islandPosition) {
+		double maxSteeringPerRound = gi.getGame().getMapConfiguration().getMaxSteeringPerRound();
+        double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
+		double islandSize = gi.getGame().getMapConfiguration().getIslandSize();
+		
 		Position collisionPosition = movingCircleCollisionDetection(submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, islandPosition, 0, 0, islandSize);
 		if (collisionPosition == null) {
 			return 0.0;
 		}
 		if (isPositionOnOurLeft(submarine, collisionPosition)) {
-			return -maxSteering;
+			return -maxSteeringPerRound;
 		} else {
-			return maxSteering;
+			return maxSteeringPerRound;
 		}
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static MoveParameter getMoveParameterHeadingToSubmarine(Submarine actualSubmarine, Submarine otherSubmarine,
-            double submarineSize, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
+	public static MoveParameter getMoveParameterHeadingToSubmarine(GameInfoResponse gi, Submarine actualSubmarine,
+			Submarine otherSubmarine) {
+		double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
+		double maxAccelerationPerRound = gi.getGame().getMapConfiguration().getMaxAccelerationPerRound();
+		double maxSpeed = gi.getGame().getMapConfiguration().getMaxSpeed();
+		double maxSteeringPerRound = gi.getGame().getMapConfiguration().getMaxSteeringPerRound();
+		
 		double minusAcceleration = normalizeVelocity(actualSubmarine.getVelocity() - maxAccelerationPerRound, maxSpeed) - actualSubmarine.getVelocity();
 		double plusAcceleration = normalizeVelocity(actualSubmarine.getVelocity() + maxAccelerationPerRound, maxSpeed) - actualSubmarine.getVelocity();
 
@@ -641,10 +664,16 @@ public class MathUtil {
 		return new MoveParameter(acc, steering);
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static MoveParameter getMoveParameterHeadingToEdge(Submarine submarine, double submarineSize, double width,
-            double height, double sonarRange, double maxSteeringPerRound, double maxAccelerationPerRound,
-            double maxSpeed) {
+	// Be careful with the sonarOrExtSonarRange argument (!).
+	public static MoveParameter getMoveParameterHeadingToEdge(GameInfoResponse gi, Submarine submarine,
+			double sonarOrExtSonarRange) {
+		double width = gi.getGame().getMapConfiguration().getWidth();
+		double height = gi.getGame().getMapConfiguration().getHeight();
+		double maxAccelerationPerRound = gi.getGame().getMapConfiguration().getMaxAccelerationPerRound();
+		double maxSpeed = gi.getGame().getMapConfiguration().getMaxSpeed();
+		double maxSteeringPerRound = gi.getGame().getMapConfiguration().getMaxSteeringPerRound();
+		double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
+		
 		double fromRight = width - submarine.getPosition().getX().doubleValue() - submarineSize;
 		double fromTop = height - submarine.getPosition().getY().doubleValue() - submarineSize;
 		double fromLeft = submarine.getPosition().getX().doubleValue() - submarineSize;
@@ -662,7 +691,7 @@ public class MathUtil {
 
 			switch (negyed) {
 				case JOBB_FELSO:
-					if (fromRight <= sonarRange) {
+					if (fromRight <= sonarOrExtSonarRange) {
 						if (submarineAngle >= 0 && submarineAngle <= 45) {
 							steering = -maxSteeringPerRound;
 						} else if (submarineAngle >= 45 && submarineAngle <= 110) {
@@ -670,7 +699,7 @@ public class MathUtil {
 						} else if (submarineAngle >= 250) {
 							steering = -maxSteeringPerRound;
 						}
-					} else if (fromTop <= sonarRange) {
+					} else if (fromTop <= sonarOrExtSonarRange) {
 						if (submarineAngle >= 45 && submarineAngle <= 200) {
 							steering = maxSteeringPerRound;
 						} else if (submarineAngle <= 45 && submarineAngle >= 0) {
@@ -682,13 +711,13 @@ public class MathUtil {
 					break;
 
 				case JOBB_ALSO:
-					if (fromRight <= sonarRange) {
+					if (fromRight <= sonarOrExtSonarRange) {
 						if (submarineAngle >= 315 || submarineAngle <= 110) {
 							steering = maxSteeringPerRound;
 						} else if (submarineAngle <= 315 && submarineAngle >= 250) {
 							steering = -maxSteeringPerRound;
 						}
-					} else if (fromBottom <= sonarRange) {
+					} else if (fromBottom <= sonarOrExtSonarRange) {
 						if (submarineAngle >= 160 && submarineAngle <= 315) {
 							steering = -maxSteeringPerRound;
 						} else if (submarineAngle >= 315 && submarineAngle <= 360) {
@@ -700,13 +729,13 @@ public class MathUtil {
 					break;
 
 				case BAL_FELSO:
-					if (fromLeft <= sonarRange) {
+					if (fromLeft <= sonarOrExtSonarRange) {
 						if (submarineAngle >= 135 && submarineAngle <= 290) {
 							steering = maxSteeringPerRound;
 						} else if (submarineAngle >= 70 && submarineAngle <= 135) {
 							steering = -maxSteeringPerRound;
 						}
-					} else if (fromTop <= sonarRange) {
+					} else if (fromTop <= sonarOrExtSonarRange) {
 						if (submarineAngle >= 0 && submarineAngle <= 135) {
 							steering = -maxSteeringPerRound;
 						} else if (submarineAngle >= 135 && submarineAngle <= 200) {
@@ -718,13 +747,13 @@ public class MathUtil {
 					break;
 
 				case BAL_ALSO:
-					if (fromLeft <= sonarRange) {
+					if (fromLeft <= sonarOrExtSonarRange) {
 						if (submarineAngle <= 225 && submarineAngle >= 70) {
 							steering = -maxSteeringPerRound;
 						} else if (submarineAngle >= 225 && submarineAngle <= 290) {
 							steering = maxSteeringPerRound;
 						}
-					} else if (fromBottom <= sonarRange) {
+					} else if (fromBottom <= sonarOrExtSonarRange) {
 						if (submarineAngle <= 225 && submarineAngle >= 160) {
 							steering = -maxSteeringPerRound;
 						} else if (submarineAngle >= 225 && submarineAngle <= 360) {
@@ -740,7 +769,7 @@ public class MathUtil {
 					break;
 			}
 		} else if (submarineAngle == 0.0) {
-			if (fromRight < sonarRange) {
+			if (fromRight < sonarOrExtSonarRange) {
 				if (fromTop < fromBottom) {
 					steering = -maxSteeringPerRound;
 				} else {
@@ -748,7 +777,7 @@ public class MathUtil {
 				}
 			}
 		} else if (submarineAngle == 90.0) {
-			if (fromTop < sonarRange) {
+			if (fromTop < sonarOrExtSonarRange) {
 				if (fromLeft < fromRight) {
 					steering = -maxSteeringPerRound;
 				} else {
@@ -756,7 +785,7 @@ public class MathUtil {
 				}
 			}
 		} else if (submarineAngle == 180.0) {
-			if (fromLeft < sonarRange) {
+			if (fromLeft < sonarOrExtSonarRange) {
 				if (fromBottom < fromTop) {
 					steering = -maxSteeringPerRound;
 				} else {
@@ -764,7 +793,7 @@ public class MathUtil {
 				}
 			}
 		} else if (submarineAngle == 270.0) {
-			if (fromBottom < sonarRange) {
+			if (fromBottom < sonarOrExtSonarRange) {
 				if (fromRight < fromLeft) {
 					steering = -maxSteeringPerRound;
 				} else {
@@ -772,58 +801,58 @@ public class MathUtil {
 				}
 			}
 		} else if (submarineAngle > 0.0 && submarineAngle < 90.0) {
-			if (fromTop < sonarRange && fromRight < sonarRange) {
-				if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(width, height), 0) < sonarRange) {
+			if (fromTop < sonarOrExtSonarRange && fromRight < sonarOrExtSonarRange) {
+				if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(width, height), 0) < sonarOrExtSonarRange) {
 					if (fromTop < fromRight) {
 						steering = -maxSteeringPerRound;
 					} else {
 						steering = maxSteeringPerRound;
 					}
 				}
-			} else if (fromTop < sonarRange) {
+			} else if (fromTop < sonarOrExtSonarRange) {
 				steering = -maxSteeringPerRound;
-			} else if (fromRight < sonarRange) {
+			} else if (fromRight < sonarOrExtSonarRange) {
 				steering = maxSteeringPerRound;
 			}
 		} else if (submarineAngle > 90.0 && submarineAngle < 180.0) {
-			if (fromLeft < sonarRange && fromTop < sonarRange) {
-				if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(0, height), 0) < sonarRange) {
+			if (fromLeft < sonarOrExtSonarRange && fromTop < sonarOrExtSonarRange) {
+				if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(0, height), 0) < sonarOrExtSonarRange) {
 					if (fromLeft < fromTop) {
 						steering = -maxSteeringPerRound;
 					} else {
 						steering = maxSteeringPerRound;
 					}
 				}
-			} else if (fromLeft < sonarRange) {
+			} else if (fromLeft < sonarOrExtSonarRange) {
 				steering = -maxSteeringPerRound;
-			} else if (fromTop < sonarRange) {
+			} else if (fromTop < sonarOrExtSonarRange) {
 				steering = maxSteeringPerRound;
 			}
 		} else if (submarineAngle > 180.0 && submarineAngle < 270.0) {
-			if (fromBottom < sonarRange && fromLeft < sonarRange) {
-				if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(0, 0), 0) < sonarRange) {
+			if (fromBottom < sonarOrExtSonarRange && fromLeft < sonarOrExtSonarRange) {
+				if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(0, 0), 0) < sonarOrExtSonarRange) {
 					if (fromBottom < fromLeft) {
 						steering = -maxSteeringPerRound;
 					} else {
 						steering = maxSteeringPerRound;
 					}
 				}
-			} else if (fromBottom < sonarRange) {
+			} else if (fromBottom < sonarOrExtSonarRange) {
 				steering = -maxSteeringPerRound;
-			} else if (fromLeft < sonarRange) {
+			} else if (fromLeft < sonarOrExtSonarRange) {
 				steering = maxSteeringPerRound;
 			}
-		} else if (fromRight < sonarRange && fromBottom < sonarRange) {
-			if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(0, width), 0) < sonarRange) {
+		} else if (fromRight < sonarOrExtSonarRange && fromBottom < sonarOrExtSonarRange) {
+			if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(0, width), 0) < sonarOrExtSonarRange) {
 				if (fromRight < fromBottom) {
 					steering = -maxSteeringPerRound;
 				} else {
 					steering = maxSteeringPerRound;
 				}
 			}
-		} else if (fromRight < sonarRange) {
+		} else if (fromRight < sonarOrExtSonarRange) {
 			steering = -maxSteeringPerRound;
-		} else if (fromBottom < sonarRange) {
+		} else if (fromBottom < sonarOrExtSonarRange) {
 			steering = maxSteeringPerRound;
 		}
 		if (steering != 0.0) {
@@ -835,23 +864,25 @@ public class MathUtil {
 		return new MoveParameter(acc, steering);
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static boolean isSubmarineHeadingToTorpedoExplosion(List<Entity> torpedos, Position submarinePosition,
-            double submarineVelocity, double submarineAngle, double submarineSize, List<Submarine> enemySubmarines,
-            double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
+	public static boolean isSubmarineHeadingToTorpedoExplosion(GameInfoResponse gi, List<Entity> torpedos,
+			Position submarinePosition, double submarineVelocity, double submarineAngle,
+			List<Submarine> enemySubmarines) {
 		for (Entity torpedo : torpedos) {
-			if (isSubmarineHeadingToTorpedoExplosion(torpedo.getPosition(), submarinePosition, submarineVelocity, submarineAngle, submarineSize, enemySubmarines, torpedo.getVelocity(), torpedo.getAngle(), torpedoExplosionRadius, islandPositions, islandSize)) {
+			if (isSubmarineHeadingToTorpedoExplosion(gi, torpedo.getPosition(), submarinePosition, submarineVelocity, submarineAngle, enemySubmarines, torpedo.getVelocity(), torpedo.getAngle())) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static boolean isSubmarineHeadingToTorpedoExplosion(Position torpedoPosition, Position submarinePosition,
-            double submarineVelocity, double submarineAngle, double submarineSize, List<Submarine> enemySubmarines,
-            double torpedoVelocity, double torpedoAngle, double torpedoExplosionRadius, List<Position> islandPositions,
-            double islandSize) {
+	public static boolean isSubmarineHeadingToTorpedoExplosion(GameInfoResponse gi, Position torpedoPosition,
+			Position submarinePosition, double submarineVelocity, double submarineAngle, List<Submarine> enemySubmarines,
+            double torpedoVelocity, double torpedoAngle) {
+		double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
+		double torpedoExplosionRadius = gi.getGame().getMapConfiguration().getTorpedoExplosionRadius();
+		List<Position> islandPositions = Arrays.asList(gi.getGame().getMapConfiguration().getIslandPositions());
+        double islandSize = gi.getGame().getMapConfiguration().getIslandSize();
+		
 		Position newSubmarinePosition = new Position(
 			submarinePosition.getX().doubleValue() + xMovement(submarineVelocity, submarineAngle),
 			submarinePosition.getY().doubleValue() + yMovement(submarineVelocity, submarineAngle));
@@ -881,10 +912,12 @@ public class MathUtil {
 		return false;
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static boolean isSubmarineHeadingToIsland(Position islandPosition, double islandSize,
-            Position submarinePosition, double submarineSize, double submarineVelocity, double submarineAngle,
-            double maxAccelerationPerRound) {
+	public static boolean isSubmarineHeadingToIsland(GameInfoResponse gi, Position islandPosition,
+			Position submarinePosition, double submarineVelocity, double submarineAngle) {
+		double islandSize = gi.getGame().getMapConfiguration().getIslandSize();
+		double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
+		double maxAccelerationPerRound = gi.getGame().getMapConfiguration().getMaxAccelerationPerRound();
+		
 		if (islandPosition == null) {
 			return false;
 		}
@@ -902,17 +935,19 @@ public class MathUtil {
 		if (submarineVelocity < MathConstants.EPSILON) {
 			return false;
 		}
-		double time = Math.abs(distanceOfCircles(newSubmarinePosition, submarineSize, collisionPosition, 0)) / (submarineVelocity / 2);
+		double time = Math.abs(distanceOfCircles(newSubmarinePosition, submarineSize, collisionPosition, 0.0)) / (submarineVelocity / 2.0);
 		if (time >= roundsToStop) {
 			return true;
 		}
 		return false;
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static boolean isSubmarineLeavingSpace(Position submarinePosition, double submarineSize,
-			double submarineVelocity, double submarineAngle, double width, double height, double maxAccelerationPerRound) {
-		double roundsToStop = Math.ceil(countRoundsToStop(maxAccelerationPerRound, submarineVelocity)) + 1;
+	public static boolean isSubmarineLeavingSpace(GameInfoResponse gi, Position submarinePosition,
+			double submarineVelocity, double submarineAngle) {
+		double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
+		double maxAccelerationPerRound = gi.getGame().getMapConfiguration().getMaxAccelerationPerRound();
+		
+		double roundsToStop = Math.ceil(countRoundsToStop(maxAccelerationPerRound, submarineVelocity)) + 1.0;
 
 		Position newSubmarinePosition = new Position(
 			submarinePosition.getX().doubleValue() + xMovement(submarineVelocity, submarineAngle),
@@ -922,12 +957,15 @@ public class MathUtil {
 			newSubmarinePosition.getX().doubleValue() + roundsToStop * xMovement(submarineVelocity / 2, submarineAngle),
 			newSubmarinePosition.getY().doubleValue() + roundsToStop * yMovement(submarineVelocity / 2, submarineAngle));
 
-		return minDistanceFromEdgeInWay(position, submarineSize, width, height, submarineAngle) < 2 * submarineSize;
+		return minDistanceFromEdgeInWay(gi, position, submarineAngle) < 2.0 * submarineSize;
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static double minDistanceFromEdgeInWay(Position submarinePosition, double submarineSize, double width,
-			double height, double submarineAngle) {
+	public static double minDistanceFromEdgeInWay(GameInfoResponse gi, Position submarinePosition,
+			double submarineAngle) {
+		double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
+		double width = gi.getGame().getMapConfiguration().getWidth();
+		double height = gi.getGame().getMapConfiguration().getHeight();
+		
 		double fromRight = width - submarinePosition.getX().doubleValue() - submarineSize;
 		double fromTop = height - submarinePosition.getY().doubleValue() - submarineSize;
 		double fromLeft = submarinePosition.getX().doubleValue() - submarineSize;
@@ -961,9 +999,12 @@ public class MathUtil {
 		return movingCircleCollisionDetection(torpedoPosition, torpedoVelocity, torpedoAngle, 0, targetPosition, targetVelocity, targetAngle, targetSize);
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.
-	public static List<Position> islandsInSubmarineDirection(Position submarinePosition, double submarineVelocity,
-			double submarineAngle, double submarineSize, Position[] islandPositions, double islandSize) {
+	public static List<Position> islandsInSubmarineDirection(GameInfoResponse gi, Position submarinePosition,
+			double submarineVelocity, double submarineAngle) {
+		double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
+		Position[] islandPositions = gi.getGame().getMapConfiguration().getIslandPositions();
+		double islandSize = gi.getGame().getMapConfiguration().getIslandSize();
+		
 		List<Position> islandsInSubmarineDirections = new ArrayList<>();
 
 		for (Position islandPosition : islandPositions) {
@@ -974,13 +1015,14 @@ public class MathUtil {
 		return islandsInSubmarineDirections;
 	}
 
-    // TODO(ZsocaCoder): vegyuk ki a felesleges parametereket.  
-	public static boolean shouldWeShoot(Position torpedoPosition, List<Submarine> submarines, double submarineSize,
-			Submarine targetSubmarine, double torpedoRange, double torpedoVelocity, double torpedoAngle,
-			double torpedoExplosionRadius, List<Position> islandPositions, double islandSize) {
-		Position aimedTargetCollisionPosition = whereCouldTorpedoHitAimedTarget(targetSubmarine, submarineSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, 0);
-		List<Position> islandTorpedoCollisionPositions = whereCouldTorpedoHitIslands(islandPositions, islandSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, 0);
-		List<Position> submarineTorpedoCollisionPositions = whereCouldTorpedoHitSubmarines(submarines, submarineSize, torpedoPosition, torpedoRange, torpedoVelocity, torpedoAngle, 0);
+	public static boolean shouldWeShoot(GameInfoResponse gi, Position torpedoPosition, List<Submarine> submarines,
+			Submarine targetSubmarine, double torpedoAngle) {
+		double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
+		double torpedoExplosionRadius = gi.getGame().getMapConfiguration().getTorpedoExplosionRadius();
+		
+		Position aimedTargetCollisionPosition = whereCouldTorpedoHitAimedTarget(gi, targetSubmarine, torpedoPosition, torpedoAngle, 0);
+		List<Position> islandTorpedoCollisionPositions = whereCouldTorpedoHitIslands(gi, torpedoPosition, torpedoAngle, 0);
+		List<Position> submarineTorpedoCollisionPositions = whereCouldTorpedoHitSubmarines(gi, submarines, torpedoPosition, torpedoAngle, 0);
 
 		if (aimedTargetCollisionPosition != null) {
 			if (!islandTorpedoCollisionPositions.isEmpty()) {
@@ -1079,31 +1121,23 @@ public class MathUtil {
 		return new Position(lhs.getX().subtract(rhs.getX()), lhs.getY().subtract(rhs.getY()));
 	}
 
-	public static Set<DangerType> getDangerTypes(GameInfoResponse gameInfo, Position submarinePosition,
+	public static Set<DangerType> getDangerTypes(GameInfoResponse gi, Position submarinePosition,
 			double submarineVelocity, double submarineAngle, List<Entity> torpedos, List<Submarine> enemySubmarines) {
-		List<Position> islandPositions = Arrays.asList(gameInfo.getGame().getMapConfiguration().getIslandPositions());
-		double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize();
-		double maxAccelerationPerRound = gameInfo.getGame().getMapConfiguration().getMaxAccelerationPerRound();
-		double islandSize = gameInfo.getGame().getMapConfiguration().getIslandSize();
-		double width = gameInfo.getGame().getMapConfiguration().getWidth();
-		double height = gameInfo.getGame().getMapConfiguration().getHeight();
-		double torpedoExplosionRadius = gameInfo.getGame().getMapConfiguration().getTorpedoExplosionRadius();
-
 		Set<DangerType> dangerTypes = new HashSet<>();
 
 		try {
-			List<Position> islandsInDirection = islandsInDirection(gameInfo, submarinePosition, submarineAngle);
+			List<Position> islandsInDirection = islandsInDirection(gi, submarinePosition, submarineAngle);
 			Position nearestIslandInDirection = getNearestIslandInDirection(islandsInDirection);
 
-			if (isSubmarineHeadingToIsland(nearestIslandInDirection, islandSize, submarinePosition, submarineSize, submarineVelocity, submarineAngle, maxAccelerationPerRound)) {
+			if (isSubmarineHeadingToIsland(gi, nearestIslandInDirection, submarinePosition, submarineVelocity, submarineAngle)) {
 				dangerTypes.add(DangerType.HEADING_TO_ISLAND);
 			}
 
-			if (isSubmarineLeavingSpace(submarinePosition, submarineSize, submarineVelocity, submarineAngle, width, height, maxAccelerationPerRound)) {
+			if (isSubmarineLeavingSpace(gi, submarinePosition, submarineVelocity, submarineAngle)) {
 				dangerTypes.add(DangerType.LEAVING_SPACE);
 			}
 
-			if (isSubmarineHeadingToTorpedoExplosion(torpedos, submarinePosition, submarineVelocity, submarineAngle, submarineSize, enemySubmarines, torpedoExplosionRadius, islandPositions, islandSize)) {
+			if (isSubmarineHeadingToTorpedoExplosion(gi, torpedos, submarinePosition, submarineVelocity, submarineAngle, enemySubmarines)) {
 				dangerTypes.add(DangerType.HEADING_TO_TORPEDO_EXPLOSION);
 			}
 		} catch (Exception e) {
