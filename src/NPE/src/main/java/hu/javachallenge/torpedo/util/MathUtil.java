@@ -26,10 +26,10 @@ public class MathUtil {
 	private static Negyed getCurrentNegyed(Submarine submarine, double width, double height) {
 		double submarineX = submarine.getPosition().getX().doubleValue();
 		double submarineY = submarine.getPosition().getY().doubleValue();
-		
+
 		double centerX = width / 2;
 		double centerY = height / 2;
-		
+
 		if (submarineX > centerX) {
 			return submarineY > centerY ? Negyed.JOBB_FELSO : Negyed.JOBB_ALSO;
 		} else {
@@ -218,7 +218,7 @@ public class MathUtil {
 	 */
 	public static List<Submarine> getPossibleTargets(GameInfoResponse gameInfoResponse, Position sourcePosition, Submarine[] submarines) {
 		double bulletVelocity = gameInfoResponse.getGame().getMapConfiguration().getTorpedoSpeed();
-		
+
 		List<Submarine> possibleTargets = new ArrayList<>();
 
 		for (Submarine submarine : submarines) {
@@ -445,9 +445,9 @@ public class MathUtil {
 
 		if (dangerousTorpedoHitPosition != null) {
 			if (isPositionInFrontOfUs(targetSubmarine, dangerousTorpedoHitPosition)) {
-				 if (targetSubmarine.getVelocity() > maxSpeed * 0.2) {
-					 acc = minusAcceleration;
-				 }
+				if (targetSubmarine.getVelocity() > maxSpeed * 0.2) {
+					acc = minusAcceleration;
+				}
 			} else {
 				acc = plusAcceleration;
 			}
@@ -603,7 +603,7 @@ public class MathUtil {
 	private static enum Negyed {
 		BAL_FELSO, JOBB_FELSO, BAL_ALSO, JOBB_ALSO
 	}
-	
+
 	public static MoveParameter getMoveParameterHeadingToEdge(Submarine submarine, double submarineSize, double width, double height, double sonarRange, double maxSteeringPerRound, double maxAccelerationPerRound, double maxSpeed) {
 		double fromRight = width - submarine.getPosition().getX().doubleValue() - submarineSize;
 		double fromTop = height - submarine.getPosition().getY().doubleValue() - submarineSize;
@@ -616,173 +616,172 @@ public class MathUtil {
 
 		double acc = plusAcceleration;
 		double steering = 0;
-		
-		Negyed negyed = getCurrentNegyed(submarine, width, height);
-		
-		switch (negyed) {
-			case JOBB_FELSO:
-				if (fromRight <= sonarRange) {
-					if (submarineAngle >= 0 && submarineAngle <= 45) {
-						steering = -maxSteeringPerRound;
-					} else if (submarineAngle >= 45 && submarineAngle <= 90) {
-						steering = maxSteeringPerRound;
-					} else if (submarineAngle >= 270) {
-						steering = -maxSteeringPerRound;
+
+		if (submarine.getVelocity() > MathConstants.EPSILON) {
+			Negyed negyed = getCurrentNegyed(submarine, width, height);
+
+			switch (negyed) {
+				case JOBB_FELSO:
+					if (fromRight <= sonarRange) {
+						if (submarineAngle >= 0 && submarineAngle <= 45) {
+							steering = -maxSteeringPerRound;
+						} else if (submarineAngle >= 45 && submarineAngle <= 90) {
+							steering = maxSteeringPerRound;
+						} else if (submarineAngle >= 270) {
+							steering = -maxSteeringPerRound;
+						}
+					} else if (fromTop <= sonarRange) {
+						if (submarineAngle >= 45 && submarineAngle <= 180) {
+							steering = maxSteeringPerRound;
+						} else if (submarineAngle <= 45 && submarineAngle >= 0) {
+							steering = -maxSteeringPerRound;
+						}
 					}
-				} else if (fromTop <= sonarRange) {
-					if (submarineAngle >= 45 && submarineAngle <= 180) {
-						steering = maxSteeringPerRound;
-					} else if (submarineAngle <= 45 && submarineAngle >= 0) {
+					break;
+
+				case JOBB_ALSO:
+					if (fromRight <= sonarRange) {
+						if (submarineAngle >= 315 || submarineAngle <= 90) {
+							steering = maxSteeringPerRound;
+						} else if (submarineAngle <= 315 && submarineAngle >= 270) {
+							steering = -maxSteeringPerRound;
+						}
+					} else if (fromBottom <= sonarRange) {
+						if (submarineAngle >= 180 && submarineAngle <= 315) {
+							steering = -maxSteeringPerRound;
+						} else if (submarineAngle >= 315 && submarineAngle <= 360) {
+							steering = maxSteeringPerRound;
+						} else if (submarineAngle == 0.0) {
+							steering = maxSteeringPerRound;
+						}
+					}
+					break;
+
+				case BAL_FELSO:
+					if (fromLeft <= sonarRange) {
+						if (submarineAngle >= 135 && submarineAngle <= 270) {
+							steering = maxSteeringPerRound;
+						} else if (submarineAngle >= 90 && submarineAngle <= 135) {
+							steering = -maxSteeringPerRound;
+						}
+					} else if (fromTop <= sonarRange) {
+						if (submarineAngle >= 0 && submarineAngle <= 135) {
+							steering = -maxSteeringPerRound;
+						} else if (submarineAngle >= 135 && submarineAngle <= 180) {
+							steering = maxSteeringPerRound;
+						}
+					}
+					break;
+
+				case BAL_ALSO:
+					if (fromLeft <= sonarRange) {
+						if (submarineAngle <= 225 && submarineAngle >= 90) {
+							steering = -maxSteeringPerRound;
+						} else if (submarineAngle >= 225 && submarineAngle <= 270) {
+							steering = maxSteeringPerRound;
+						}
+					} else if (fromBottom <= sonarRange) {
+						if (submarineAngle <= 225 && submarineAngle >= 180) {
+							steering = -maxSteeringPerRound;
+						} else if (submarineAngle >= 225 && submarineAngle <= 360) {
+							steering = maxSteeringPerRound;
+						} else if (submarineAngle == 0.0) {
+							steering = maxSteeringPerRound;
+						}
+					}
+					break;
+
+				default:
+					log.warn("Something went wrong!");
+					break;
+			}
+		} else if (submarineAngle == 0.0) {
+			if (fromRight < sonarRange) {
+				if (fromTop < fromBottom) {
+					steering = -maxSteeringPerRound;
+				} else {
+					steering = maxSteeringPerRound;
+				}
+			}
+		} else if (submarineAngle == 90.0) {
+			if (fromTop < sonarRange) {
+				if (fromLeft < fromRight) {
+					steering = -maxSteeringPerRound;
+				} else {
+					steering = maxSteeringPerRound;
+				}
+			}
+		} else if (submarineAngle == 180.0) {
+			if (fromLeft < sonarRange) {
+				if (fromBottom < fromTop) {
+					steering = -maxSteeringPerRound;
+				} else {
+					steering = maxSteeringPerRound;
+				}
+			}
+		} else if (submarineAngle == 270.0) {
+			if (fromBottom < sonarRange) {
+				if (fromRight < fromLeft) {
+					steering = -maxSteeringPerRound;
+				} else {
+					steering = maxSteeringPerRound;
+				}
+			}
+		} else if (submarineAngle > 0.0 && submarineAngle < 90.0) {
+			if (fromTop < sonarRange && fromRight < sonarRange) {
+				if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(width, height), 0) < sonarRange) {
+					if (fromTop < fromRight) {
 						steering = -maxSteeringPerRound;
+					} else {
+						steering = maxSteeringPerRound;
 					}
 				}
-				break;
-			
-			case JOBB_ALSO:
-				if (fromRight <= sonarRange) {
-					if (submarineAngle >= 315 || submarineAngle <= 90) {
-						steering = maxSteeringPerRound;
-					} else if (submarineAngle <= 315 && submarineAngle >= 270) {
+			} else if (fromTop < sonarRange) {
+				steering = -maxSteeringPerRound;
+			} else if (fromRight < sonarRange) {
+				steering = maxSteeringPerRound;
+			}
+		} else if (submarineAngle > 90.0 && submarineAngle < 180.0) {
+			if (fromLeft < sonarRange && fromTop < sonarRange) {
+				if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(0, height), 0) < sonarRange) {
+					if (fromLeft < fromTop) {
 						steering = -maxSteeringPerRound;
-					}
-				} else if (fromBottom <= sonarRange) {
-					if (submarineAngle >= 180 && submarineAngle <= 315) {
-						steering = -maxSteeringPerRound;
-					} else if (submarineAngle >= 315 && submarineAngle <= 360) {
-						steering = maxSteeringPerRound;
-					} else if (submarineAngle == 0.0) {
+					} else {
 						steering = maxSteeringPerRound;
 					}
 				}
-				break;
-			
-			case BAL_FELSO:
-				if (fromLeft <= sonarRange) {
-					if (submarineAngle >= 135 && submarineAngle <= 270) {
-						steering = maxSteeringPerRound;
-					} else if (submarineAngle >= 90 && submarineAngle <= 135) {
+			} else if (fromLeft < sonarRange) {
+				steering = -maxSteeringPerRound;
+			} else if (fromTop < sonarRange) {
+				steering = maxSteeringPerRound;
+			}
+		} else if (submarineAngle > 180.0 && submarineAngle < 270.0) {
+			if (fromBottom < sonarRange && fromLeft < sonarRange) {
+				if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(0, 0), 0) < sonarRange) {
+					if (fromBottom < fromLeft) {
 						steering = -maxSteeringPerRound;
-					}
-				} else if (fromTop <= sonarRange) {
-					if (submarineAngle >= 0 && submarineAngle <= 135) {
-						steering = -maxSteeringPerRound;
-					} else if (submarineAngle >= 135 && submarineAngle <= 180) {
+					} else {
 						steering = maxSteeringPerRound;
 					}
 				}
-				break;
-			
-			case BAL_ALSO:
-				if (fromLeft <= sonarRange) {
-					if (submarineAngle <= 225 && submarineAngle >= 90) {
-						steering = -maxSteeringPerRound;
-					} else if (submarineAngle >= 225 && submarineAngle <= 270) {
-						steering = maxSteeringPerRound;
-					}
-				} else if (fromBottom <= sonarRange) {
-					if (submarineAngle <= 225 && submarineAngle >= 180) {
-						steering = -maxSteeringPerRound;
-					} else if (submarineAngle >= 225 && submarineAngle <= 360) {
-						steering = maxSteeringPerRound;
-					} else if (submarineAngle == 0.0) {
-						steering = maxSteeringPerRound;
-					}
+			} else if (fromBottom < sonarRange) {
+				steering = -maxSteeringPerRound;
+			} else if (fromLeft < sonarRange) {
+				steering = maxSteeringPerRound;
+			}
+		} else if (fromRight < sonarRange && fromBottom < sonarRange) {
+			if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(0, width), 0) < sonarRange) {
+				if (fromRight < fromBottom) {
+					steering = -maxSteeringPerRound;
+				} else {
+					steering = maxSteeringPerRound;
 				}
-				break;
-			
-			default:
-				log.warn("Something went wrong!");
-				break;
+			}
+		} else if (fromRight < sonarRange) {
+			steering = -maxSteeringPerRound;
+		} else if (fromBottom < sonarRange) {
+			steering = maxSteeringPerRound;
 		}
-
-//		if (submarineAngle == 0.0) {
-//			if (fromRight < sonarRange) {
-//				if (fromTop < fromBottom) {
-//					steering = -maxSteeringPerRound;
-//				} else {
-//					steering = maxSteeringPerRound;
-//				}
-//			}
-//		} else if (submarineAngle == 90.0) {
-//			if (fromTop < sonarRange) {
-//				if (fromLeft < fromRight) {
-//					steering = -maxSteeringPerRound;
-//				} else {
-//					steering = maxSteeringPerRound;
-//				}
-//			}
-//		} else if (submarineAngle == 180.0) {
-//			if (fromLeft < sonarRange) {
-//				if (fromBottom < fromTop) {
-//					steering = -maxSteeringPerRound;
-//				} else {
-//					steering = maxSteeringPerRound;
-//				}
-//			}
-//		} else if (submarineAngle == 270.0) {
-//			if (fromBottom < sonarRange) {
-//				if (fromRight < fromLeft) {
-//					steering = -maxSteeringPerRound;
-//				} else {
-//					steering = maxSteeringPerRound;
-//				}
-//			}
-//		} else if (submarineAngle > 0.0 && submarineAngle < 90.0) {
-//			if (fromTop < sonarRange && fromRight < sonarRange) {
-//				if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(width, height), 0) < sonarRange) {
-//					if (fromTop < fromRight) {
-//						steering = -maxSteeringPerRound;
-//					} else {
-//						steering = maxSteeringPerRound;
-//					}
-//				}
-//			} else if (fromTop < sonarRange) {
-//				steering = -maxSteeringPerRound;
-//			} else if (fromRight < sonarRange) {
-//				steering = maxSteeringPerRound;
-//			}
-//		} else if (submarineAngle > 90.0 && submarineAngle < 180.0) {
-//			if (fromLeft < sonarRange && fromTop < sonarRange) {
-//				if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(0, height), 0) < sonarRange) {
-//					if (fromLeft < fromTop) {
-//						steering = -maxSteeringPerRound;
-//					} else {
-//						steering = maxSteeringPerRound;
-//					}
-//				}
-//			} else if (fromLeft < sonarRange) {
-//				steering = -maxSteeringPerRound;
-//			} else if (fromTop < sonarRange) {
-//				steering = maxSteeringPerRound;
-//			}
-//		} else if (submarineAngle > 180.0 && submarineAngle < 270.0) {
-//			if (fromBottom < sonarRange && fromLeft < sonarRange) {
-//				if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(0, 0), 0) < sonarRange) {
-//					if (fromBottom < fromLeft) {
-//						steering = -maxSteeringPerRound;
-//					} else {
-//						steering = maxSteeringPerRound;
-//					}
-//				}
-//			} else if (fromBottom < sonarRange) {
-//				steering = -maxSteeringPerRound;
-//			} else if (fromLeft < sonarRange) {
-//				steering = maxSteeringPerRound;
-//			}
-//		} else if (fromRight < sonarRange && fromBottom < sonarRange) {
-//			if (distanceOfCircles(submarine.getPosition(), submarineSize, new Position(0, width), 0) < sonarRange) {
-//				if (fromRight < fromBottom) {
-//					steering = -maxSteeringPerRound;
-//				} else {
-//					steering = maxSteeringPerRound;
-//				}
-//			}
-//		} else if (fromRight < sonarRange) {
-//			steering = -maxSteeringPerRound;
-//		} else if (fromBottom < sonarRange) {
-//			steering = maxSteeringPerRound;
-//		}
-
 		if (steering != 0.0) {
 			if (submarine.getVelocity() > maxSpeed * 0.5) {
 				acc = minusAcceleration;
@@ -1027,11 +1026,11 @@ public class MathUtil {
 		List<Position> islandPositions = Arrays.asList(gameInfo.getGame().getMapConfiguration().getIslandPositions());
 		double submarineSize = gameInfo.getGame().getMapConfiguration().getSubmarineSize();
 		double maxAccelerationPerRound = gameInfo.getGame().getMapConfiguration().getMaxAccelerationPerRound();
-		double islandSize  = gameInfo.getGame().getMapConfiguration().getIslandSize();
+		double islandSize = gameInfo.getGame().getMapConfiguration().getIslandSize();
 		double width = gameInfo.getGame().getMapConfiguration().getWidth();
 		double height = gameInfo.getGame().getMapConfiguration().getHeight();
 		double torpedoExplosionRadius = gameInfo.getGame().getMapConfiguration().getTorpedoExplosionRadius();
-		
+
 		Set<DangerType> dangerTypes = new HashSet<>();
 
 		try {
