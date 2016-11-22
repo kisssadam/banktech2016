@@ -387,7 +387,7 @@ public class GameController implements Runnable {
 
 		if (moveParameter.getSteering() == 0.0) {
 			//Ellenséges tengeralattjáró túl közel van-e, szonáron belül van-e, stb..
-			moveParameter = MathUtil.getMoveParameterBasedOnEnemyPosition(gameInfo, submarine, enemySubmarines, allSubmarines);
+			moveParameter = MathUtil.getMoveParameterBasedOnEnemyPosition(gameInfo, submarine, enemySubmarines, allSubmarines, false);
 		}
 
 		if (moveParameter.getSteering() == 0.0) {
@@ -416,9 +416,10 @@ public class GameController implements Runnable {
 
 		for (Submarine enemySubmarine : enemySubmarines) {
 			Double theta = aimAtMovingTarget(submarine.getPosition(), enemySubmarine.getPosition(), enemySubmarine.getAngle(), enemySubmarine.getVelocity(), torpedoSpeed);
-			//boolean areWeInDanger = MathUtil.isSubmarineHeadingToTorpedoExplosion(torpedos, submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), submarineSize, enemySubmarines, torpedoExplosionRadius, islandPositions, islandSize);
-			boolean shouldWeShoot = shouldWeShoot(gameInfo, submarine.getPosition(), Arrays.asList(submarinesInGame.getSubmarines()), enemySubmarine, theta);
-			if (theta != null && (/*areWeInDanger || */shouldWeShoot)) {
+			//Ha már úgyis veszélyben vagyunk, mindegy, ha nagyobba kerülünk. :)
+			boolean areWeInDanger = MathUtil.isSubmarineHeadingToTorpedoExplosion(gameInfo, torpedos, submarine.getPosition(), submarine.getVelocity(), submarine.getAngle(), enemySubmarines);
+			boolean shouldWeShoot = shouldWeShoot(gameInfo, submarine.getPosition(), Arrays.asList(submarinesInGame.getSubmarines()), enemySubmarine, theta, areWeInDanger);
+			if (theta != null && (areWeInDanger || shouldWeShoot)) {
 				if (submarine.getTorpedoCooldown() == 0.0) {
 					callHandler.shoot(gameId, submarine.getId(), normalizeAngle(theta));
 					break;
