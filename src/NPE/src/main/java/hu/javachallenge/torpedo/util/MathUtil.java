@@ -476,7 +476,7 @@ public class MathUtil {
 				} else {
 					steering = maxSteeringPerRound;
 				}
-			} else {
+			}/* else {
 				if (isPositionInFrontOfUs(submarine, submarine2.getPosition())) {
 					acc = plusAcceleration;
 				} else if (submarine.getVelocity() > maxSpeed * 0.5) {
@@ -490,13 +490,13 @@ public class MathUtil {
 				} else {
 					steering = -maxSteeringPerRound;
 				}
-			}
+			}*/
 		}
 		return new MoveParameterWithDistance(distance, acc, steering);
 	}
 
 	public static MoveParameter getMoveParameterBasedOnTorpedos(GameInfoResponse gi, List<Entity> torpedos,
-		List<Submarine> submarines, Submarine targetSubmarine, Map accelerationMap) {
+		List<Submarine> submarines, Submarine targetSubmarine, Map<Long, MathUtil.Acceleration> accelerationMap) {
 		double maxSteeringPerRound = gi.getGame().getMapConfiguration().getMaxSteeringPerRound();
 		double maxAccelerationPerRound = gi.getGame().getMapConfiguration().getMaxAccelerationPerRound();
 		double maxSpeed = gi.getGame().getMapConfiguration().getMaxSpeed();
@@ -506,7 +506,7 @@ public class MathUtil {
 
 		double acc = plusAcceleration;
 		double steering = 0;
-		MathUtil.Acceleration prevAcceleration = (MathUtil.Acceleration) accelerationMap.get(targetSubmarine.getId());
+		MathUtil.Acceleration prevAcceleration = accelerationMap.get(targetSubmarine.getId());
 		
 		Position dangerousTorpedoHitPosition = getDangerousTorpedoHitPosition(gi, torpedos, submarines, targetSubmarine);
 
