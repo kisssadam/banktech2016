@@ -512,11 +512,11 @@ public class MathUtil {
 
 		if (dangerousTorpedoHitPosition != null) {
 			if (isPositionInFrontOfUs(targetSubmarine, dangerousTorpedoHitPosition)) {
-				if (targetSubmarine.getVelocity() > maxSpeed * 0.25 || !prevAcceleration.equals(Acceleration.POSITIVE)) {
+				if (targetSubmarine.getVelocity() >= maxSpeed * 0.25 || !prevAcceleration.equals(Acceleration.POSITIVE)) {
 					acc = minusAcceleration;
 				}
 			} else {
-				if	(targetSubmarine.getVelocity() < maxSpeed * 0.75 || !prevAcceleration.equals(Acceleration.NEGATIVE)) {
+				if	(targetSubmarine.getVelocity() <= maxSpeed * 0.75 || !prevAcceleration.equals(Acceleration.NEGATIVE)) {
 					acc = plusAcceleration;
 				} else {
 					acc = minusAcceleration;
