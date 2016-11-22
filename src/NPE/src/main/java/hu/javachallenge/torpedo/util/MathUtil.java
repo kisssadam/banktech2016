@@ -476,21 +476,21 @@ public class MathUtil {
 				} else {
 					steering = maxSteeringPerRound;
 				}
-			}/* else {
-				if (isPositionInFrontOfUs(submarine1, submarine2.getPosition())) {
+			} else {
+				if (isPositionInFrontOfUs(submarine, submarine2.getPosition())) {
 					acc = plusAcceleration;
-				} else if (submarine1.getVelocity() > maxSpeed * 0.5) {
+				} else if (submarine.getVelocity() > maxSpeed * 0.5) {
 					acc = minusAcceleration;
 				} else {
 					acc = plusAcceleration;
 				}
 
-				if (isPositionLeftOfUs(submarine1, submarine2.getPosition())) {
+				if (isPositionOnOurLeft(submarine, submarine2.getPosition())) {
 					steering = maxSteeringPerRound;
 				} else {
 					steering = -maxSteeringPerRound;
 				}
-			}*/
+			}
 		}
 		return new MoveParameterWithDistance(distance, acc, steering);
 	}
@@ -626,6 +626,7 @@ public class MathUtil {
 		double maxSpeed = gi.getGame().getMapConfiguration().getMaxSpeed();
 		double submarineSize = gi.getGame().getMapConfiguration().getSubmarineSize();
 		double islandSize = gi.getGame().getMapConfiguration().getIslandSize();
+		double sonarRange = gi.getGame().getMapConfiguration().getSonarRange();
 
 		double minusAcceleration = normalizeVelocity(submarine.getVelocity() - maxAccelerationPerRound, maxSpeed) - submarine.getVelocity();
 		double plusAcceleration = normalizeVelocity(submarine.getVelocity() + maxAccelerationPerRound, maxSpeed) - submarine.getVelocity();
@@ -633,20 +634,25 @@ public class MathUtil {
 		double acc = plusAcceleration;
 		double steering = 0;
 		Double distance = null;
-		
-		if (isPositionInFrontOfUs(submarine, islandPosition)) {
-			if (submarine.getVelocity() > maxSpeed * 0.5) {
-				acc = minusAcceleration;
-				if (isPositionOnOurLeft(submarine, islandPosition)) {
-					steering = -maxSteeringPerRound;
-				} else {
-					steering = maxSteeringPerRound;
-				}
-			} else {
-				acc = plusAcceleration;
-			}
-		}
 		distance = distanceOfCircles(submarine.getPosition(), submarineSize, islandPosition, islandSize);
+		
+		if (distance < sonarRange) {
+			if (isPositionInFrontOfUs(submarine, islandPosition)) {
+				if (submarine.getVelocity() > maxSpeed * 0.5) {
+					acc = minusAcceleration;
+					if (isPositionOnOurLeft(submarine, islandPosition)) {
+						steering = -maxSteeringPerRound;
+					} else {
+						steering = maxSteeringPerRound;
+					}
+				} else {
+					acc = plusAcceleration;
+				}
+			}
+		} else {
+			distance = null;
+		}
+		
 		return new MoveParameterWithDistance(distance, acc, steering);
 	}
 

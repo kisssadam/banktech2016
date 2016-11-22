@@ -93,7 +93,7 @@ public class GameController implements Runnable {
 	}
 
 	private void startGame() {
-		callHandler.createGame();
+//		callHandler.createGame();
 
 		GameListResponse gameList = callHandler.gameList();
 		long[] games = gameList.getGames();
