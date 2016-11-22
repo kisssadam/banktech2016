@@ -401,7 +401,7 @@ public class MathUtil {
 		return biggestSonarIntersectionSubmarine;
 	}
 	
-	public static boolean areSubmarinesHeadingToEachOther(Submarine s1, Submarine s2) {
+	public static boolean areSubmarinesApproachingEachOtherTooFast(Submarine s1, Submarine s2, double maxAcceleration) {
 		Position newS1Position = new Position(
 			s1.getPosition().getX().doubleValue() + xMovement(s1.getVelocity(), s1.getAngle()),
 			s1.getPosition().getY().doubleValue() + yMovement(s1.getVelocity(), s1.getAngle()));
@@ -409,7 +409,15 @@ public class MathUtil {
 			s2.getPosition().getX().doubleValue() + xMovement(s2.getVelocity(), s2.getAngle()),
 			s2.getPosition().getY().doubleValue() + yMovement(s2.getVelocity(), s2.getAngle()));
 		
-		return distanceOfCircles(s1.getPosition(), 0, s2.getPosition(), 0) > distanceOfCircles(newS1Position, 0, newS2Position, 0);
+		double distance = distanceOfCircles(s1.getPosition(), 0, s2.getPosition(), 0);
+		double newDistance = distanceOfCircles(newS1Position, 0, newS2Position, 0);
+		if(distance > newDistance) {
+			//  v=s/t jelen esetben t = 1-gyel számolunk, így az egymás felé közelítés sebessége megegyezik a megtett távval: (distance - newDistance)
+			if((distance - newDistance) > 2 * maxAcceleration) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public static MoveParameter getMoveParameterBasedOnEnemyPosition(GameInfoResponse gi, Submarine submarine,
@@ -446,6 +454,19 @@ public class MathUtil {
 				} else {
 					steering = maxSteeringPerRound;
 				}
+			} else if (areSubmarinesApproachingEachOtherTooFast(submarine, submarine2, maxAccelerationPerRound)) {
+				if (isPositionInFrontOfUs(submarine, submarine2.getPosition())) {
+					if (submarine.getVelocity() > maxSpeed * 0.25) {
+						acc = minusAcceleration;
+					}
+				} else {
+					acc = plusAcceleration;
+				}
+				if (isPositionOnOurLeft(submarine, submarine2.getPosition())) {
+					steering = -maxSteeringPerRound;
+				} else {
+					steering = maxSteeringPerRound;
+				}
 			}/* else {
 				if (isPositionInFrontOfUs(submarine1, submarine2.getPosition())) {
 					acc = plusAcceleration;
@@ -461,10 +482,6 @@ public class MathUtil {
 					steering = -maxSteeringPerRound;
 				}
 			}*/
-			if(areSubmarinesHeadingToEachOther(submarine, submarine2)) {
-				acc *= -1;
-				steering *= -1;
-			}
 		}
 		return new MoveParameter(acc, steering);
 	}
