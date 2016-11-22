@@ -379,8 +379,10 @@ public class GameController implements Runnable {
 						moveParameter.setSteering(moveParameterBasedOnTorpedos.getSteering());
 					}
 				}
-				if (maxSpeed * (2.0 / 3.0) <= submarine.getVelocity()) {
+				if (maxSpeed * (2.0 / 3.0) == submarine.getVelocity()) {
 					moveParameter.setAcceleration(0.0);
+				} else if (maxSpeed * (2.0 / 3.0) < submarine.getVelocity()) {
+					moveParameter.setAcceleration(-maxAccelerationPerRound);
 				}
 				callHandler.move(gameId, submarine.getId(), moveParameter.getAcceleration(), moveParameter.getSteering());
 				
