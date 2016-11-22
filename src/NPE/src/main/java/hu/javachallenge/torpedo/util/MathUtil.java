@@ -19,6 +19,7 @@ import hu.javachallenge.torpedo.model.Entity;
 import hu.javachallenge.torpedo.model.Position;
 import hu.javachallenge.torpedo.model.Submarine;
 import hu.javachallenge.torpedo.response.GameInfoResponse;
+import java.util.Map;
 
 public class MathUtil {
 
@@ -37,6 +38,10 @@ public class MathUtil {
 
 	private static enum Negyed {
 		BAL_FELSO, JOBB_FELSO, BAL_ALSO, JOBB_ALSO
+	}
+	
+	public static enum Acceleration {
+		NEGATIVE, ZERO, POSITIVE
 	}
 
 	private static Negyed getCurrentNegyed(Submarine submarine, double width, double height) {
@@ -491,7 +496,7 @@ public class MathUtil {
 	}
 
 	public static MoveParameter getMoveParameterBasedOnTorpedos(GameInfoResponse gi, List<Entity> torpedos,
-		List<Submarine> submarines, Submarine targetSubmarine) {
+		List<Submarine> submarines, Submarine targetSubmarine, Map accelerationMap) {
 		double maxSteeringPerRound = gi.getGame().getMapConfiguration().getMaxSteeringPerRound();
 		double maxAccelerationPerRound = gi.getGame().getMapConfiguration().getMaxAccelerationPerRound();
 		double maxSpeed = gi.getGame().getMapConfiguration().getMaxSpeed();
@@ -501,16 +506,21 @@ public class MathUtil {
 
 		double acc = plusAcceleration;
 		double steering = 0;
-
+		MathUtil.Acceleration prevAcceleration = (MathUtil.Acceleration) accelerationMap.get(targetSubmarine.getId());
+		
 		Position dangerousTorpedoHitPosition = getDangerousTorpedoHitPosition(gi, torpedos, submarines, targetSubmarine);
 
 		if (dangerousTorpedoHitPosition != null) {
 			if (isPositionInFrontOfUs(targetSubmarine, dangerousTorpedoHitPosition)) {
-				if (targetSubmarine.getVelocity() > maxSpeed * 0.2) {
+				if (targetSubmarine.getVelocity() > maxSpeed * 0.25 || !prevAcceleration.equals(Acceleration.POSITIVE)) {
 					acc = minusAcceleration;
 				}
 			} else {
-				acc = plusAcceleration;
+				if	(targetSubmarine.getVelocity() < maxSpeed * 0.75 || !prevAcceleration.equals(Acceleration.NEGATIVE)) {
+					acc = plusAcceleration;
+				} else {
+					acc = minusAcceleration;
+				}
 			}
 
 			if (isPositionOnOurLeft(targetSubmarine, dangerousTorpedoHitPosition)) {

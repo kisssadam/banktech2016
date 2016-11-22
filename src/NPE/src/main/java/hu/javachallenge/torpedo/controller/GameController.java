@@ -33,6 +33,7 @@ import hu.javachallenge.torpedo.response.SonarResponse;
 import hu.javachallenge.torpedo.response.SubmarinesResponse;
 import hu.javachallenge.torpedo.util.DangerType;
 import hu.javachallenge.torpedo.util.MathUtil;
+import java.util.HashMap;
 
 public class GameController implements Runnable {
 
@@ -70,6 +71,7 @@ public class GameController implements Runnable {
 	private Set<Submarine> enemySubmarineSet;
 	private Set<Entity> torpedoSet;
 	private List<Long> shipsWithActivatedSonar;
+	private Map<Long, MathUtil.Acceleration> accelerationMap;
 
 	public GameController(CallHandler callHandler, String teamName) {
 		this.callHandler = callHandler;
@@ -81,6 +83,7 @@ public class GameController implements Runnable {
 		this.enemySubmarineSet = new HashSet<>();
 		this.torpedoSet = new HashSet<>();
 		this.shipsWithActivatedSonar = new ArrayList<>();
+		this.accelerationMap = new HashMap<>();
 	}
 
 	@Override
@@ -125,7 +128,11 @@ public class GameController implements Runnable {
 		this.submarinesInGame = callHandler.submarinesInGame(gameId);
 		this.sonarRange = gameInfo.getGame().getMapConfiguration().getSonarRange();
 		this.extendedSonarRange = gameInfo.getGame().getMapConfiguration().getExtendedSonarRange();
-
+		
+		for (Submarine submarine : submarinesInGame.getSubmarines()) {
+			accelerationMap.put(submarine.getId(), MathUtil.Acceleration.ZERO);
+		}
+		
 		mainPanel = new MainPanel(gameInfo);
 		mainPanel.setLayout(new BorderLayout());
 		mainPanel.setPreferredSize(new Dimension(1275, 600));
@@ -265,6 +272,7 @@ public class GameController implements Runnable {
 				newDangerTypes = MathUtil.getDangerTypes(gameInfo, newSubmarinePosition, submarine.getVelocity(), plusAngle, torpedos, enemySubmarines);
 				if (newDangerTypes.isEmpty()) {
 					callHandler.move(gameId, submarine.getId(), 0, maxSteeringPerRound);
+					accelerationMap.put(submarine.getId(), MathUtil.Acceleration.ZERO);
 					moved = true;
 				} else if (newDangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
 					moveParameters.add(new MoveParameter(0, maxSteeringPerRound));
@@ -277,6 +285,7 @@ public class GameController implements Runnable {
 				newDangerTypes = MathUtil.getDangerTypes(gameInfo, newSubmarinePosition, submarine.getVelocity(), minusAngle, torpedos, enemySubmarines);
 				if (newDangerTypes.isEmpty()) {
 					callHandler.move(gameId, submarine.getId(), 0, -maxSteeringPerRound);
+					accelerationMap.put(submarine.getId(), MathUtil.Acceleration.ZERO);
 					moved = true;
 				} else if (newDangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
 					moveParameters.add(new MoveParameter(0, -maxSteeringPerRound));
@@ -289,6 +298,7 @@ public class GameController implements Runnable {
 				newDangerTypes = MathUtil.getDangerTypes(gameInfo, newSubmarinePosition, minusVelocity, minusAngle, torpedos, enemySubmarines);
 				if (newDangerTypes.isEmpty()) {
 					callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), -maxSteeringPerRound);
+					accelerationMap.put(submarine.getId(), minusVelocity - submarine.getVelocity() < 0 ? MathUtil.Acceleration.NEGATIVE : MathUtil.Acceleration.ZERO);
 					moved = true;
 				} else if (newDangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
 					moveParameters.add(new MoveParameter(minusVelocity - submarine.getVelocity(), -maxSteeringPerRound));
@@ -301,6 +311,7 @@ public class GameController implements Runnable {
 				newDangerTypes = MathUtil.getDangerTypes(gameInfo, newSubmarinePosition, minusVelocity, plusAngle, torpedos, enemySubmarines);
 				if (newDangerTypes.isEmpty()) {
 					callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), maxSteeringPerRound);
+					accelerationMap.put(submarine.getId(), minusVelocity - submarine.getVelocity() < 0 ? MathUtil.Acceleration.NEGATIVE : MathUtil.Acceleration.ZERO);
 					moved = true;
 				} else if (newDangerTypes.contains(DangerType.HEADING_TO_TORPEDO_EXPLOSION)) {
 					moveParameters.add(new MoveParameter(minusVelocity - submarine.getVelocity(), maxSteeringPerRound));
@@ -309,6 +320,7 @@ public class GameController implements Runnable {
 
 			if (!moved && dangerTypes.contains(DangerType.LEAVING_SPACE)) {
 				callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), MathUtil.getMoveParameterHeadingToEdge(gameInfo, submarine, extendedSonarRange).getSteering());
+				accelerationMap.put(submarine.getId(), minusVelocity - submarine.getVelocity() < 0 ? MathUtil.Acceleration.NEGATIVE : MathUtil.Acceleration.ZERO);
 				moved = true;
 			}
 
@@ -316,6 +328,7 @@ public class GameController implements Runnable {
 				Position islandPosition = MathUtil.getNearestIslandInDirection(islandPositions);
 				double steering = MathUtil.getSteeringHeadingToIsland(gameInfo, submarine, islandPosition);
 				callHandler.move(gameId, submarine.getId(), minusVelocity - submarine.getVelocity(), steering);
+				accelerationMap.put(submarine.getId(), minusVelocity - submarine.getVelocity() < 0 ? MathUtil.Acceleration.NEGATIVE : MathUtil.Acceleration.ZERO);
 				moved = true;
 			}
 		}
@@ -324,8 +337,18 @@ public class GameController implements Runnable {
 			if (!moveParameters.isEmpty()) {
 				log.warn("Submarine {} is heading to torpedo.", submarine);
 				MoveParameter moveParameter = moveParameters.get(0);
-				System.out.println("Submarine: " + submarine + " HEADING TO TORPEDO acc: " + moveParameter.getAcceleration() + " steering: " + moveParameter.getSteering());
 				callHandler.move(gameId, submarine.getId(), moveParameter.getAcceleration(), moveParameter.getSteering());
+				
+				MathUtil.Acceleration accelerationWay;
+				if (moveParameter.getAcceleration() > 0) {
+					accelerationWay = MathUtil.Acceleration.POSITIVE;
+				} else if (moveParameter.getAcceleration() == 0) {
+					accelerationWay = MathUtil.Acceleration.ZERO;
+				} else {
+					accelerationWay = MathUtil.Acceleration.NEGATIVE;
+				}
+				accelerationMap.put(submarine.getId(), accelerationWay);
+				
 				moved = true;
 			} else {
 				List<Submarine> allSubmarines = new LinkedList<>();
@@ -336,7 +359,7 @@ public class GameController implements Runnable {
 				MoveParameter moveParameter;
 
 				//Van-e ránk veszélyes torpedó?
-				moveParameterBasedOnTorpedos = MathUtil.getMoveParameterBasedOnTorpedos(gameInfo, torpedos, allSubmarines, submarine);
+				moveParameterBasedOnTorpedos = MathUtil.getMoveParameterBasedOnTorpedos(gameInfo, torpedos, allSubmarines, submarine, accelerationMap);
 				//Ha nincs veszélyes torpedó
 				if (moveParameterBasedOnTorpedos.getSteering() == 0.0) {
 					moveParameter = getMoveParameterIfNotHeadingToTorpedo(submarine, allSubmarines);
@@ -348,7 +371,7 @@ public class GameController implements Runnable {
 				double velocity = MathUtil.normalizeVelocity(submarine.getVelocity() + moveParameter.getAcceleration(), maxSpeed);
 				Position newSubmarinePosition = new Position(submarine.getPosition().getX().doubleValue() + MathUtil.xMovement(submarine.getVelocity(), angle), submarine.getPosition().getY().doubleValue() + MathUtil.yMovement(submarine.getVelocity(), angle));
 				Submarine newSubmarine = new Submarine(submarine.getType(), submarine.getId(), newSubmarinePosition, submarine.getOwner(), velocity, angle, submarine.getHp(), submarine.getSonarCooldown(), submarine.getTorpedoCooldown(), submarine.getSonarExtended());
-				MoveParameter newMoveParameter = MathUtil.getMoveParameterBasedOnTorpedos(gameInfo, torpedos, allSubmarines, newSubmarine);
+				MoveParameter newMoveParameter = MathUtil.getMoveParameterBasedOnTorpedos(gameInfo, torpedos, allSubmarines, newSubmarine, accelerationMap);
 
 				//Ha rá akarnánk fordulni egy torpedóra, az nem jó ötlet...
 				if (newMoveParameter.getSteering() != 0) {
@@ -357,6 +380,16 @@ public class GameController implements Runnable {
 					}
 				}
 				callHandler.move(gameId, submarine.getId(), moveParameter.getAcceleration(), moveParameter.getSteering());
+				
+				MathUtil.Acceleration accelerationWay;
+				if (moveParameter.getAcceleration() > 0) {
+					accelerationWay = MathUtil.Acceleration.POSITIVE;
+				} else if (moveParameter.getAcceleration() == 0) {
+					accelerationWay = MathUtil.Acceleration.ZERO;
+				} else {
+					accelerationWay = MathUtil.Acceleration.NEGATIVE;
+				}
+				accelerationMap.put(submarine.getId(), accelerationWay);
 			}
 		}
 	}
